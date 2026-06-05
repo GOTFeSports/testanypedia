@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Team · Anypedia</title>
+<!-- Ставим тему ДО загрузки CSS — исключает вспышку при любом направлении перехода -->
+<script>
+(function(){
+  var t = localStorage.getItem('ap-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  document.documentElement.style.background = t === 'light' ? '#f4f4f6' : '#0f0f10';
+})();
+</script>
+<script src="page-transition.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="data.js"></script>
+<script src="teams.js"></script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=109393123', 'ym');
+
+    ym(109393123, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/109393123" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+
+<style>
+/* ============================================================
+   CSS VARIABLES
+   ============================================================ */
+:root {
+  --bg:         #0f0f10;
+  --bg2:        #151516;
+  --bg3:        #1c1c1e;
+  --border:     #252528;
+  --text:       #eaeaea;
+  --text-muted: #888;
+  --accent:     #6bb6ff;
+  --accent2:    #3d8fe0;
+  --tg:         #2ea6ff;
+  --radius:     12px;
+  --shadow:     0 4px 24px rgba(0,0,0,.45);
+  --transition: color .25s, background-color .25s, border-color .25s;
+}
+[data-theme="light"] {
+  --bg:         #f4f4f6;
+  --bg2:        #ffffff;
+  --bg3:        #e8e8ec;
+  --border:     #d0d0d8;
+  --text:       #111114;
+  --text-muted: #666;
+  --accent:     #1a6fcc;
+  --accent2:    #1452a0;
+  --tg:         #1a88d6;
+  --shadow:     0 4px 24px rgba(0,0,0,.12);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { background: #0f0f10; }
+html[data-theme="light"] { background: #f4f4f6; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  transition: var(--transition);
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent2); }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  transition: var(--transition);
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.logo-wrap { display: flex; flex-direction: column; }
+.logo {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .5px;
+  line-height: 1;
+  transition: color .2s;
+}
+.logo:hover { color: var(--accent); }
+.logo-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.header-search {
+  width: 240px;
+  padding: 9px 14px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, var(--transition);
+}
+.header-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(107,182,255,.15);
+}
+.header-search::placeholder { color: var(--text-muted); }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.page-body {
+  max-width: 1200px;
+  margin: 24px auto 60px;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ============================================================
+   BLOCKS
+   ============================================================ */
+.block {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  transition: var(--transition);
+}
+.block h2 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  margin-bottom: 14px;
+}
+.page-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.desc-text {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* ============================================================
+   INFOBOX (sidebar)
+   ============================================================ */
+.team-infobox {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  position: sticky;
+  top: 72px;
+  transition: var(--transition);
+}
+.team-logo {
+  width: 76px;
+  height: 76px;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+}
+.team-infobox h1 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 22px;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.info-row:last-of-type { border-bottom: none; }
+.info-label { color: var(--text-muted); flex-shrink: 0; }
+.info-val   { font-weight: 500; text-align: right; }
+
+.btn {
+  display: flex;
+  width: 100%;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  transition: opacity .2s;
+  text-align: center;
+}
+.btn:hover { opacity: .88; }
+.btn.is-disabled {
+  pointer-events: none;
+  opacity: .5;
+  background: var(--bg3);
+  color: var(--text-muted);
+}
+/* Telegram — синяя */
+.btn-tg      { background: var(--tg); color: #000; margin-top: 14px; }
+/* Капитан — нейтральная */
+.btn-captain { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+
+/* ── МЕДАЛЬНЫЕ СТРОКИ в таблице турниров ── */
+.place-cell { font-size: 14px; white-space: nowrap; }
+
+/* Золото */
+tr.place-gold td {
+  background: rgba(255, 200, 50, .07);
+}
+tr.place-gold {
+  outline: 1px solid rgba(255, 200, 50, .35);
+  outline-offset: -1px;
+}
+tr.place-gold td:first-child {
+  border-left: 3px solid #ffc832;
+}
+
+/* Серебро */
+tr.place-silver td {
+  background: rgba(180, 190, 210, .07);
+}
+tr.place-silver {
+  outline: 1px solid rgba(180, 190, 210, .3);
+  outline-offset: -1px;
+}
+tr.place-silver td:first-child {
+  border-left: 3px solid #b4bed2;
+}
+
+/* Бронза */
+tr.place-bronze td {
+  background: rgba(200, 130, 60, .07);
+}
+tr.place-bronze {
+  outline: 1px solid rgba(200, 130, 60, .3);
+  outline-offset: -1px;
+}
+tr.place-bronze td:first-child {
+  border-left: 3px solid #c8823c;
+}
+
+/* ============================================================
+   DATA TABLES (ростер, турниры)
+   ============================================================ */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.data-table th {
+  text-align: left;
+  padding: 7px 8px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+  word-break: break-word;
+}
+.data-table tr:last-child td { border-bottom: none; }
+
+.pos-pill {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.empty-state {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.site-footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 32px 20px 24px;
+  transition: var(--transition);
+}
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.footer-brand .logo-foot {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+.footer-brand p {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 6px;
+  line-height: 1.65;
+  max-width: 260px;
+}
+.footer-socials-label {
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.footer-socials { display: flex; flex-direction: column; gap: 9px; }
+.footer-socials a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+  transition: color .2s;
+}
+.footer-socials a:hover { color: var(--accent); }
+.footer-socials a svg { flex-shrink: 0; }
+.footer-bottom {
+  max-width: 1200px;
+  margin: 20px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* ============================================================
+   FLOATING BUTTONS
+   ============================================================ */
+.fab {
+  position: fixed;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  box-shadow: var(--shadow);
+  transition: transform .2s, background .2s, opacity .3s, var(--transition);
+}
+.fab:hover { transform: scale(1.1); }
+.fab svg { width: 18px; height: 18px; pointer-events: none; }
+#themeBtn { bottom: 24px; left: 24px; }
+#toTopBtn { bottom: 24px; right: 24px; opacity: 0; pointer-events: none; }
+#toTopBtn.visible { opacity: 1; pointer-events: auto; }
+
+.search-hidden { display: none !important; }
+
+/* ============================================================
+   RESPONSIVE — TABLET
+   ============================================================ */
+@media (max-width: 900px) {
+  .page-body { grid-template-columns: 1fr; }
+  .team-infobox { position: static; order: -1; }
+  /* На планшете — инфобокс горизонтальный */
+  .team-infobox-inner {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .team-logo { flex-shrink: 0; }
+  .team-infobox-details { flex: 1; }
+}
+
+/* ============================================================
+   RESPONSIVE — MOBILE
+   ============================================================ */
+@media (max-width: 640px) {
+  /* Header */
+  .header-inner { flex-wrap: wrap; padding: 10px 16px; gap: 8px; }
+  .header-search { width: 100%; order: 3; }
+
+  /* Layout */
+  .page-body { padding: 0 16px; margin-top: 16px; gap: 0; }
+  .block      { padding: 14px 16px; margin-bottom: 12px; border-radius: 10px; }
+  .block h2   { font-size: 16px; }
+  .page-title { font-size: 22px; }
+
+  /* Infobox — компактный горизонтальный вид */
+  .team-infobox { padding: 14px 16px; border-radius: 10px; }
+  .team-infobox-inner { display: flex; gap: 14px; align-items: flex-start; }
+  .team-logo { width: 56px; height: 56px; flex-shrink: 0; margin-bottom: 0; border-radius: 10px; }
+  .team-infobox-details { flex: 1; min-width: 0; }
+  .team-infobox h1 { font-size: 18px; margin-bottom: 10px; }
+  .info-row { padding: 6px 0; font-size: 12px; }
+  .btn { min-height: 38px; font-size: 13px; margin-top: 10px; }
+
+  /* Tables — карточный режим */
+  .data-table thead { display: none; }
+  .data-table,
+  .data-table tbody,
+  .data-table tr,
+  .data-table td { display: block; width: 100%; }
+  .data-table tr {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table tr:last-child { border-bottom: none; }
+  .data-table td {
+    border-bottom: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+    font-size: 12px;
+  }
+  .data-table td::before {
+    content: attr(data-label);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    flex-shrink: 0;
+    min-width: 90px;
+  }
+  /* Название турнира — занимает всю строку */
+  .data-table td[data-label="Турнир"] {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .data-table td[data-label="Турнир"]::before { min-width: unset; }
+
+  /* FABs */
+  .fab { width: 40px; height: 40px; }
+  #themeBtn { bottom: 16px; left: 16px; }
+  #toTopBtn { bottom: 16px; right: 16px; }
+
+  /* Footer */
+  .site-footer { padding: 24px 16px 20px; }
+  .footer-inner { flex-direction: column; gap: 20px; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+
+@media (max-width: 400px) {
+  .logo { font-size: 20px; }
+  .page-title { font-size: 20px; }
+  .team-logo { width: 48px; height: 48px; }
+}
+
+/* ── GLOBAL SEARCH ── */
+.header-search-wrap { position: relative; width: 280px; }
+.header-search { width: 100%; padding: 9px 14px 9px 36px; }
+.search-icon {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted); pointer-events: none; width: 15px; height: 15px;
+}
+.search-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  z-index: 500; display: none; max-height: 400px; overflow-y: auto;
+}
+.search-dropdown.visible { display: block; }
+.sd-group-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text-muted); padding: 10px 14px 6px;
+  background: var(--bg3); border-bottom: 1px solid var(--border);
+}
+.sd-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 14px;
+  cursor: pointer; transition: background .12s;
+  border-bottom: 1px solid var(--border); text-decoration: none; color: var(--text);
+}
+.sd-item:last-child { border-bottom: none; }
+.sd-item:hover, .sd-item.active { background: var(--bg3); }
+.sd-icon {
+  width: 28px; height: 28px; border-radius: 6px; background: var(--bg3);
+  border: 1px solid var(--border); display: flex; align-items: center;
+  justify-content: center; font-size: 13px; flex-shrink: 0;
+}
+.sd-item img.sd-logo {
+  width: 28px; height: 28px; border-radius: 6px; object-fit: cover;
+  border: 1px solid var(--border); flex-shrink: 0;
+}
+.sd-info { min-width: 0; }
+.sd-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sd-meta  { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.sd-badge {
+  margin-left: auto; flex-shrink: 0; font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 999px; border: 1px solid var(--border);
+  color: var(--text-muted); background: var(--bg3);
+}
+.sd-empty { padding: 16px 14px; color: var(--text-muted); font-size: 13px; text-align: center; }
+@media (max-width: 640px) {
+  .header-search-wrap { width: 100%; order: 3; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <a class="logo" id="homeLink" href="/">Anypedia</a>
+      <div class="logo-sub">Dota 2 · Команды СНГ</div>
+    </div>
+    <div class="header-search-wrap" id="searchWrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="search" class="header-search" placeholder="Поиск турниров и команд…" autocomplete="off"/>
+      <div class="search-dropdown" id="searchDropdown"></div>
+    </div>
+  </div>
+</header>
+
+<!-- PAGE BODY -->
+<div class="page-body" id="pageBody" style="display:none">
+
+  <main>
+    <div class="block" id="summaryBlock"></div>
+    <div class="block">
+      <h2>Активный состав</h2>
+      <div id="activeRoster"></div>
+    </div>
+    <div class="block">
+      <h2>Бывшие игроки</h2>
+      <div id="formerPlayers"></div>
+    </div>
+    <div class="block">
+      <h2>Турниры</h2>
+      <div id="teamTournaments"></div>
+    </div>
+  </main>
+
+  <aside class="team-infobox" id="teamInfobox">
+    <!-- Содержимое рендерится через JS — нужна обёртка для горизонтального layout на планшете -->
+  </aside>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-foot">Anypedia</div>
+      <p>Платформа для поиска и отслеживания турниров по Dota 2 в СНГ. Следите за расписанием, ростерами и результатами.</p>
+    </div>
+    <div>
+      <div class="footer-socials-label">Наши соцсети</div>
+      <div class="footer-socials">
+        <a href="https://t.me/anylvlcommunity" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 14.173l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.386z"/></svg>
+          Telegram
+        </a>
+        <a href="https://discord.gg/3N4Jg6Jpak" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.492c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 0 0-.079.036c-.21.369-.444.85-.608 1.23a18.566 18.566 0 0 0-5.487 0 12.36 12.36 0 0 0-.617-1.23A.077.077 0 0 0 8.562 3c-1.714.29-3.354.8-4.885 1.491a.07.07 0 0 0-.032.027C.533 9.093-.32 13.555.099 17.961a.08.08 0 0 0 .031.055 20.03 20.03 0 0 0 5.993 2.98.078.078 0 0 0 .084-.026c.462-.62.874-1.275 1.226-1.963a.074.074 0 0 0-.041-.104 13.2 13.2 0 0 1-1.872-.878.075.075 0 0 1-.008-.125c.126-.093.252-.19.372-.287a.075.075 0 0 1 .078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 0 1 .079.009c.12.098.245.195.372.288a.075.075 0 0 1-.006.125c-.598.344-1.22.635-1.873.877a.075.075 0 0 0-.041.105c.36.687.772 1.341 1.225 1.962a.077.077 0 0 0 .084.028 19.963 19.963 0 0 0 6.002-2.981.076.076 0 0 0 .032-.054c.5-5.094-.838-9.52-3.549-13.442a.06.06 0 0 0-.031-.028zM8.02 15.278c-1.182 0-2.157-1.069-2.157-2.38 0-1.312.956-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.956 2.38-2.157 2.38zm7.975 0c-1.183 0-2.157-1.069-2.157-2.38 0-1.312.955-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.946 2.38-2.157 2.38z"/></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Anypedia. Все права защищены.</span>
+    <span>Dota 2 — торговая марка Valve Corporation.</span>
+  </div>
+</footer>
+
+<!-- FLOATING BUTTONS -->
+<button class="fab" id="themeBtn" title="Тема" aria-label="Тема">
+  <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+</button>
+<button class="fab" id="toTopBtn" title="Наверх" aria-label="Наверх">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<script src="team.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

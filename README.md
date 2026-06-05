@@ -1,1 +1,1 @@
-# testanypedia
+# anypedia

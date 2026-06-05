@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/team/:id",
+      "destination": "/team.html?id=:id"
+    },
+    {
+      "source": "/:id",
+      "destination": "/tournament.html?id=:id"
+    }
+  ]
+}

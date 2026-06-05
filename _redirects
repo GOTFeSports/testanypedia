@@ -1,0 +1,5 @@
+/index.html   /index.html       200
+/data.js      /data.js          200
+/tournament.html /tournament.html 200
+/team/:id     /team.html?id=:id        200
+/:id          /tournament.html?id=:id  200
