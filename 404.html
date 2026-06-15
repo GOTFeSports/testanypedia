@@ -8,11 +8,15 @@
 <body>
 <script>
 const parts = location.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+const orgIndex = parts.indexOf('organizer');
 const teamIndex = parts.indexOf('team');
 let baseParts;
 let target;
 
-if (teamIndex >= 0 && parts[teamIndex + 1]) {
+if (orgIndex >= 0 && parts[orgIndex + 1]) {
+  baseParts = parts.slice(0, orgIndex);
+  target = `${baseParts.length ? '/' + baseParts.join('/') : ''}/organizer.html?id=${encodeURIComponent(decodeURIComponent(parts[orgIndex + 1]))}`;
+} else if (teamIndex >= 0 && parts[teamIndex + 1]) {
   baseParts = parts.slice(0, teamIndex);
   target = `${baseParts.length ? '/' + baseParts.join('/') : ''}/team.html?id=${encodeURIComponent(decodeURIComponent(parts[teamIndex + 1]))}`;
 } else if (parts.length) {

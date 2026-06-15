@@ -1,0 +1,16 @@
+# Anypedia — robots.txt
+# Разрешаем индексацию всего сайта
+
+User-agent: *
+Allow: /
+
+# Основные страницы
+Allow: /index.html
+Allow: /tournament.html
+Allow: /team.html
+
+# Статика
+Disallow: /node_modules/
+
+# Карта сайта
+Sitemap: https://anypedia.ru/sitemap.xml

@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/organizer/:id",
+      "destination": "/organizer.html?id=:id"
+    },
+    {
       "source": "/team/:id",
       "destination": "/team.html?id=:id"
     },

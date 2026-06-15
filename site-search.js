@@ -7,6 +7,7 @@
 
   const allTournaments = typeof tournaments !== 'undefined' && Array.isArray(tournaments) ? tournaments : [];
   const allTeams = typeof teams !== 'undefined' && Array.isArray(teams) ? teams : [];
+  const allOrganizers = typeof organizers !== 'undefined' && Array.isArray(organizers) ? organizers : [];
   let activeIdx = -1;
 
   function escapeHtml(value) {
@@ -54,6 +55,30 @@
       .some(name => name.toLowerCase().includes(q));
   }
 
+  function slugifyOrganizer(value) {
+    return String(value || '').normalize('NFKC').trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\p{L}\p{N}_-]+/gu, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || 'organizer';
+  }
+
+  function organizerId(org) {
+    return org.id || slugifyOrganizer(org.name);
+  }
+
+  function organizerAliases(org) {
+    const aliases = org.aliases || [];
+    if (Array.isArray(aliases)) return aliases;
+    return String(aliases).split(',').map(name => name.trim()).filter(Boolean);
+  }
+
+  function organizerMatchesQuery(org, q) {
+    return [org.name, ...organizerAliases(org)]
+      .filter(Boolean)
+      .some(name => name.toLowerCase().includes(q));
+  }
+
   function getBasePath() {
     const path = location.pathname;
     if (path.endsWith('/index.html') || path.endsWith('/team.html') || path.endsWith('/tournament.html')) {
@@ -82,6 +107,10 @@
     return `${siteBase}team.html?id=${encodeURIComponent(teamId(team))}`;
   }
 
+  function organizerLink(org) {
+    return `${siteBase}organizer.html?id=${encodeURIComponent(organizerId(org))}`;
+  }
+
   function assetUrl(value) {
     const url = String(value || 'dota2.png');
     if (/^(https?:|data:|\/)/i.test(url)) return url;
@@ -107,7 +136,11 @@
       .filter(team => teamMatchesQuery(team, q))
       .slice(0, 5);
 
-    if (!matchedTournaments.length && !matchedTeams.length) {
+    const matchedOrganizers = allOrganizers
+      .filter(org => organizerMatchesQuery(org, q))
+      .slice(0, 5);
+
+    if (!matchedTournaments.length && !matchedTeams.length && !matchedOrganizers.length) {
       searchDropdown.innerHTML = '<div class="sd-empty">Ничего не найдено</div>';
       searchDropdown.classList.add('visible');
       return;
@@ -148,6 +181,23 @@
               <div class="sd-meta">${escapeHtml(team.region || '—')}${team.prize ? ' · ' + escapeHtml(team.prize) : ''}</div>
             </div>
             <span class="sd-badge">Команда</span>
+          </a>`;
+      });
+    }
+
+    if (matchedOrganizers.length) {
+      html += '<div class="sd-group-label">🛡️ Организаторы</div>';
+      matchedOrganizers.forEach(org => {
+        html += `
+          <a class="sd-item" href="${organizerLink(org)}">
+            <img class="sd-logo" src="${escapeHtml(assetUrl(org.logo))}"
+                 alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="sd-icon" style="display:none">🛡️</div>
+            <div class="sd-info">
+              <div class="sd-title">${escapeHtml(org.name)}</div>
+              <div class="sd-meta">${escapeHtml(org.region || '—')}</div>
+            </div>
+            <span class="sd-badge">Организатор</span>
           </a>`;
       });
     }

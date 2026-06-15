@@ -4,6 +4,17 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Tournament · Anypedia</title>
+  <!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=109393123', 'ym');
+
+    ym(109393123, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
 <!-- Ставим тему ДО загрузки CSS — исключает вспышку при любом направлении перехода -->
 <script>
 (function(){
@@ -12,11 +23,12 @@
   document.documentElement.style.background = t === 'light' ? '#f4f4f6' : '#0f0f10';
 })();
 </script>
-<script src="page-transition.js"></script>
+<script src="/page-transition.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="data.js"></script>
-<script src="teams.js"></script>
+<script src="/data.js"></script>
+<script src="/teams.js"></script>
+<script src="/organizers.js"></script>
 
 <style>
 /* ============================================================
@@ -214,8 +226,8 @@ a:hover { color: var(--accent2); }
 }
 .btn:active { transform: scale(.98); }
 .btn:hover  { opacity: .88; }
-.btn-reg    { background: var(--accent); color: #000; }
-.btn-tg     { background: var(--tg);    color: #000; }
+.btn-reg    { background: var(--accent); color: #000; display: flex; align-items: center; justify-content: center; gap: 7px; }
+.btn-tg     { background: var(--tg);    color: #000; display: flex; align-items: center; justify-content: center; gap: 7px; }
 .btn-share  {
   background: var(--bg3);
   color: var(--text);
@@ -377,6 +389,18 @@ a:hover { color: var(--accent2); }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* Тип участия команды (Invited, Closed Qual и т.д.) — под последним игроком */
+.team-seed {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-align: center;
 }
 /* pos: маленький бейдж, фиксированная ширина, выравнивается по правому краю */
 .pos {
@@ -588,6 +612,20 @@ a:hover { color: var(--accent2); }
   .btn { font-size: 12px; padding: 8px 4px; }
 }
 
+/* ── SITE NAV ── */
+.site-nav {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 4px;
+}
+.nav-link {
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+  color: var(--text-muted); padding: 6px 14px; border-radius: 7px;
+  text-decoration: none; transition: color .2s, background .2s; white-space: nowrap;
+}
+.nav-link:hover { color: var(--text); background: var(--bg2); }
+.nav-link.active { color: var(--accent); background: var(--bg2); }
+
 /* ── GLOBAL SEARCH ── */
 .header-search-wrap { position: relative; width: 300px; }
 .header-search { width: 100%; padding: 9px 14px 9px 36px; }
@@ -634,6 +672,8 @@ a:hover { color: var(--accent2); }
 .sd-empty { padding: 16px 14px; color: var(--text-muted); font-size: 13px; text-align: center; }
 @media (max-width: 640px) {
   .header-search-wrap { width: 100%; order: 3; }
+  .site-nav { order: 2; width: 100%; justify-content: flex-start; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .nav-link { padding: 6px 12px; font-size: 12px; }
 }
 </style>
 </head>
@@ -643,9 +683,14 @@ a:hover { color: var(--accent2); }
 <header class="site-header">
   <div class="header-inner">
     <div class="logo-wrap">
-      <a class="logo" href="/">Anypedia</a>
-      <div class="logo-sub">Dota 2 · Турниры СНГ</div>
+      <a class="logo" href="/index.html">Anypedia</a>
+      <div class="logo-sub">Киберспортивное Dota 2 Wiki</div>
     </div>
+    <nav class="site-nav">
+      <a class="nav-link active" href="/index.html">Турниры</a>
+      <a class="nav-link" href="/teams-list.html">Команды</a>
+      <a class="nav-link" href="/organizers-list.html">Организаторы</a>
+    </nav>
     <div class="header-search-wrap" id="searchWrap">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -738,8 +783,31 @@ function doShare() {
 }
 
 /* ---------- TOURNAMENT DATA ---------- */
-const id = new URLSearchParams(window.location.search).get('id');
+function getTournamentIdFromUrl() {
+  const paramsId = new URLSearchParams(window.location.search).get('id');
+  if (paramsId) return paramsId;
+
+  const path = location.pathname.replace(/\/+$/, '');
+  const lastSegment = decodeURIComponent(path.split('/').pop() || '');
+  if (!lastSegment || lastSegment === 'tournament.html' || lastSegment === 'index.html') return '';
+  return lastSegment;
+}
+
+function getSiteBasePath(id) {
+  const path = location.pathname;
+  if (path.endsWith('/tournament.html') || path.endsWith('/index.html')) {
+    return path.slice(0, path.lastIndexOf('/') + 1) || '/';
+  }
+  const suffix = `/${encodeURIComponent(id)}`;
+  return path.endsWith(suffix) ? path.slice(0, -suffix.length + 1) : '/';
+}
+
+const id = getTournamentIdFromUrl();
 const t  = tournaments.find(x => x.id === id);
+
+if (t && new URLSearchParams(window.location.search).has('id')) {
+  history.replaceState(null, '', `${getSiteBasePath(id)}${encodeURIComponent(id)}`);
+}
 
 if (!t) {
   document.body.innerHTML = `
@@ -748,7 +816,7 @@ if (!t) {
       <div>
         <h1 style="font-size:22px;margin-bottom:10px">❌ Турнир не найден</h1>
         <p style="color:#888;margin-bottom:20px">Проверьте ссылку или вернитесь на главную</p>
-        <a href="index.html" style="padding:10px 18px;background:#1c1c1e;border:1px solid #2a2a2a;
+        <a href="/index.html" style="padding:10px 18px;background:#1c1c1e;border:1px solid #2a2a2a;
            border-radius:10px;color:#6bb6ff;display:inline-block">← Назад</a>
       </div>
     </div>`;
@@ -868,8 +936,7 @@ function findTeamByName(name) {
   return allTeams.find(team => teamAllNames(team).includes(key)) || null;
 }
 function getSiteBase() {
-  const p = location.pathname.replace(/\/[^/]*\.html$/, '/');
-  return location.origin + p;
+  return location.origin + getSiteBasePath(id);
 }
 /* Оборачивает имя команды в ссылку если команда найдена в teams.js */
 function renderTeamLink(name, style = '') {
@@ -877,7 +944,16 @@ function renderTeamLink(name, style = '') {
   const found = findTeamByName(name);
   if (!found) return name;
   const tid = getTeamPageId(found);
-  return `<a href="${getSiteBase()}team.html?id=${encodeURIComponent(tid)}" style="color:var(--accent);font-weight:600${style ? ';' + style : ''}">${name}</a>`;
+  return `<a href="${getSiteBase()}team/${encodeURIComponent(tid)}" style="color:var(--accent);font-weight:600${style ? ';' + style : ''}">${name}</a>`;
+}
+
+/* Оборачивает имя организатора в ссылку если организатор найден в organizers.js */
+function renderOrganizerLink(name) {
+  if (!name || name === '—') return name || '—';
+  const found = typeof findOrganizerByName === 'function' ? findOrganizerByName(name) : null;
+  if (!found) return name;
+  const oid = getOrganizerId(found);
+  return `<a href="${getSiteBase()}organizer/${encodeURIComponent(oid)}" style="color:var(--accent);font-weight:600">${name}</a>`;
 }
 
 /* ---------- INFOBOX ---------- */
@@ -895,10 +971,20 @@ document.getElementById('infobox').innerHTML = `
   <div class="info-row"><span class="info-label">Формат</span><span class="info-val">${t.format || '—'}</span></div>
   <div class="info-row"><span class="info-label">Лимит</span><span class="info-val">${t.limit || '—'}</span></div>
   <div class="info-row"><span class="info-label">Победитель</span><span class="info-val">${renderTeamLink(t.winner || 'TBD')}</span></div>
-  <div class="info-row"><span class="info-label">Организатор</span><span class="info-val">${t.organizer || '—'}</span></div>
+  <div class="info-row"><span class="info-label">Организатор</span><span class="info-val">${renderOrganizerLink(t.organizer || '—')}</span></div>
   <div class="action-btns">
-    ${t.registrationLink ? `<a class="btn btn-reg" href="${t.registrationLink}" target="_blank" rel="noopener">📋 Регистрация</a>` : ''}
-    ${t.telegramLink     ? `<a class="btn btn-tg"  href="${t.telegramLink}"     target="_blank" rel="noopener">✈️ Telegram</a>` : ''}
+    ${t.registrationLink ? `<a class="btn btn-reg" href="${t.registrationLink}" target="_blank" rel="noopener">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+      </svg>
+      Регистрация
+    </a>` : ''}
+    ${t.telegramLink     ? `<a class="btn btn-tg"  href="${t.telegramLink}"     target="_blank" rel="noopener">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 14.173l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.386z"/>
+      </svg>
+      Telegram
+    </a>` : ''}
     <button class="btn btn-share" onclick="doShare()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -960,6 +1046,7 @@ document.getElementById('teams').innerHTML = (t.teamsList || []).map(team => `
         <span class="nick">${p.nick}</span>
         <span class="pos" title="Позиция ${p.pos}">${p.pos}</span>
       </div>`).join('')}
+    ${team.seed ? `<div class="team-seed">${team.seed}</div>` : ''}
   </div>`).join('');
 
 /* ---------- BRACKET ---------- */
@@ -973,6 +1060,6 @@ document.getElementById('casters').innerHTML = (t.casters || []).map(c => `
       : `<span>${c.name || 'TBD'}</span>`}
   </div>`).join('');
 </script>
-<script src="search.js"></script>
+<script src="/search.js"></script>
 </body>
 </html>

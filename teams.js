@@ -39,7 +39,7 @@ const teams = [
     ],
 
     formerPlayers: [
-      { nick: "Collapse Mini", pos: 3, joined: "2025-07-18", left: "2026-04-10", newTeam: "DRAGFIRE Ascent"  },
+      { nick: "Collapse Mini", pos: 3, joined: "2025-07-18", left: "2026-04-10", newTeam: "DRAGFIRE Ascent"   },
     ],
 
     // Добавляйте турниры вручную.
@@ -74,8 +74,8 @@ const teams = [
     ],
 
     formerPlayers: [
-      { nick: "danyok", pos: 2, joined: "2025-04-21", left: "2026-05-17", newTeam: ""  },
-      { nick: "drim", pos: 4, joined: "2025-04-21", left: "2026-01-18", newTeam: "Bedlam Red"  },
+      { nick: "danyok", pos: 2, joined: "2025-04-21", left: "2026-05-17", newTeam: ""   },
+      { nick: "drim", pos: 4, joined: "2025-04-21", left: "2026-01-18", newTeam: "Bedlam Red"    },
     ],
 
     // Добавляйте турниры вручную.
@@ -115,7 +115,7 @@ const teams = [
       { nick: "Nico",         pos: 5, joined: "2026-04-24" },
     ],
     formerPlayers: [
-      { nick: "Shiroyami", pos: 4, joined: "2026-02-21", left: "2026-04-24" },
+      { nick: "Shiroyami", pos: 4, joined: "2026-02-21", left: "2026-04-24", newTeam: ""    },
     ],
     tournaments: [
       {
@@ -139,6 +139,13 @@ const teams = [
         prize: "—",
         limit: "До 8.500 MMR на игрока"
       },
+      {
+        title: "Bedlam Waiting For Summer Cup",
+        date:  "2026-05-31",
+        place: "1",
+        prize: "10.000₽",
+        limit: "До 35.000 MMR на команду"
+      },
     ]
   },
   {
@@ -150,15 +157,18 @@ const teams = [
     prize: ">4.000₽",
     telegramLink: "https://t.me/hakiavota",
     captainLink: "https://t.me/Mikhael16",
-    description: "СНГ-команда, существовавшая с 2025 по 2026 год. За время выступлений коллектив неоднократно показывал достойные результаты на региональных турнирах и сумел завоевать чемпионский титул на AnyLvL x GOTF eSports: Special 2. LETO Junior считалась одной из заметных молодых команд своей сцены, однако в мае 2026 года состав был официально распущен.",
+    description: "СНГ-команда, ведущая свою историю с 2025 года. Коллектив неоднократно показывает достойные результаты на региональных турнирах и имеет в активе чемпионский титул на AnyLvL x GOTF eSports: Special 2. LETO Junior является одной из заметных молодых команд своей сцены.",
     activeRoster: [
+      { nick: "cotsu", pos: 1, joined: "2026-05-31" },
+      { nick: "Alisa", pos: 2, joined: "2025-05-14" },
+      { nick: "popi", pos: 3, joined: "2025-05-14" },
+      { nick: "Dark Light", pos: 4, joined: "2026-05-31" },
+      { nick: "Freak", pos: 5, joined: "2026-05-31" },
     ],
     formerPlayers: [
-      { nick: "Teenwave", pos: 1, joined: "2025-05-14", left: "2026-05-31", newTeam: ""  },
-      { nick: "Alisa", pos: 2, joined: "2025-05-14", left: "2026-05-31", newTeam: ""  },
-      { nick: "popi", pos: 3, joined: "2025-05-14", left: "2026-05-31", newTeam: ""  },
-      { nick: "el tivke", pos: 4, joined: "2025-05-14", left: "2026-05-31", newTeam: ""  },
-      { nick: "Freakuxa", pos: 5, joined: "2025-05-14", left: "2026-05-31", newTeam: ""  },
+      { nick: "Teenwave", pos: 1, joined: "2025-05-14", left: "2026-05-31", newTeam: "Barracuda Team"    },
+      { nick: "el tivke", pos: 4, joined: "2025-05-14", left: "2026-05-31", newTeam: "LETO Junior (Manager)"    },
+      { nick: "Freakuxa", pos: 5, joined: "2025-05-14", left: "2026-05-31", newTeam: ""    },
     ],
     tournaments: [
       {
@@ -224,6 +234,13 @@ const teams = [
         prize: "—",
         limit: "Без лимита"
       },
+      {
+        title: "Bedlam Waiting For Summer Cup",
+        date:  "2026-05-31",
+        place: "5-8",
+        prize: "",
+        limit: "До 35.000 MMR на команду"
+      },
     ]
   },
   {
@@ -237,7 +254,7 @@ const teams = [
     captainLink: "https://t.me/prokazz_a",
     description: "Команда СНГ-региона, основанная 3 января 2026 года. С момента создания коллектив практически не менял основной состав, что позволило игрокам выстроить хорошее взаимопонимание и командную игру. Наиболее значимым достижением команды стала победа на SkewerEsports Season 1. Podosinovik известна своей стабильностью, сыгранностью и активным участием в региональных турнирах.",
     activeRoster: [
-      { nick: "ИНП",                      pos: 1, joined: "2026-01-03" },
+      { nick: "Woods",                      pos: 1, joined: "2026-06-09" },
       { nick: "зато уютно умирать",       pos: 2, joined: "2026-01-03" },
       { nick: "МИШКА МОРГЕН",             pos: 3, joined: "2026-01-03" },
       { nick: "El Oreshniko del Perú",    pos: 4, joined: "2026-01-03" },
@@ -258,6 +275,13 @@ const teams = [
         place: "4",
         prize: "—",
         limit: "До 8.500 MMR на игрока"
+      },
+      {
+        title: "Bedlam Waiting For Summer Cup",
+        date:  "2026-05-31",
+        place: "2",
+        prize: "5.000₽",
+        limit: "До 35.000 MMR на команду"
       },
     ]
   },
@@ -281,9 +305,9 @@ const teams = [
     ],
 
     formerPlayers: [
-      { nick: "cotsu", pos: 1, joined: "2026-04-18", left: "2026-05-29", newTeam: "Gitlz"},
-      { nick: "marty", pos: 4, joined: "2026-04-19", left: "2026-05-29", newTeam: ""},
-      { nick: "yomyKo", pos: 4, joined: "2026-04-18", left: "2026-04-19", newTeam: "" },
+      { nick: "cotsu", pos: 1, joined: "2026-04-18", left: "2026-05-29", newTeam: "LASTDANCE"     },
+      { nick: "marty", pos: 4, joined: "2026-04-19", left: "2026-05-29", newTeam: ""     },
+      { nick: "yomyKo", pos: 4, joined: "2026-04-18", left: "2026-04-19", newTeam: ""     },
     ],
 
     tournaments: [
@@ -295,7 +319,7 @@ const teams = [
         limit: "До 8.500 MMR на игрока"
       },
       {
-        title: "AnyLvL x GOTF eSports: Special 2",
+        title: "AnyLvL x GOTF eSports Tournament #1",
         date:  "2026-04-19",
         place: "9-16",
         prize: "—",
@@ -307,6 +331,76 @@ const teams = [
         place: "9-16",
         prize: "—",
         limit: "До 35.000 MMR на команду"
+      },
+    ]
+  },
+  {
+    id: "never-back-down",
+    name: "Never Back Down",
+    aliases: ["Never Back Down"],
+    logo: "nbdteam.png",
+    region: "СНГ",
+    prize: "11.500₽",
+    telegramLink: "",   // ссылка на группу/канал команды
+    captainLink:  "https://t.me/roseofficial_26",   // личный TG капитана для связи
+    description: "Киберспортивный коллектив из Восточной Европы. Был основан в 2025 году.",
+
+    activeRoster: [
+      { nick: "KarineGod",  pos: 1, joined: "2025-11-01" },
+      { nick: "Baby, Nice Try",   pos: 2, joined: "2025-11-01" },
+      { nick: "m1nd1",   pos: 3, joined: "2026-05-31" },
+      { nick: "Darklight",   pos: 4, joined: "2026-05-31" },
+      { nick: "Rose",   pos: 5, joined: "2025-11-01" },
+    ],
+
+    formerPlayers: [
+      
+    ],
+
+    // Добавляйте турниры вручную.
+    // Поле title должно совпадать с названием в data.js — ссылка появится автоматически.
+    tournaments: [
+      {
+        title: "Bedlam Battles Season 3",
+        date:  "2025-11-09",
+        place: "1",
+        prize: "7.500₽",
+        limit: "До 7.000 MMR на игрока"
+      },
+      {
+        title: "Bedlam Winter Cup: Division 1",
+        date:  "2026-02-22",
+        place: "7-8",
+        prize: "—",
+        limit: "До 8.500 MMR на игрока"
+      },
+      {
+        title: "Bedlam Swamp Wars",
+        date:  "2026-03-29",
+        place: "5-8",
+        prize: "—",
+        limit: "До 7.500 MMR на игрока"
+      },
+      {
+        title: "SkewerEsports Season 1",
+        date:  "2026-05-08",
+        place: "2",
+        prize: "—",
+        limit: "До 35.000 MMR на команду"
+      },
+      {
+        title: "Bedlam Waiting For Summer Cup",
+        date:  "2026-05-31",
+        place: "3-4",
+        prize: "—",
+        limit: "До 35.000 MMR на команду"
+      },
+      {
+        title: "Bedlam Christmas Cup",
+        date:  "2025-12-14",
+        place: "3",
+        prize: "4.000₽",
+        limit: "До 7.000 MMR на игрока"
       },
     ]
   },

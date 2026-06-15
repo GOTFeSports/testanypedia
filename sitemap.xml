@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap.xml — Anypedia
+  Помогает Google и Яндекс быстрее находить страницы.
+
+  КАК ОБНОВЛЯТЬ:
+  При добавлении нового турнира в data.js — добавьте запись:
+  <url>
+    <loc>https://anypedia.ru/ID_ТУРНИРА</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  При добавлении команды в teams.js — добавьте:
+  <url>
+    <loc>https://anypedia.ru/team/ID_КОМАНДЫ</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Главная страница -->
+  <url>
+    <loc>https://anypedia.ru/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- ==================== ТУРНИРЫ ==================== -->
+  <!-- Будущие и текущие: changefreq=daily, priority=0.9 -->
+  <!-- Прошедшие:         changefreq=monthly, priority=0.7 -->
+
+  <url>
+    <loc>https://anypedia.ru/The-Trial-of-Immortality-5</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/SkewerEsports-Season-3</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/Bedlam-Summer-Cup-1x1</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/Hater-Zdes-Dota-Cup-Season-3-Division-1</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/reflection-league-6</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/SkewerEsports-Season-2</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/Bedlam-Waiting-For-Summer-Cup</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/Bedlam-Spring-Cup</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/Armagedon-Championship-S8</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/AnyLvL-x-GOTF-eSports-Tournament-1</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/SkewerEsports-Season-1</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/Bedlam-Swamp-Wars</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/bedlam-winter-cup-division-2</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/bedlam-winter-cup-division-1</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/bedlam-christmas-cup</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/bedlam-battles-season-3</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/bedlam-battles-season-2</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/bedlam-battles-season-1</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- ==================== ОРГАНИЗАТОРЫ ==================== -->
+
+  <url>
+    <loc>https://anypedia.ru/organizer/bedlam-tournaments</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/organizer/skeweresports</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/organizer/reflection-league</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/organizer/rampage-tournaments</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- ==================== КОМАНДЫ ==================== -->
+
+  <url>
+    <loc>https://anypedia.ru/team/gitlz</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/team/never-back-down</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/team/bedlam-red</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/team/podosinovik</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/team/leto-junior</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/team/team-sexy</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://anypedia.ru/team/azutive-fans</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>

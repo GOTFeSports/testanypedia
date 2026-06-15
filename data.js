@@ -11,40 +11,174 @@
 //    bracket:  "https://..."
 //  }
 //  Пустые или отсутствующие ссылки не отображаются.
+//
+//  teamsList[] — участники турнира. У каждой команды:
+//    name, logo, roster: [{nick, pos}, ...]
+//    seed (опционально) — тип участия команды в турнире,
+//    например: "Invited", "From Closed Qual", "Direct Invite" и т.д.
+//    Если поле seed ОТСУТСТВУЕТ — ничего не отображается.
+//    Если ЕСТЬ — отображается под последним игроком состава.
+//    Пример: {"name": "Team X", "logo": "dota2.png", "seed": "Invited",
+//             "roster": [{"nick": "...", "pos": 1}, ...]}
 // =============================================
 
-const tournaments = [
-     {
-    id: "Test123",
-    title: "The Trial of Immortality 5",
-    limit: "До 30.000 MMR на команду",
-    start: "2026-04-10",
-    end: "2026-09-14",
-    startTime: "13:00",
-    prize: "20.000₽",
-    location: "СНГ",
-    teams: 32,
-    winner: "TBD",
-    format: "Double Elimination",
-    organizer: "Immortality",
-    links: {
-        dotabuff: "https://ru.dotabuff.com/esports/leagues/19692-the-trial-of-immortality-season-5",
-        discord: "https://discord.gg/Vu8kNs39PX",
-        rules: "https://t.me/reglamentbyimmortality",
-        bracket: "https://t.me/immsetka"
+const tournaments = [  
+    {      
+    "id": "Bedlam-Season-4-Division-1",
+    "title": "Bedlam Season 4 Division 1",
+    "limit": "До 25.000 MMR на команду",
+    "start": "2026-06-20",
+    "end": "2026-06-28",
+    "startTime": "17:00",
+    "prize": "20.000₽",
+    "location": "СНГ",
+    "teams": 32,
+    "winner": "TBD",
+    "format": "Group Stage + Double Elimination",
+    "organizer": "Bedlam Tournaments",
+    "links": {
+        "dotabuff": "",
+        "discord": "https://discord.gg/FktVXm4gRD",
+        "rules": "",
+        "bracket": ""
     },
-    teamsList: [],
-        casters: [
-        { name: "Nix", link: "https://www.twitch.tv/nix"},
+    "teamsList": [],
+    "casters": [
+        {"name": "jimbo_jox", "link": "https://www.twitch.tv/jimbo_jox"},
+        {"name": "tiltuhabratuha", "link": "https://www.twitch.tv/tiltuhabratuha"}
     ],
-    bracketEmbed: "",
-    registrationLink: "https://t.me/questionnaireimm",
-    telegramLink: "https://t.me/cultimm",
-    description: "The Trial of Immortality 5 — 13-14 июня в 13:00 МСК, Double Elimination, Captains Draft, BO1 (гранд-финал BO3), лимит MMR 30000 на команду (10000 на игрока), 16-32 команды, взнос 750₽, призовой фонд 20000₽ (1-е место — 10000₽, 2-е — 6000₽, 3-е — 4000₽). Организатор: Immortality.",
-    prizePool: [
-        { place: 1, amount: "10.000₽", team: "" },
-        { place: 2, amount: "6.000₽", team: "" },
-        { place: 3, amount: "4.000₽", team: "" }
+    "bracketEmbed": "",
+    "registrationLink": "",
+    "telegramLink": "https://t.me/bedlamtournaments",
+    "description": "",
+    "prizePool": [
+        { "place": 1, "amount": "", "team": "" }
+    ]
+},
+    {      
+    "id": "ECHO-Rapture-x-Rampage-TURIK-1",
+    "title": "ECHO Rapture x Rampage TURIK",
+    "limit": "До 25.000 MMR на команду",
+    "start": "2026-06-13",
+    "end": "2026-06-14",
+    "startTime": "17:00",
+    "prize": "2.500₽",
+    "location": "СНГ",
+    "teams": 32,
+    "winner": "TBD",
+    "format": "Single Elimination",
+    "organizer": "ECHO Rapture & RAMPAGE Tournaments",
+    "links": {
+        "dotabuff": "",
+        "discord": "",
+        "rules": "",
+        "bracket": ""
+    },
+    "teamsList": [],
+    "casters": [
+        {"name": "Echo Rapture", "link": "https://twitch.tv/echo_rapture"},
+        {"name": "RAMPAGE Tournaments", "link": "https://www.twitch.tv/rampagetouriks"}
+    ],
+    "bracketEmbed": "",
+    "registrationLink": "https://echorapture.ru/",
+    "telegramLink": "https://t.me/rampagetournaments",
+    "description": "Турнир для игроков до 25.000 MMR на команду. Регистрация бесплатная. Обязательные условия: подписка на Telegram-каналы RAMPAGE TOURIKS и ECHO RAPTURE. Если сайт регистрации не открывается, необходимо использовать VPN.",
+    "prizePool": [
+        { "place": 1, "amount": "2.500₽", "team": "" }
+    ]
+},
+    {
+    "id": "SkewerEsports-Season-3",
+    "title": "SkewerEsports Season 3",
+    "limit": "До 36.500 MMR на команду",
+    "start": "2026-06-21",
+    "end": "2026-06-22",
+    "startTime": "12:00",
+    "prize": "8.500₽",
+    "location": "СНГ",
+    "teams": 10,
+    "winner": "TBD",
+    "format": "Single Elimination",
+    "organizer": "SkewerEsports",
+    "links": {
+        "dotabuff": "",
+        "discord": "https://discord.gg/pDAytCj3fe",
+        "rules": "https://docs.google.com/document/d/e/2PACX-1vTI-P2IVy8orZfORzNnueF16-yd0-Czoe0YaFr0TaUqt8f69OBUHycF7wJmqQQqQC6UJwrJY7dW7XQz/pub",
+        "bracket": ""
+    },
+    "teamsList": [],
+    "casters": [],
+    "bracketEmbed": "",
+    "registrationLink": "https://forms.gle/BGr29FgBjSfwYCbj6",
+    "telegramLink": "https://t.me/SkewerEsports",
+    "description": "Турнир будет отменён, если не будет набрано минимум 10 команд. Формат Single Elimination, все матчи Bo1, финал Bo3. Взнос с команды — 800 рублей. Участники должны подписаться на Telegram-канал, подключиться к Discord и заполнить Google-форму. MVP турнира получает 500 рублей.",
+    "prizePool": [
+        { "place": 1, "amount": "6.000₽", "team": "" },
+        { "place": 2, "amount": "2.000₽", "team": "" },
+        { "place": "MVP", "amount": "500₽", "team": "" }
+    ]
+},
+    {
+    "id": "Hater-Zdes-Dota-Cup-Season-3-Division-1",
+    "title": "HATER ZDES` Dota Cup: Season 3 Division 1",
+    "limit": "До 30.000 MMR на команду",
+    "start": "2026-07-27",
+    "end": "2026-08-04",
+    "startTime": "18:00",
+    "prize": "67.000₽",
+    "location": "СНГ",
+    "teams": 16,
+    "winner": "TBD",
+    "format": "Swiss Stage + Double Elimination",
+    "organizer": "HATER ZDES`",
+    "links": {
+        "dotabuff": "",
+        "discord": "https://discord.gg/haterzdes",
+        "rules": "",
+        "bracket": ""
+    },
+    "teamsList": [],
+    "casters": [
+    ],
+    "bracketEmbed": "",
+    "registrationLink": "",
+    "telegramLink": "https://t.me/haterzdes",
+    "description": "В случае набора более 16 участников проводятся квалификации по системе Single Elimination. На турнире действует Captains Draft. Все матчи проходят в формате Bo1, за исключением гранд-финала (Bo3).",
+    "prizePool": [
+        { "place": 1, "amount": "67.000₽", "team": "" }
+    ]
+},
+    {
+    "id": "Bedlam-Summer-Cup-1x1",
+    "title": "Bedlam Summer Cup 1x1",
+    "limit": "Без лимита MMR",
+    "start": "2026-06-14",
+    "end": "2026-06-14",
+    "startTime": "13:00",
+    "prize": "5.000₽",
+    "location": "СНГ",
+    "teams": 128,
+    "winner": "TBD",
+    "format": "Single Elimination",
+    "organizer": "Bedlam Tournaments",
+    "links": {
+        "dotabuff": "",
+        "discord": "https://discord.gg/cYzysAHgJd",
+        "rules": "https://t.me/bedlamtournaments/257?comment=485",
+        "bracket": ""
+    },
+    "teamsList": [],
+    "casters": [
+        {"name": "jimbo_jox", "link": "https://www.twitch.tv/jimbo_jox"},
+        {"name": "tiltuhabratuha", "link": "https://www.twitch.tv/tiltuhabratuha"}
+    ],
+    "bracketEmbed": "",
+    "registrationLink": "https://docs.google.com/forms/d/e/1FAIpQLSeMY67ncN0H96YW7lJniypg2Ee_u6NO3zGg6l_QOmHCFT81Xw/viewform",
+    "telegramLink": "https://t.me/bedlamtournaments",
+    "description": "BEDLAM SUMMER CUP 1X1 - турнир с форматом Solo Mid 1x1 который пройдет 14 июня. Призовой фонд составит 5.000 рублей, с бесплатным входом. Изначально даётся пул из 12 героев. Путём голосования игроки выбирают 5 героев. (в отдельном телеграмм канале где будут только участники турнира). Затем каждый игрок в паре банит по 2 героя из 5-ти выбранных. В итоге остаётся 1 герой на котором пары играют BO1. (финал BO3). Сторона на карту выбирается через /roll.",
+    "prizePool": [
+        { "place": 1, "amount": "3.500₽", "team": "" },
+        { "place": 2, "amount": "1.500₽", "team": "" },
     ]
 },
   {
@@ -69,9 +203,9 @@ const tournaments = [
     teamsList: [],
         casters: [
         { name: "pepepainstv", link: "https://twitch.tv/pepepainstv" },
-        { name: "waitureally", link: "https://twitch.tv/waitureally" },
         { name: "9kael", link: "https://twitch.tv/9kael" },
-        { name: "zyat0r0", link: "https://www.twitch.tv/zyat0r0" },
+        { name: "lebowski", link: "https://www.twitch.tv/lebowskidota" },
+        { name: "yosumo", link: "https://www.twitch.tv/yosumo_doto" },
     ],
     bracketEmbed: "",
     registrationLink: "https://t.me/questionnaireimm",
@@ -84,105 +218,6 @@ const tournaments = [
     ]
 },
   {
-    "id": "Special-3-Open-Qual",
-    "title": "Special 3: Open Qualification",
-    "limit": "Нет данных",
-    "start": "2026-07-04",
-    "end": "2026-07-04",
-    "startTime": "12:00",
-    "prize": "TBD",
-    "location": "СНГ",
-    "teams": 32,
-    "winner": "TBD",
-    "format": "Single Elimination",
-    "organizer": "AnyLvL Community x GOTF eSports",
-    "links": {
-        "dotabuff": "",
-        "discord": "https://discord.gg/3N4Jg6Jpak",
-        "rules": "",
-        "bracket": ""
-    },
-    "teamsList": [],
-    "casters": [
-        { "name": "TBD", "link": "" }
-    ],
-    "bracketEmbed": "",
-    "registrationLink": "",
-    "telegramLink": "https://t.me/gotf_dota",
-    "description": "Без описания.",
-    "prizePool": [
-        { "place": 1, "amount": "", "team": "" },
-        { "place": 2, "amount": "", "team": "" },
-        { "place": 3, "amount": "", "team": "" },
-        { "place": 4, "amount": "", "team": "" },
-    ]
-},
-  {
-    "id": "Special-3-Closed-Qual",
-    "title": "Special 3: Closed Qualification",
-    "limit": "Нет данных",
-    "start": "2026-07-05",
-    "end": "2026-07-05",
-    "startTime": "12:00",
-    "prize": "TBD",
-    "location": "СНГ",
-    "teams": 8,
-    "winner": "TBD",
-    "format": "Double Elimination",
-    "organizer": "AnyLvL Community x GOTF eSports",
-    "links": {
-        "dotabuff": "",
-        "discord": "https://discord.gg/3N4Jg6Jpak",
-        "rules": "",
-        "bracket": ""
-    },
-    "teamsList": [],
-    "casters": [
-        { "name": "TBD", "link": "" }
-    ],
-    "bracketEmbed": "",
-    "registrationLink": "",
-    "telegramLink": "https://t.me/gotf_dota",
-    "description": "Без описания.",
-    "prizePool": [
-        { "place": 1, "amount": "", "team": "" },
-        { "place": 2, "amount": "", "team": "" },
-    ]
-},
-  {
-    "id": "AnyLvL-GOTF-Special-3",
-    "title": "AnyLvL x GOTF eSports: Special 3",
-    "limit": "Нет данных",
-    "start": "2026-07-10",
-    "end": "2026-07-12",
-    "startTime": "19:00",
-    "prize": "TBD",
-    "location": "СНГ",
-    "teams": 8,
-    "winner": "TBD",
-    "format": "Swiss Stage + Play offs",
-    "organizer": "AnyLvL Community x GOTF eSports",
-    "links": {
-        "dotabuff": "https://www.dotabuff.com/esports/leagues/19830",
-        "discord": "https://discord.gg/3N4Jg6Jpak",
-        "rules": "",
-        "bracket": ""
-    },
-    "teamsList": [],
-    "casters": [
-        { "name": "TBD", "link": "" }
-    ],
-    "bracketEmbed": "",
-    "registrationLink": "",
-    "telegramLink": "https://t.me/gotf_dota",
-    "description": "Без описания.",
-    "prizePool": [
-        { "place": 1, "amount": "55%", "team": "" },
-        { "place": 2, "amount": "30%", "team": "" },
-        { "place": 3, "amount": "15%", "team": "" },
-    ]
-},
-  {
     "id": "rampage-pulik-3",
     "title": "RAMPAGE PULIK #3",
     "limit": "До 3.000 MMR на игрока",
@@ -192,25 +227,25 @@ const tournaments = [
     "prize": "1.000₽",
     "location": "СНГ",
     "teams": 16,
-    "winner": "TBD",
+    "winner": "HalalTeam",
     "format": "Double Elimination",
     "organizer": "RAMPAGE Tournaments",
     "links": {
         "dotabuff": "",
         "discord": "https://discord.gg/yBGQ4ssxH",
         "rules": "",
-        "bracket": ""
+        "bracket": "https://challonge.com/ru/5s0i3t8n"
     },
     "teamsList": [],
     "casters": [
-        { "name": "TBD", "link": "" }
+        { "name": "nandecrew", "link": "https://www.twitch.tv/nandecrew" }
     ],
-    "bracketEmbed": "",
+    "bracketEmbed": "https://challonge.com/ru/5s0i3t8n/module",
     "registrationLink": "https://t.me/visagebroken",
     "telegramLink": "https://t.me/rampagetournaments",
     "description": "RAMPAGE PULIK #3 — турнир для игроков до 3.000 MMR. Формат Double Elimination (BO1), гранд-финал BO3. Призовой фонд 1.000₽ (может быть увеличен). Дата проведения: 6-7 июня 2026. Регистрация через @visagebroken.",
     "prizePool": [
-        { "place": 1, "amount": "1.000₽", "team": "" }
+        { "place": 1, "amount": "1.000₽", "team": "HalalTeam" }
     ]
 },
   {
@@ -443,8 +478,8 @@ const tournaments = [
     "id": "reflection-league-6",
     "title": "Reflection League 6",
     "limit": "До 35.500 MMR на команду",
-    "start": "2026-06-07",
-    "end": "2026-06-07",
+    "start": "2026-06-21",
+    "end": "2026-06-21",
     "startTime": "14:00",
     "prize": "TBD",
     "location": "СНГ",
@@ -593,7 +628,7 @@ const tournaments = [
         {"name": "Pavel enragovi4 funs", "logo": "dota2.png", "roster": [{"nick": "Hatershello", "pos": 1}, {"nick": "EgorKul4", "pos": 2}, {"nick": "muff01", "pos": 3}, {"nick": "MihaPlut", "pos": 4}, {"nick": "retarded_as_fuck", "pos": 5}]},
         {"name": "EnrageTurniriDota2", "logo": "dota2.png", "roster": [{"nick": "LookAtTeenwave", "pos": 1}, {"nick": "sooqa7", "pos": 2}, {"nick": "sadpasha123", "pos": 3}, {"nick": "nevercr7", "pos": 4}, {"nick": "Mikhael16", "pos": 5}]},
         {"name": "Sad Boys", "logo": "dota2.png", "roster": [{"nick": "lerc0re", "pos": 1}, {"nick": "alleyesonme166", "pos": 2}, {"nick": "ceogulag", "pos": 3}, {"nick": "whattheffuckkk", "pos": 4}, {"nick": "Keks552", "pos": 5}]},
-        {"name": "Never Back Down", "logo": "dota2.png", "roster": [{"nick": "GUFprime", "pos": 1}, {"nick": "Vkidavyumef", "pos": 2}, {"nick": "qukich", "pos": 3}, {"nick": "Alikk313", "pos": 4}, {"nick": "roseofficial_24", "pos": 5}]},
+        {"name": "Never Back Down", "logo": "nbdteam.png", "roster": [{"nick": "GUFprime", "pos": 1}, {"nick": "Vkidavyumef", "pos": 2}, {"nick": "qukich", "pos": 3}, {"nick": "Alikk313", "pos": 4}, {"nick": "roseofficial_24", "pos": 5}]},
         {"name": "СТЕПАН PRIME", "logo": "dota2.png", "roster": [{"nick": "syze9", "pos": 1}, {"nick": "Manekkkkk", "pos": 2}, {"nick": "mss0280", "pos": 3}, {"nick": "rastoman4ik2", "pos": 4}, {"nick": "bbpoka", "pos": 5}]},
         {"name": "Primal Dance", "logo": "dota2.png", "roster": [{"nick": "Utrataa", "pos": 1}, {"nick": "deox1d3R", "pos": 2}, {"nick": "w8myoverdose", "pos": 3}, {"nick": "Kirill_makhorin", "pos": 4}, {"nick": "oleg41567", "pos": 5}]},
         {"name": "Team zei junior", "logo": "dota2.png", "roster": [{"nick": "lagan322", "pos": 1}, {"nick": "BatonSolo", "pos": 2}, {"nick": "mollypoedatel911", "pos": 3}, {"nick": "depress3dkid", "pos": 4}, {"nick": "matmyee1", "pos": 5}]},
@@ -640,7 +675,7 @@ const tournaments = [
         "bracket": "https://challonge.com/ru/xkyi7hz6"
     },
     "teamsList": [
-        {"name": "Never Back Down", "logo": "dota2.png", "roster": [{"nick": "karinegod", "pos": 1}, {"nick": "Vkidavyumef", "pos": 2}, {"nick": "yanazavode", "pos": 3}, {"nick": "SCorPion_LSPD", "pos": 4}, {"nick": "Denzerin", "pos": 5}]},
+        {"name": "Never Back Down", "logo": "nbdteam.png", "roster": [{"nick": "karinegod", "pos": 1}, {"nick": "Vkidavyumef", "pos": 2}, {"nick": "yanazavode", "pos": 3}, {"nick": "SCorPion_LSPD", "pos": 4}, {"nick": "Denzerin", "pos": 5}]},
         {"name": "TEIKO", "logo": "dota2.png", "roster": [{"nick": "LookAtTeenwave", "pos": 1}, {"nick": "Kricsalis_mode", "pos": 2}, {"nick": "ManuuLq", "pos": 3}, {"nick": "Mikhael16", "pos": 4}, {"nick": "Ingsiontich", "pos": 5}]},
         {"name": "Angetsu", "logo": "dota2.png", "roster": [{"nick": "paroksetii", "pos": 1}, {"nick": "g4denish", "pos": 2}, {"nick": "Kiryqz", "pos": 3}, {"nick": "consumeyou", "pos": 4}, {"nick": "Crimson_witness", "pos": 5}]},
         {"name": "Primal Dance", "logo": "dota2.png", "roster": [{"nick": "arcotsu", "pos": 1}, {"nick": "deox1d3R", "pos": 2}, {"nick": "Edsai1", "pos": 3}, {"nick": "Kirill_makhorin", "pos": 4}, {"nick": "oleg41567", "pos": 5}]},
@@ -739,7 +774,7 @@ const tournaments = [
     },
     "teamsList": [
         {"name": "BuLxS", "logo": "dota2.png", "roster": [{"nick": "kisliy", "pos": 1}, {"nick": "D0nem", "pos": 2}, {"nick": "Malenia", "pos": 3}, {"nick": "Scorpion", "pos": 4}, {"nick": "Ebatov", "pos": 5}]},
-        {"name": "Never Back Down", "logo": "dota2.png", "roster": [{"nick": "GUFprime", "pos": 1}, {"nick": "Vkidavyumef", "pos": 2}, {"nick": "qukich", "pos": 3}, {"nick": "etceterrra", "pos": 4}, {"nick": "roseofficial_24", "pos": 5}]},
+        {"name": "Never Back Down", "logo": "nbdteam.png", "roster": [{"nick": "GUFprime", "pos": 1}, {"nick": "Vkidavyumef", "pos": 2}, {"nick": "qukich", "pos": 3}, {"nick": "etceterrra", "pos": 4}, {"nick": "roseofficial_24", "pos": 5}]},
         {"name": "DF JUNIOR", "logo": "dota2.png", "roster": [{"nick": "misterbrood", "pos": 1}, {"nick": "ssaaaooo1", "pos": 2}, {"nick": "Bot4nS", "pos": 3}, {"nick": "Imfuckingdeadinside", "pos": 4}, {"nick": "DarkManaa", "pos": 5}]},
         {"name": "DF YOUTH", "logo": "dota2.png", "roster": [{"nick": "NamelessMonster300", "pos": 1}, {"nick": "Hurricane_ww", "pos": 2}, {"nick": "o_oshiete", "pos": 3}, {"nick": "Abdulazxc", "pos": 4}, {"nick": "Kulaagnin", "pos": 5}]},
         {"name": "Sternritters", "logo": "dota2.png", "roster": [{"nick": "aceqlzx", "pos": 1}, {"nick": "trenxd", "pos": 2}, {"nick": "Visi1n", "pos": 3}, {"nick": "Wextr1", "pos": 4}, {"nick": "Clevanq", "pos": 5}]},
@@ -800,7 +835,7 @@ const tournaments = [
         { name: "Fallen Angels", logo: "dota2.png", roster: [ { nick: "killklkal", pos: 1 }, { nick: "Invplayer", pos: 2 }, { nick: "Emporgi", pos: 3 }, { nick: "adragg", pos: 4 }, { nick: "zxc5posdeadinside", pos: 5 } ] },
         { name: "VVSU", logo: "dota2.png", roster: [ { nick: "Pudgeb0y", pos: 1 }, { nick: "arzjjd", pos: 2 }, { nick: "muff01", pos: 3 }, { nick: "Limmmmmmp", pos: 4 }, { nick: "", pos: 5 } ] },
         { name: "Oren67_Team", logo: "dota2.png", roster: [ { nick: "tortipur", pos: 1 }, { nick: "BigBlack_Man", pos: 2 }, { nick: "zxcsosiska322", pos: 3 }, { nick: "McLovin252", pos: 4 }, { nick: "Mirlainnn", pos: 5 } ] },
-        { name: "Never Back Down", logo: "dota2.png", roster: [ { nick: "chisto_krovniy", pos: 1 }, { nick: "D0nem", pos: 2 }, { nick: "emoterracted", pos: 3 }, { nick: "roseofficial_26", pos: 4 }, { nick: "hanett135", pos: 5 } ] },
+        { name: "Never Back Down", logo: "nbdteam.png", roster: [ { nick: "chisto_krovniy", pos: 1 }, { nick: "D0nem", pos: 2 }, { nick: "emoterracted", pos: 3 }, { nick: "roseofficial_26", pos: 4 }, { nick: "hanett135", pos: 5 } ] },
         { name: "Strafe Team", logo: "dota2.png", roster: [ { nick: "audiorecorder", pos: 1 }, { nick: "HSSJEY", pos: 2 }, { nick: "M1nd1q", pos: 3 }, { nick: "nearthelamppost", pos: 4 }, { nick: "prtim09", pos: 5 } ] }
     ],
     casters: [
@@ -839,7 +874,7 @@ const tournaments = [
         bracket: "https://challonge.com/ru/BSC67/module"
     },
     teamsList: [
-        { name: "Bedlam Battle Team", logo: "dota2.png", roster: [ { nick: "arcotsu", pos: 1 }, { nick: "imortall_boy", pos: 2 }, { nick: "Edsai1", pos: 3 }, { nick: "yomyKo", pos: 4 }, { nick: "Ar1urn", pos: 5 } ] },
+        { name: "Bedlam Battle Team", logo: "bedlamred.png", roster: [ { nick: "arcotsu", pos: 1 }, { nick: "imortall_boy", pos: 2 }, { nick: "Edsai1", pos: 3 }, { nick: "yomyKo", pos: 4 }, { nick: "Ar1urn", pos: 5 } ] },
         { name: "Gitlz", logo: "gitlz.png", roster: [ { nick: "konfetkaaap", pos: 1 }, { nick: "puziblinchik96", pos: 2 }, { nick: "Idcwhour", pos: 3 }, { nick: "Pod_metr0", pos: 4 }, { nick: "Phwvnu", pos: 5 } ] },
         { name: "egoisto team", logo: "dota2.png", roster: [ { nick: "xinegod", pos: 1 }, { nick: "m1nd1q", pos: 2 }, { nick: "dark_light666", pos: 3 }, { nick: "zxcnikita2809", pos: 4 }, { nick: "HSSJEY", pos: 5 } ] },
         { name: "узбагойся", logo: "dota2.png", roster: [ { nick: "Ghostraze", pos: 1 }, { nick: "arcabuse", pos: 2 }, { nick: "xtravs", pos: 3 }, { nick: "rsln_ttr", pos: 4 }, { nick: "VfIDF", pos: 5 } ] },
@@ -942,10 +977,10 @@ const tournaments = [
       { name: "LETO Junior", logo: "dota2.png", roster: [ { nick: "Teenwave", pos: 1 }, { nick: "Alisa", pos: 2 }, { nick: "popi", pos: 3 }, { nick: "el tivke", pos: 4 }, { nick: "Freakuxa", pos: 5 } ] },
       { name: "Gitlz", logo: "gitlz.png", roster: [ { nick: "breaoutlik", pos: 1 }, { nick: "Akama", pos: 2 }, { nick: "Moody", pos: 3 }, { nick: "AstarOtzio", pos: 4 }, { nick: "Nico", pos: 5 } ] },
       { name: "DRAGFIRE Ascent", logo: "dota2.png", roster: [ { nick: "ONSAMIY", pos: 1 }, { nick: "Shima~", pos: 2 }, { nick: "CollapseMini", pos: 3 }, { nick: "splitta", pos: 4 }, { nick: "LegasY221", pos: 5 } ] },
-      { name: "Bedlam Red", logo: "dota2.png", roster: [ { nick: "lonix", pos: 1 }, { nick: "immortall boy", pos: 2 }, { nick: "Edsa1?", pos: 3 }, { nick: "drim", pos: 4 }, { nick: "Ariurn", pos: 5 } ] },
+      { name: "Bedlam Red", logo: "bedlamred.png", roster: [ { nick: "lonix", pos: 1 }, { nick: "immortall boy", pos: 2 }, { nick: "Edsa1?", pos: 3 }, { nick: "drim", pos: 4 }, { nick: "Ariurn", pos: 5 } ] },
       { name: "GLHF", logo: "dota2.png", roster: [ { nick: "bebebe", pos: 1 }, { nick: "Divan", pos: 2 }, { nick: "mognus", pos: 3 }, { nick: "LasTdep", pos: 4 }, { nick: "heb", pos: 5 } ] },
       { name: "Entropiq", logo: "dota2.png", roster: [ { nick: "321", pos: 1 }, { nick: "destructive thoughts", pos: 2 }, { nick: "ДЖЕНТЕЛЬМЕН ЗОНЫ", pos: 3 }, { nick: "Bang", pos: 4 }, { nick: "katarsis", pos: 5 } ] },
-      { name: "Never Back Down", logo: "dota2.png", roster: [ { nick: "wakeup", pos: 1 }, { nick: "Baby, Nice Try", pos: 2 }, { nick: "m1nd1", pos: 3 }, { nick: "Darklight", pos: 4 }, { nick: "Rose", pos: 5 } ] },
+      { name: "Never Back Down", logo: "nbdteam.png", roster: [ { nick: "wakeup", pos: 1 }, { nick: "Baby, Nice Try", pos: 2 }, { nick: "m1nd1", pos: 3 }, { nick: "Darklight", pos: 4 }, { nick: "Rose", pos: 5 } ] },
       { name: "Смешарики", logo: "dota2.png", roster: [ { nick: "ahtenoma", pos: 1 }, { nick: "Frenzy", pos: 2 }, { nick: "StRaXa NeT", pos: 3 }, { nick: "dRЯnB", pos: 4 }, { nick: "borutsu", pos: 5 } ] },
       { name: "Tatsinskay Team", logo: "dota2.png", roster: [ { nick: "steelbetteryou", pos: 1 }, { nick: "justToxic", pos: 2 }, { nick: "Sorry4911", pos: 3 }, { nick: "setrakovVi", pos: 4 }, { nick: "3500", pos: 5 } ] },
       { name: "Cyberia Esports", logo: "dota2.png", roster: [ { nick: "paroksetii", pos: 1 }, { nick: "fobas", pos: 2 }, { nick: "iFlopz", pos: 3 }, { nick: "sheremetov17", pos: 4 }, { nick: "Crimson_witness", pos: 5 } ] },
@@ -1073,33 +1108,164 @@ const tournaments = [
     "prize": "6.500₽",
     "location": "СНГ",
     "teams": 16,
-    "winner": "TBD",
+    "winner": "mid diff",
     "format": "Single Elimination",
     "organizer": "SkewerEsports",
     "links": {
         "dotabuff": "",
         "discord": "https://discord.gg/M6QaGMkdDr",
         "rules": "",
-        "bracket": ""
+        "bracket": "https://challonge.com/ru/ju8y4e0"
     },
     "teamsList": [
-        {
-            "name": "DestroyItems",
-            "logo": "dota2.png",
-            "roster": [ { "nick": "Fuck this society", "pos": 1 }, { "nick": "Rinec1", "pos": 2 }, { "nick": "Squall", "pos": 3 }, { "nick": "14shagov", "pos": 4 }, { "nick": "н угопак~", "pos": 5 },
-            ]
-        }
-    ],
+    {
+        "name": "DestroyItems",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "Fuck this society", "pos": 1 },
+            { "nick": "Rinec1", "pos": 2 },
+            { "nick": "Squall", "pos": 3 },
+            { "nick": "14shagov", "pos": 4 },
+            { "nick": "н угопак~", "pos": 5 }
+        ]
+    },
+    {
+        "name": "team squirt",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "модафинил", "pos": 1 },
+            { "nick": "tulpa228", "pos": 2 },
+            { "nick": "太", "pos": 3 },
+            { "nick": "EgorWW", "pos": 4 },
+            { "nick": "krepostyan", "pos": 5 }
+        ]
+    },
+    {
+        "name": "MPGYGY",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "CRIMINAL AUTODRIVING", "pos": 1 },
+            { "nick": "Hamster Cobatёr", "pos": 2 },
+            { "nick": "я в атаке", "pos": 3 },
+            { "nick": "Maroon sh1ne", "pos": 4 },
+            { "nick": "Скам", "pos": 5 }
+        ]
+    },
+    {
+        "name": "Поколение чудес",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "YATOROGOD", "pos": 1 },
+            { "nick": "dance with mу", "pos": 2 },
+            { "nick": "limit!", "pos": 3 },
+            { "nick": "0l_EG", "pos": 4 },
+            { "nick": "KATOSHI", "pos": 5 }
+        ]
+    },
+            {
+        "name": "Barracuda Team",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "teenwave777", "pos": 1 },
+            { "nick": "y6555", "pos": 2 },
+            { "nick": "bla3er", "pos": 3 },
+            { "nick": "jhxdddd", "pos": 4 },
+            { "nick": "zakharius77", "pos": 5 }
+        ]
+    },
+            {
+        "name": "Feed4Life",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "gulyonysh", "pos": 1 },
+            { "nick": "ntxra", "pos": 2 },
+            { "nick": "an6elichrzn", "pos": 3 },
+            { "nick": "VeNdettA", "pos": 4 },
+            { "nick": "jormungand", "pos": 5 }
+        ]
+    },
+    {
+        "name": "Team Leto",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "auratoshi", "pos": 1 },
+            { "nick": "Forever young", "pos": 2 },
+            { "nick": "emotionalabyss", "pos": 3 },
+            { "nick": "Мебель", "pos": 4 },
+            { "nick": "Irrelevant", "pos": 5 }
+        ]
+    },
+    {
+        "name": "Gaimin Suetologs",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "nevertxxmuch", "pos": 1 },
+            { "nick": "пидалирование", "pos": 2 },
+            { "nick": "molodoy padonok", "pos": 3 },
+            { "nick": "MaCr0sNik", "pos": 4 },
+            { "nick": "Limp", "pos": 5 }
+        ]
+    },
+            {
+        "name": "Immortal Dragons",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "Dragonaychik", "pos": 1 },
+            { "nick": "thats all", "pos": 2 },
+            { "nick": "I have no enemies-MODE", "pos": 3 },
+            { "nick": "Rubistan", "pos": 4 },
+            { "nick": "4к ранг уебище", "pos": 5 }
+        ]
+    },
+    {
+        "name": "Screenshot#3",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "headache", "pos": 1 },
+            { "nick": "KaSu", "pos": 2 },
+            { "nick": "Dr Dolitle", "pos": 3 },
+            { "nick": "Димасик67", "pos": 4 },
+            { "nick": "нож в руке", "pos": 5 }
+        ],
+        "substitutes": ["diffi"]
+    },
+    {
+        "name": "mid diff",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "dodikre⁶⁷", "pos": 1 },
+            { "nick": "Baby, Nice Try", "pos": 2 },
+            { "nick": "плюсы", "pos": 3 },
+            { "nick": "rork_a", "pos": 4 },
+            { "nick": "Condemnation", "pos": 5 }
+        ],
+        "substitutes": ["чихлюп", "procto_kot"]
+    },
+    {
+        "name": "Gods Only Team",
+        "logo": "dota2.png",
+        "roster": [
+            { "nick": "rokadam", "pos": 1 },
+            { "nick": "nosebleed~", "pos": 2 },
+            { "nick": "ammanual独唱", "pos": 3 },
+            { "nick": "мистер чипс)", "pos": 4 },
+            { "nick": "Razdor", "pos": 5 }
+        ]
+    }
+],
     "casters": [
-        { "name": "mansh1nee", "link": "https://www.twitch.tv/mansh1nee" }
+        { "name": "mansh1nee", "link": "https://www.twitch.tv/mansh1nee" },
+        { "name": "neverdiise", "link": "http://twitch.tv/neverdiise" },
+        { "name": "mugi", "link": "https://www.twitch.tv/mugia1" },
+        { "name": "Forgiven3SS", "link": "https://www.twitch.tv/forgiven3ss" },
     ],
-    "bracketEmbed": "",
+    "bracketEmbed": "https://challonge.com/ru/ju8y4e0/module",
     "registrationLink": "https://docs.google.com/forms/d/1AOPnhM_jFYUyFw3BUeo6k9FE_l-VBqVLXns_P8DtVpY/edit#response=ACYDBNgetI5JxnfiwHNgNxtbtqmO0hslBtb8rb9AiRT9kiFgFgxuJYrpbzjd2yqG_6mKouk",
     "telegramLink": "https://t.me/SkewerEsports",
     "description": "SkewerEsports Season 2. Single Elimination (BO1, финал BO3). Лимит 8500 MMR на игрока. Взнос 500₽ с команды. Призовой фонд 6.500₽ (6.000₽ — 1 место + 500₽ — мини-игра 1v1 между мидерами). Старт: 7 июня 2026 в 11:00.",
     "prizePool": [
-        { "place": 1, "amount": "6.000₽", "team": "" },
-        { "place": "1v1 Mid", "amount": "500₽", "team": "" }
+        { "place": 1, "amount": "6.000₽", "team": "mid diff" },
+        { "place": "1v1 Mid", "amount": "500₽", "team": "Baby, Nice Try!" }
     ]
 },
   {
@@ -1132,7 +1298,7 @@ const tournaments = [
       { name: "zxc players",       logo: "dota2.png", roster: [ { nick: "absolut", pos: 1 }, { nick: "ягодичный парикм", pos: 2 }, { nick: "-_-", pos: 3 }, { nick: "Dima Kulak Bicuha", pos: 4 }, { nick: "NotChag", pos: 5 } ] },
       { name: "VHS Team",          logo: "dota2.png", roster: [ { nick: "Саша Белый Prime", pos: 1 }, { nick: "MIA", pos: 2 }, { nick: "Raikiri-", pos: 3 }, { nick: "Weekend", pos: 4 }, { nick: "yleuvyu", pos: 5 } ] },
       { name: "LETO jr",           logo: "dota2.png", roster: [ { nick: "Teenwave", pos: 1 }, { nick: "Alisa", pos: 2 }, { nick: "popi", pos: 3 }, { nick: "el tivke", pos: 4 }, { nick: "UZBEKSILA", pos: 5 } ] },
-      { name: "Never Back Down",   logo: "dota2.png", roster: [ { nick: "Лысый", pos: 1 }, { nick: "Baby, Nice Try", pos: 2 }, { nick: "Кэп", pos: 3 }, { nick: "Rose", pos: 4 }, { nick: "Błyskawica", pos: 5 } ] },
+      { name: "Never Back Down",   logo: "nbdteam.png", roster: [ { nick: "Лысый", pos: 1 }, { nick: "Baby, Nice Try", pos: 2 }, { nick: "Кэп", pos: 3 }, { nick: "Rose", pos: 4 }, { nick: "Błyskawica", pos: 5 } ] },
       { name: "Primal Dance",      logo: "dota2.png", roster: [ { nick: "cotsu", pos: 1 }, { nick: "m33pmap", pos: 2 }, { nick: "m1nd1", pos: 3 }, { nick: "darklight", pos: 4 }, { nick: "Freak", pos: 5 } ] },
       { name: "Podosinoviki",      logo: "podosinovik.png", roster: [ { nick: "Ростовский Богатырь", pos: 1 }, { nick: "зато уютно умирать", pos: 2 }, { nick: "МИШКА МОРГЕН", pos: 3 }, { nick: "El Oreshniko del Perú", pos: 4 }, { nick: "аурная зараза", pos: 5 } ] },
       { name: "James & Jeremy",    logo: "dota2.png", roster: [ { nick: "ihatekirk", pos: 1 }, { nick: "wannafeels", pos: 2 }, { nick: "Голубчик", pos: 3 }, { nick: "king bob", pos: 4 }, { nick: "CocsmeN", pos: 5 } ] },
@@ -1186,7 +1352,7 @@ const tournaments = [
       { name: "Neki4 +4",              logo: "dota2.png", roster: [ { nick: "Oketra", pos: 2 }, { nick: "squalor", pos: 1 }, { nick: "mdk", pos: 3 }, { nick: "all eyes on me", pos: 4 }, { nick: "come around", pos: 5 } ] },
       { name: "Antagonist",            logo: "dota2.png", roster: [ { nick: "пустота", pos: 1 }, { nick: "Semich", pos: 2 }, { nick: "Darkled", pos: 3 }, { nick: "Antagonist", pos: 4 }, { nick: "Gummi_bear", pos: 5 } ] },
       { name: "Tatsinskay Team",       logo: "dota2.png", roster: [ { nick: "Iny", pos: 1 }, { nick: "gleblixo", pos: 2 }, { nick: "Sorry", pos: 3 }, { nick: "Elmisho", pos: 4 }, { nick: "Poga", pos: 5 } ] },
-      { name: "Bedlam battle team",    logo: "dota2.png", roster: [ { nick: "cotsu", pos: 1 }, { nick: "imortall_boy", pos: 2 }, { nick: "edsaiii", pos: 3 }, { nick: "marty", pos: 4 }, { nick: "Ariurn", pos: 5 } ] },
+      { name: "Bedlam battle team",    logo: "bedlamred.png", roster: [ { nick: "cotsu", pos: 1 }, { nick: "imortall_boy", pos: 2 }, { nick: "edsaiii", pos: 3 }, { nick: "marty", pos: 4 }, { nick: "Ariurn", pos: 5 } ] },
       { name: "Team Sexy",             logo: "dota2.png", roster: [ { nick: "hosh1no愛", pos: 1 }, { nick: "fff", pos: 2 }, { nick: "kushinada.", pos: 3 }, { nick: "icememory<3", pos: 4 }, { nick: "Лысый Очколом", pos: 5 } ] },
       { name: "Gitlz",                 logo: "gitlz.png", roster: [ { nick: "breaoutlik", pos: 1 }, { nick: "AstarOtzio", pos: 2 }, { nick: "moody", pos: 3 }, { nick: "Shiroyami", pos: 4 }, { nick: "Akama", pos: 5 } ] },
       { name: "стул и 4 ножки",        logo: "dota2.png", roster: [ { nick: "Miracle-", pos: 1 }, { nick: "rain,", pos: 2 }, { nick: "MAB1K", pos: 3 }, { nick: "yomyko.", pos: 4 }, { nick: "El Gato Negro", pos: 5 } ] }

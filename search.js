@@ -23,6 +23,20 @@
     return [team.name, ...aliases].filter(Boolean).map(norm);
   }
 
+  /* ── ID организатора для ссылки ── */
+  function orgSlug(org) {
+    return org.id || String(org.name || '').normalize('NFKC').trim()
+      .replace(/\s+/g, '-').replace(/[^\p{L}\p{N}_-]+/gu, '')
+      .replace(/-+/g, '-').replace(/^-|-$/g, '') || 'organizer';
+  }
+
+  /* ── Все имена организатора: актуальное + алиасы ── */
+  function orgNames(org) {
+    const a = org.aliases || [];
+    const aliases = Array.isArray(a) ? a : String(a).split(',').map(s => s.trim()).filter(Boolean);
+    return [org.name, ...aliases].filter(Boolean).map(norm);
+  }
+
   /* ── Корень сайта — работает с любого URL ── */
   function siteRoot() {
     const p = location.pathname;
@@ -59,6 +73,7 @@
     /* Данные — читаем один раз */
     const allTournaments = typeof tournaments !== 'undefined' ? tournaments : [];
     const allTeams       = typeof teams       !== 'undefined' ? teams       : [];
+    const allOrganizers  = typeof organizers  !== 'undefined' ? organizers  : [];
 
     let activeIdx = -1;
 
@@ -74,8 +89,9 @@
 
       const matchT = allTournaments.filter(t => norm(t.title).includes(q)).slice(0, 6);
       const matchK = allTeams.filter(t => teamNames(t).some(n => n.includes(q))).slice(0, 5);
+      const matchO = allOrganizers.filter(o => orgNames(o).some(n => n.includes(q))).slice(0, 5);
 
-      if (!matchT.length && !matchK.length) {
+      if (!matchT.length && !matchK.length && !matchO.length) {
         dropdown.innerHTML = `<div class="sd-empty">Ничего не найдено</div>`;
         dropdown.classList.add('visible');
         return;
@@ -113,6 +129,24 @@
                 <div class="sd-meta">${team.region || '—'}${team.prize ? ' · ' + team.prize : ''}</div>
               </div>
               <span class="sd-badge">Команда</span>
+            </a>`;
+        }
+      }
+
+      if (matchO.length) {
+        html += `<div class="sd-group-label">🛡️ Организаторы</div>`;
+        for (const org of matchO) {
+          const link = `${base}organizer.html?id=${encodeURIComponent(orgSlug(org))}`;
+          html += `
+            <a class="sd-item" href="${link}">
+              <img class="sd-logo" src="${base}${org.logo || 'dota2.png'}"
+                   alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+              <div class="sd-icon" style="display:none">🛡️</div>
+              <div class="sd-info">
+                <div class="sd-title">${org.name}</div>
+                <div class="sd-meta">${org.region || '—'}</div>
+              </div>
+              <span class="sd-badge">Организатор</span>
             </a>`;
         }
       }

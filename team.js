@@ -76,7 +76,7 @@ function найтиКомандуПоИмени(имя) {
     .find(к => всеИменаКоманды(к).includes(ключ)) || null;
 }
 
-function все Турниры() {
+function всеТурниры() {
   return typeof tournaments !== 'undefined' && Array.isArray(tournaments) ? tournaments : [];
 }
 
@@ -104,9 +104,9 @@ function получитьБазовыйПуть(id) {
   if (путь.endsWith('/team.html')) return путь.slice(0, путь.lastIndexOf('/') + 1);
   const чистый = путь.replace(/\/+$/, '');
   const суффикс = `/team/${encodeURIComponent(id)}`;
-  if (чистый.endsWith(суффикс)) return chистый.slice(0, -суффикс.length + 1);
+  if (чистый.endsWith(суффикс)) return чистый.slice(0, -суффикс.length + 1);
   const индексTeam = чистый.lastIndexOf('/team/');
-  if (индексTeam >= 0) return chистый.slice(0, индексTeam + 1);
+  if (индексTeam >= 0) return чистый.slice(0, индексTeam + 1);
   return '/';
 }
 
@@ -276,8 +276,9 @@ function инициализироватьПоиск() {
   const обёртка  = document.getElementById('searchWrap');
   if (!поле || !дропдаун || !обёртка) return;
 
-  const все Турниры = typeof tournaments !== 'undefined' ? tournaments : [];
+  const всеТурнирыСписок = typeof tournaments !== 'undefined' ? tournaments : [];
   const всеКоманды  = typeof teams       !== 'undefined' ? teams       : [];
+  const всеОрганизаторы = typeof organizers !== 'undefined' ? organizers : [];
 
   const статусТекст = { upcoming: 'Будущий', live: 'Текущий', finished: 'Завершён' };
   let активныйИндекс = -1;
@@ -297,6 +298,15 @@ function инициализироватьПоиск() {
     return всеИменаКоманды(команда).some(н => н.includes(запрос));
   }
 
+  function организаторПодходит(организатор, запрос) {
+    const псевдонимы = организатор.aliases || [];
+    const список = Array.isArray(псевдонимы)
+      ? псевдонимы
+      : String(псевдонимы).split(',').map(s => s.trim()).filter(Boolean);
+    return [организатор.name, ...список].filter(Boolean)
+      .map(нормализовать).some(н => н.includes(запрос));
+  }
+
   function закрыть() {
     дропдаун.classList.remove('visible');
     активныйИндекс = -1;
@@ -307,7 +317,7 @@ function инициализироватьПоиск() {
 
     const база = корньСайта();
 
-    const турниры = всеТурниры
+    const турниры = всеТурнирыСписок
       .filter(t => t.title.toLowerCase().includes(запрос))
       .slice(0, 6);
 
@@ -315,7 +325,11 @@ function инициализироватьПоиск() {
       .filter(к => командаПодходит(к, запрос))
       .slice(0, 5);
 
-    if (!турниры.length && !команды.length) {
+    const организаторы = всеОрганизаторы
+      .filter(о => организаторПодходит(о, запрос))
+      .slice(0, 5);
+
+    if (!турниры.length && !команды.length && !организаторы.length) {
       дропдаун.innerHTML = `<div class="sd-empty">Ничего не найдено</div>`;
       дропдаун.classList.add('visible');
       return;
@@ -355,6 +369,25 @@ function инициализироватьПоиск() {
               <div class="sd-meta">${к.region || '—'}${к.prize ? ' · ' + к.prize : ''}</div>
             </div>
             <span class="sd-badge">Команда</span>
+          </a>`;
+      });
+    }
+
+    if (организаторы.length) {
+      html += `<div class="sd-group-label">🛡️ Организаторы</div>`;
+      организаторы.forEach(о => {
+        const id = о.id || транслитерироватьСлаг(о.name);
+        const ссылка = `${база}organizer.html?id=${encodeURIComponent(id)}`;
+        html += `
+          <a class="sd-item" href="${ссылка}">
+            <img class="sd-logo" src="${база}${о.logo || 'dota2.png'}"
+                 alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="sd-icon" style="display:none">🛡️</div>
+            <div class="sd-info">
+              <div class="sd-title">${о.name}</div>
+              <div class="sd-meta">${о.region || '—'}</div>
+            </div>
+            <span class="sd-badge">Организатор</span>
           </a>`;
       });
     }
@@ -434,7 +467,7 @@ const базаПути = получитьБазовыйПуть(текущийId
 
 /* Ссылка «Anypedia» в шапке → корень */
 const ссылкаДомой = document.getElementById('homeLink');
-if (ссылкаДомой) ссылкаДомой.href = базаПути || '/';
+if (ссылкаДомой) ссылкаДомой.href = `${базаПути || '/'}index.html`;
 
 /* Инфобокс */
 document.getElementById('teamInfobox').innerHTML = `
@@ -455,11 +488,15 @@ document.getElementById('teamInfobox').innerHTML = `
   </div>
   <a class="btn btn-tg ${команда.telegramLink ? '' : 'is-disabled'}"
      href="${экранировать(команда.telegramLink || '#')}" target="_blank" rel="noopener">
-    ✈️ Telegram
+     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 14.173l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.386z"/></svg>
+    Telegram
   </a>
   <a class="btn btn-captain ${команда.captainLink ? '' : 'is-disabled'}"
      href="${экранировать(команда.captainLink || '#')}" target="_blank" rel="noopener">
-    👤 Связаться с капитаном
+     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.314 0-10 1.657-10 5v2h20v-2c0-3.343-6.686-5-10-5z"/>
+</svg>
+    Связаться с капитаном
   </a>
 `;
 
