@@ -30,6 +30,16 @@
 
 const organizers = [
   {
+    id: "Enrage",
+    name: "Enrage",
+    aliases: ["Enrage"],
+    logo: "enrage.png",
+    region: "СНГ",
+    description: "Enrage турниры для маленьких рангов Dota 2 - турнир операторов, которые проводит регулярные турниры с ограничением по рейтингу. Всего проведено уже более 60-ти турниров одной линейки. Помимо этого, иногда бывают турниры по известным кастомкам.",
+    telegramLink: "https://t.me/enragetournaments",
+    discordLink: "https://discord.com/invite/enrage",
+  },
+  {
     id: "Bedlam-Battles-Tournaments",
     name: "Bedlam Battles Tournaments",
     aliases: ["Bedlam Tournaments"],

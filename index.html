@@ -1019,14 +1019,14 @@ tbody tr:hover {
     </div>
     <nav class="site-nav">
       <a class="nav-link active" href="/">Турниры</a>
-      <a class="nav-link" href="/teams-list.html">Команды</a>
-      <a class="nav-link" href="/organizers-list.html">Организаторы</a>
+      <a class="nav-link" href="/teams-list">Команды</a>
+      <a class="nav-link" href="/organizers-list">Организаторы</a>
     </nav>
     <div class="header-search-wrap" id="searchWrap">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
-      <input id="search" class="header-search" type="text" placeholder="Поиск турниров и команд…" autocomplete="off" />
+      <input id="search" class="header-search" type="text" placeholder="Поиск…" autocomplete="off" />
       <div class="search-dropdown" id="searchDropdown"></div>
     </div>
   </div>
@@ -1332,6 +1332,14 @@ function buildRow(t) {
     : `${formatDateShort(t.start)} — ${formatDate(t.end)}`;
   const pageUrl  = `${siteBase}tournament.html?id=${t.id}`;
   const link     = `${siteBase}tournament.html?id=${t.id}`;
+  const winner =
+  t.winner ||
+  (
+    Array.isArray(t.prizePool)
+      ? t.prizePool.find(p => Number(p.place) === 1)?.team
+      : null
+  ) ||
+  '—';
 
   return `
     <tr onclick="location.href='${link}'">
@@ -1342,7 +1350,7 @@ function buildRow(t) {
       <td>${t.location || '—'}</td>
       <td>${t.teams ?? '—'}</td>
       <td><span class="tag ${statusClass[st]}">${statusLabel[st]}</span></td>
-      <td class="winner-cell">${renderWinner(t.winner || '—')}</td>
+      <td class="winner-cell">${renderWinner(winner)}</td>
       <td>
         <button class="share-btn" title="Поделиться"
           onclick="shareUrl('${pageUrl}','${t.title.replace(/'/g, "\\'")}',event)">
@@ -1364,6 +1372,14 @@ function buildCard(t) {
     : `${formatDateShort(t.start)} — ${formatDateShort(t.end)}`;
   const pageUrl = `${siteBase}tournament.html?id=${t.id}`;
   const link    = `${siteBase}tournament.html?id=${t.id}`;
+  const winner =
+  t.winner ||
+  (
+    Array.isArray(t.prizePool)
+      ? t.prizePool.find(p => Number(p.place) === 1)?.team
+      : null
+  ) ||
+  '—';
 
   return `
     <div class="t-card" onclick="location.href='${link}'">
@@ -1375,7 +1391,7 @@ function buildCard(t) {
         <span>📅 <b>${dateText}</b></span>
         <span>🌍 <b>${t.location || '—'}</b></span>
         <span>👥 <b>${t.teams ?? '—'} команд</b></span>
-        <span>🏆 <b>${renderWinner(t.winner || 'TBD')}</b></span>
+        <span>🏆 <b>${renderWinner(winner)}</b></span>
       </div>
       <div class="t-card-bottom">
         <div class="t-card-prize">${t.prize || '—'}</div>

@@ -254,15 +254,15 @@ a:hover { color: var(--accent2); }
 
     <nav class="site-nav">
       <a class="nav-link" href="/">Турниры</a>
-      <a class="nav-link" href="/teams-list.html">Команды</a>
-      <a class="nav-link active" href="/organizers-list.html">Организаторы</a>
+      <a class="nav-link" href="/teams-list">Команды</a>
+      <a class="nav-link active" href="/organizers-list">Организаторы</a>
     </nav>
 
     <div class="header-search-wrap" id="searchWrap">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
-      <input id="search" class="header-search" type="text" placeholder="Поиск турниров и команд…" autocomplete="off"/>
+      <input id="search" class="header-search" type="text" placeholder="Поиск…" autocomplete="off"/>
       <div class="search-dropdown" id="searchDropdown"></div>
     </div>
   </div>
@@ -405,7 +405,19 @@ function renderOrgs(list) {
 }
 
 /* ---------- INIT ---------- */
-const allOrgs = typeof organizers !== 'undefined' ? [...organizers] : [];
+const allOrgs = typeof organizers !== 'undefined'
+  ? [...organizers].sort((a, b) => {
+      const prizeA = parseInt(
+        String(calcOrgPrize(a) || '0').replace(/[^\d]/g, '')
+      ) || 0;
+
+      const prizeB = parseInt(
+        String(calcOrgPrize(b) || '0').replace(/[^\d]/g, '')
+      ) || 0;
+
+      return prizeB - prizeA;
+    })
+  : [];
 document.getElementById('totalCount').textContent = allOrgs.length ? `(${allOrgs.length})` : '';
 renderOrgs(allOrgs);
 

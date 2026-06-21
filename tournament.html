@@ -419,7 +419,7 @@ a:hover { color: var(--accent2); }
 }
 
 /* ============================================================
-   BRACKET iframe
+   BRACKET iframe (legacy fallback — Challonge и т.п.)
    ============================================================ */
 .bracket-frame {
   border-radius: 9px;
@@ -427,6 +427,168 @@ a:hover { color: var(--accent2); }
   width: 100%;
   height: 500px;
   display: block;
+}
+
+/* ============================================================
+   BRACKET — собственный рендер (tournament.bracket)
+   ============================================================ */
+.bracket-render {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* --- Single elimination: горизонтальные колонки раундов --- */
+.bracket-rounds {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.bracket-round {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+}
+.bracket-round-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  text-align: center;
+}
+.bracket-round-matches {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 14px;
+  flex: 1;
+}
+
+/* --- Group stage: вертикальный список стадий/групп --- */
+.bracket-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg2);
+  padding: 14px 16px;
+  transition: var(--transition);
+}
+.bracket-group-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.bracket-group-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* --- Карточка матча (общая для single и group) --- */
+.bracket-match {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px 12px;
+  transition: var(--transition), border-color .2s;
+  position: relative;
+}
+.bracket-match.is-final {
+  border-color: rgba(107,182,255,.35);
+}
+.bracket-match-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+.bracket-match-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.bracket-match-status.st-scheduled { background: rgba(107,182,255,.12); color: var(--upcoming); }
+.bracket-match-status.st-live      { background: rgba(255,107,107,.15); color: var(--live); }
+.bracket-match-status.st-finished  { background: rgba(93,255,156,.10);  color: var(--finished); }
+.bracket-match-status .live-pulse {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--live);
+  animation: bracketLivePulse 1.4s ease-in-out infinite;
+}
+@keyframes bracketLivePulse {
+  0%   { box-shadow: 0 0 0 0   rgba(255,107,107,.6); }
+  70%  { box-shadow: 0 0 0 6px rgba(255,107,107,0); }
+  100% { box-shadow: 0 0 0 0   rgba(255,107,107,0); }
+}
+.bracket-match-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.bracket-match-team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 13px;
+}
+.bracket-match-team-name {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.bracket-match-team-name a { color: inherit; }
+.bracket-match-team.is-winner .bracket-match-team-name {
+  font-weight: 700;
+  color: var(--accent);
+}
+.bracket-match-team.is-loser .bracket-match-team-name {
+  color: var(--text-muted);
+}
+.bracket-match-score {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 18px;
+  text-align: center;
+}
+.bracket-match-team.is-winner .bracket-match-score { color: var(--accent); }
+.bracket-match-divider {
+  height: 1px;
+  background: var(--border);
+}
+.bracket-final-badge {
+  position: absolute;
+  top: -8px;
+  right: 10px;
+  background: var(--accent);
+  color: #000;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+@media (max-width: 640px) {
+  .bracket-round { flex: 0 0 180px; }
+  .bracket-round-matches { gap: 10px; }
 }
 
 /* ============================================================
@@ -688,14 +850,14 @@ a:hover { color: var(--accent2); }
     </div>
     <nav class="site-nav">
       <a class="nav-link active" href="/index.html">Турниры</a>
-      <a class="nav-link" href="/teams-list.html">Команды</a>
-      <a class="nav-link" href="/organizers-list.html">Организаторы</a>
+      <a class="nav-link" href="/teams-list">Команды</a>
+      <a class="nav-link" href="/organizers-list">Организаторы</a>
     </nav>
     <div class="header-search-wrap" id="searchWrap">
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
-      <input id="search" class="header-search" placeholder="Поиск турниров и команд…" autocomplete="off"/>
+      <input id="search" class="header-search" placeholder="Поиск…" autocomplete="off"/>
       <div class="search-dropdown" id="searchDropdown"></div>
     </div>
   </div>
@@ -711,9 +873,9 @@ a:hover { color: var(--accent2); }
       <h2>Участники</h2>
       <div class="team-grid" id="teams"></div>
     </div>
-    <div class="block">
+    <div class="block" id="bracketBlock">
       <h2>Сетка турнира</h2>
-      <iframe class="bracket-frame" id="bracketFrame" allowfullscreen></iframe>
+      <div id="bracketContainer"></div>
     </div>
     <div class="block">
       <h2>Кастеры</h2>
@@ -961,16 +1123,26 @@ const dateText = t.start === t.end
   ? formatDateLong(t.start)
   : `${formatDateLong(t.start)} — ${formatDateLong(t.end)}`;
 
+const autoWinner =
+  t.winner ||
+  (
+    Array.isArray(t.prizePool) &&
+    t.prizePool.find(p => Number(p.place) === 1)?.team
+  ) ||
+  'TBD';
+
 document.getElementById('infobox').innerHTML = `
   <h2>${t.title}</h2>
   <div class="countdown-wrap">${renderCountdown()}</div>
+  <div class="info-row"><span class="info-label">Регистрация</span><span class="info-val">${t.registrationStart && t.registrationEnd? `${formatDateLong(t.registrationStart)} — ${formatDateLong(t.registrationEnd)}`: '—'}</span></div>
   <div class="info-row"><span class="info-label">Даты</span><span class="info-val">${dateText}</span></div>
   <div class="info-row"><span class="info-label">Приз</span><span class="info-val" style="font-weight:700;color:var(--accent)">${t.prize || '—'}</span></div>
   <div class="info-row"><span class="info-label">Регион</span><span class="info-val">${t.location || '—'}</span></div>
   <div class="info-row"><span class="info-label">Команд</span><span class="info-val">${t.teams ?? '—'}</span></div>
-  <div class="info-row"><span class="info-label">Формат</span><span class="info-val">${t.format || '—'}</span></div>
+  <div class="info-row"><span class="info-label">Формат Сетки</span><span class="info-val">${t.format || '—'}</span></div>
+  <div class="info-row"><span class="info-label">Формат Игры</span><span class="info-val">${t.gameFormat || '—'}</span></div>
   <div class="info-row"><span class="info-label">Лимит</span><span class="info-val">${t.limit || '—'}</span></div>
-  <div class="info-row"><span class="info-label">Победитель</span><span class="info-val">${renderTeamLink(t.winner || 'TBD')}</span></div>
+  <div class="info-row"><span class="info-label">Победитель</span><span class="info-val">${renderTeamLink(autoWinner)}</span></div>
   <div class="info-row"><span class="info-label">Организатор</span><span class="info-val">${renderOrganizerLink(t.organizer || '—')}</span></div>
   <div class="action-btns">
     ${t.registrationLink ? `<a class="btn btn-reg" href="${t.registrationLink}" target="_blank" rel="noopener">
@@ -1025,8 +1197,10 @@ function prizeTable() {
 document.getElementById('descBlock').innerHTML = `
   <div class="title-row"><h1 class="page-title">${t.title}</h1></div>
   <p class="desc-text">${t.description || '—'}</p>
-  <div class="block-section-label">Формат</div>
+  <div class="block-section-label">Формат Сетки</div>
   <p class="desc-text">${t.format || '—'}</p>
+  <div class="block-section-label">Формат Игры</div>
+<p class="desc-text">${t.gameFormat || '—'}</p>
   <div class="block-section-label">Призовой фонд</div>
   ${prizeTable()}
 `;
@@ -1050,7 +1224,132 @@ document.getElementById('teams').innerHTML = (t.teamsList || []).map(team => `
   </div>`).join('');
 
 /* ---------- BRACKET ---------- */
-document.getElementById('bracketFrame').src = t.bracketEmbed || '';
+/* Если у турнира есть собственная структура t.bracket — рисуем её.
+   Если нет — используем legacy iframe (bracketEmbed), как раньше.
+   Турниры без обоих полей просто показывают пустой блок (как было). */
+
+const STATUS_LABEL = { scheduled: 'Скоро', live: 'Идёт сейчас', finished: 'Завершён' };
+
+function escBracket(v) {
+  return String(v ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+
+function formatMatchTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+/* Команда матча — если найдена в teams.js, оборачиваем в ссылку (как остальные имена команд на странице) */
+function bracketTeamName(name) {
+  if (!name || name === 'TBD') return escBracket(name || 'TBD');
+  return renderTeamLink(name);
+}
+
+function renderMatchCard(match) {
+  const status = match.status || 'scheduled';
+  const statusCls = `st-${status}`;
+  const statusIcon = status === 'live' ? '<span class="live-pulse"></span>' : '';
+  const winner = match.winner || null;
+  const teamAWin = winner && winner === match.teamA;
+  const teamBWin = winner && winner === match.teamB;
+
+  const teamRow = (name, score, isWinner, isLoser) => `
+    <div class="bracket-match-team${isWinner ? ' is-winner' : ''}${isLoser ? ' is-loser' : ''}">
+      <span class="bracket-match-team-name">${bracketTeamName(name)}</span>
+      <span class="bracket-match-score">${score ?? 0}</span>
+    </div>`;
+
+  return `
+    <div class="bracket-match${match.isFinal ? ' is-final' : ''}">
+      ${match.isFinal ? '<span class="bracket-final-badge">Финал</span>' : ''}
+      <div class="bracket-match-meta">
+        <span class="bracket-match-status ${statusCls}">${statusIcon}${STATUS_LABEL[status] || status}</span>
+        ${match.scheduledAt ? `<span class="bracket-match-time">${formatMatchTime(match.scheduledAt)}</span>` : ''}
+      </div>
+      ${teamRow(match.teamA, match.scoreA, teamAWin, teamBWin)}
+      <div class="bracket-match-divider"></div>
+      ${teamRow(match.teamB, match.scoreB, teamBWin, teamAWin)}
+    </div>`;
+}
+
+/* Single elimination — раунды в колонки. Берём все матчи всех stages подряд,
+   группируя по полю round внутри каждого stage (стадии идут последовательно слева→направо). */
+function renderSingleElimination(bracket) {
+  const stages = Array.isArray(bracket.stages) ? bracket.stages : [];
+  const columns = [];
+
+  stages.forEach(stage => {
+    const matches = Array.isArray(stage.matches) ? stage.matches : [];
+    const byRound = {};
+    matches.forEach(m => {
+      const r = m.round ?? 1;
+      if (!byRound[r]) byRound[r] = [];
+      byRound[r].push(m);
+    });
+    const roundNumbers = Object.keys(byRound).map(Number).sort((a, b) => a - b);
+    roundNumbers.forEach(r => {
+      columns.push({ title: stage.name || `Раунд ${r}`, matches: byRound[r] });
+    });
+  });
+
+  if (!columns.length) return `<div class="empty-state">Сетка пока пуста</div>`;
+
+  return `
+    <div class="bracket-rounds">
+      ${columns.map(col => `
+        <div class="bracket-round">
+          <div class="bracket-round-title">${escBracket(col.title)}</div>
+          <div class="bracket-round-matches">
+            ${col.matches.map(renderMatchCard).join('')}
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+/* Group stage — каждая стадия выводится как отдельная группа со списком матчей */
+function renderGroupStage(bracket) {
+  const stages = Array.isArray(bracket.stages) ? bracket.stages : [];
+  if (!stages.length) return `<div class="empty-state">Сетка пока пуста</div>`;
+
+  return `
+    <div class="bracket-render">
+      ${stages.map(stage => `
+        <div class="bracket-group">
+          <div class="bracket-group-title">${escBracket(stage.name || 'Группа')}</div>
+          <div class="bracket-group-matches">
+            ${(stage.matches || []).map(renderMatchCard).join('')}
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderBracket() {
+  const container = document.getElementById('bracketContainer');
+  const bracket = t.bracket;
+
+  // Турниров без bracket — старое поведение: iframe на bracketEmbed (даже если пустой src, как раньше)
+  if (!bracket || !Array.isArray(bracket.stages) || !bracket.stages.length) {
+    container.innerHTML = `<iframe class="bracket-frame" id="bracketFrame" allowfullscreen></iframe>`;
+    document.getElementById('bracketFrame').src = t.bracketEmbed || '';
+    return;
+  }
+
+  // Турнир с собственной сеткой — рисуем нативно, без внешних сервисов
+  const type = bracket.type || 'single';
+  if (type === 'group') {
+    container.innerHTML = renderGroupStage(bracket);
+  } else {
+    // 'single' и 'double' (double elimination пока рендерится как последовательность раундов —
+    // полноценные ветки upper/lower bracket это отдельная доработка, не ломает текущие турниры)
+    container.innerHTML = renderSingleElimination(bracket);
+  }
+}
+
+renderBracket();
 
 /* ---------- CASTERS ---------- */
 document.getElementById('casters').innerHTML = (t.casters || []).map(c => `
