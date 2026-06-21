@@ -1,0 +1,28 @@
+{
+  "name": "anypedia-bot",
+  "version": "1.0.0",
+  "description": "Telegram-bot for Anypedia",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@octokit/rest": "^21.0.2",
+    "dotenv": "^16.4.5",
+    "p-queue": "^7.4.1",
+    "pino": "^9.4.0",
+    "pino-pretty": "^11.2.2",
+    "telegraf": "^4.16.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.1"
+  }
+}
