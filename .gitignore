@@ -1,0 +1,25 @@
+# Секреты — никогда не коммитить
+.env
+*.env
+.env.local
+.env.production
+
+# Зависимости Node.js
+node_modules/
+bot/node_modules/
+
+# Логи
+*.log
+server.err.log
+server.out.log
+
+# Системные файлы Windows
+Thumbs.db
+desktop.ini
+
+# Системные файлы Mac
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
