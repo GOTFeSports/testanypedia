@@ -1,0 +1,15 @@
+{
+  "_schema": "bot-state.v1",
+  "_comment": "Служебное состояние бота. Не история действий (для этого activity-log.json) — здесь только текущие настройки и dedup-данные, нужные для работы рассылок.",
+  "announceChatId": null,
+  "featureFlags": {
+    "moderationEnabled": true,
+    "liveMatchesEnabled": false,
+    "notificationsEnabled": false,
+    "captainRosterEditingEnabled": false
+  },
+  "lastNotifiedHashes": {
+    "_comment": "match.id -> hash последнего отправленного состояния, чтобы не дублировать уведомления при ретраях коммитов",
+    "example": "m-final:finished:2:1"
+  }
+}
