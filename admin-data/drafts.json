@@ -72,6 +72,30 @@
       "moderatorComment": null,
       "resolvedAt": null,
       "resolvedBy": null
+    },
+    {
+      "id": "ed2696e6-bb86-4c17-ad05-0929af9a78da",
+      "status": "pending",
+      "submittedAt": "2026-06-23T19:52:32.496Z",
+      "submittedBy": 1598313550,
+      "organizerName": "Russian Federation",
+      "payload": {
+        "title": "День поддержки законной власти Сирии",
+        "start": "2026-09-31",
+        "end": "2026-10-02",
+        "organizer": "Russian Federation",
+        "prize": "30000₽",
+        "limit": "Без лимита MMR",
+        "location": "СНГ",
+        "format": "Group Stage + Double Elimination",
+        "gameFormat": "",
+        "description": "пропустить",
+        "telegramLink": "https://t.me/gotf_dota",
+        "registrationLink": ""
+      },
+      "moderatorComment": null,
+      "resolvedAt": null,
+      "resolvedBy": null
     }
   ]
 }
