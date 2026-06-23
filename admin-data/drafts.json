@@ -24,6 +24,30 @@
       "moderatorComment": null,
       "resolvedAt": null,
       "resolvedBy": null
+    },
+    {
+      "id": "6bcc81ca-2af2-4900-b85c-f764055caa11",
+      "status": "pending",
+      "submittedAt": "2026-06-23T19:39:17.454Z",
+      "submittedBy": 1598313550,
+      "organizerName": "ФКС-России",
+      "payload": {
+        "title": "Турнир-в-честь-Дня-ВДВ",
+        "start": "2026-08-02",
+        "end": "2026-08-02",
+        "organizer": "ФКС-России",
+        "prize": "20000₽",
+        "limit": "До 45.000 MMR на команду",
+        "location": "Россия",
+        "format": "Single Elimination",
+        "gameFormat": "Captains Mode",
+        "description": "",
+        "telegramLink": "https://t.me/gotf_dota",
+        "registrationLink": ""
+      },
+      "moderatorComment": null,
+      "resolvedAt": null,
+      "resolvedBy": null
     }
   ]
 }
