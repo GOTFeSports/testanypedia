@@ -387,7 +387,7 @@ const tournaments = [
     "prize": "8.500₽",
     "location": "СНГ",
     "teams": 10,
-    "winner": "",
+    "winner": "Gray Matter",
     "format": "Single Elimination",
     "organizer": "SkewerEsports",
     "links": {
@@ -467,10 +467,10 @@ const tournaments = [
               "isFinal": true,
               "teamA": "Gray Matter",
               "teamB": "TBD",
-              "scoreA": 0,
-              "scoreB": 0,
-              "status": "scheduled",
-              "winner": null,
+              "scoreA": 2,
+              "scoreB": 1,
+              "status": "finished",
+              "winner": "Gray Matter",
               "scheduledAt": "2026-06-21T15:00:00+03:00"
             }
           ]
