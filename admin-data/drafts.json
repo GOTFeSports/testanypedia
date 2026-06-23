@@ -76,7 +76,7 @@
     },
     {
       "id": "ed2696e6-bb86-4c17-ad05-0929af9a78da",
-      "status": "pending",
+      "status": "rejected",
       "submittedAt": "2026-06-23T19:52:32.496Z",
       "submittedBy": 1598313550,
       "organizerName": "Russian Federation",
@@ -94,9 +94,9 @@
         "telegramLink": "https://t.me/gotf_dota",
         "registrationLink": ""
       },
-      "moderatorComment": null,
-      "resolvedAt": null,
-      "resolvedBy": null
+      "moderatorComment": "[иди нахуй]",
+      "resolvedAt": "2026-06-23T20:03:49.272Z",
+      "resolvedBy": 1598313550
     }
   ]
 }
