@@ -3,7 +3,7 @@
   "drafts": [
     {
       "id": "c295354b-001f-41d7-b849-1c8f515b22a1",
-      "status": "pending",
+      "status": "approved",
       "submittedAt": "2026-06-23T19:39:16.822Z",
       "submittedBy": 1598313550,
       "organizerName": "ФКС-России",
@@ -22,8 +22,9 @@
         "registrationLink": ""
       },
       "moderatorComment": null,
-      "resolvedAt": null,
-      "resolvedBy": null
+      "resolvedAt": "2026-06-23T19:54:45.315Z",
+      "resolvedBy": 1598313550,
+      "tournamentId": "турнир-в-честь-дня-вдв"
     },
     {
       "id": "6bcc81ca-2af2-4900-b85c-f764055caa11",
