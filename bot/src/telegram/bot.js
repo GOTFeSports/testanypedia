@@ -6,7 +6,16 @@ const log    = require('../logger');
 
 const { requireRole }                              = require('./middleware/auth');
 const { rateLimit }                                = require('./middleware/rateLimiter');
-const { matchCommand }                             = require('./commands/match');
+
+const {
+  matchCommand,
+  startMatchCommand,
+  endMatchCommand,
+  forceMatchCommand,
+  bracketCommand,
+  matchInfoCommand,
+}                                                  = require('./commands/liveMatch');
+
 const { draftCommand, cancelCommand, processWizardText } = require('./commands/draft');
 const { approveCommand, rejectCommand }            = require('./commands/moderate');
 const { draftsCommand, draftInfoCommand, myDraftsCommand } = require('./commands/drafts');
@@ -27,18 +36,21 @@ function createBot() {
   bot.start(async (ctx) => {
     await ctx.reply(
       '👋 <b>Anypedia Bot</b>\n\n' +
-      '<b>Команды для организаторов:</b>\n' +
+      '<b>Матчи и сетка:</b>\n' +
+      '/match — внести счёт матча\n' +
+      '/startmatch — запустить матч (→ live)\n' +
+      '/endmatch — завершить матч\n' +
+      '/bracket — посмотреть сетку турнира\n' +
+      '/matchinfo — информация о матче\n\n' +
+      '<b>Турниры:</b>\n' +
       '/draft — подать заявку на турнир\n' +
       '/mydrafts — мои заявки\n\n' +
-      '<b>Команды для администраторов:</b>\n' +
+      '<b>Администраторам:</b>\n' +
       '/drafts — список заявок\n' +
-      '/approve — одобрить заявку\n' +
-      '/reject — отклонить заявку\n\n' +
-      '<b>Общие:</b>\n' +
-      '/match — обновить результат матча\n' +
-      '/subscribe — подписаться на команду\n' +
-      '/status — состояние бота (admin)\n' +
-      '/help — справка',
+      '/approve · /reject — модерация\n' +
+      '/forcematch — исправить результат\n' +
+      '/status — состояние бота\n\n' +
+      '/help — полная справка',
       { parse_mode: 'HTML' }
     );
   });
@@ -46,37 +58,58 @@ function createBot() {
   /* ── /help ── */
   bot.help(async (ctx) => {
     await ctx.reply(
-      '<b>Справка по командам</b>\n\n' +
-      '<b>/draft</b> — подать заявку на турнир (пошаговый wizard)\n' +
-      '<b>/mydrafts</b> — ваши черновики и их статус\n' +
-      '<b>/cancel</b> — отменить заполнение заявки\n\n' +
-      '<b>/drafts</b> — все ожидающие заявки (admin)\n' +
-      '<b>/drafts all</b> — заявки всех статусов (admin)\n' +
-      '<b>/draftinfo &lt;id&gt;</b> — подробности заявки\n' +
-      '<b>/approve &lt;id&gt;</b> — одобрить заявку (admin)\n' +
-      '<b>/reject &lt;id&gt; [причина]</b> — отклонить заявку (admin)\n\n' +
-      '<b>/match</b> &lt;tournamentId&gt; &lt;matchId&gt; &lt;счёт&gt;\n' +
-      'Пример: <code>/match SkewerEsports-Season-3 m1 2:1</code>\n\n' +
-      '<b>/subscribe</b> &lt;teamId&gt; · <b>/unsubscribe</b> &lt;teamId&gt;\n' +
-      '<b>/status</b> — состояние бота (admin)',
+      '<b>Все команды</b>\n\n' +
+
+      '<b>📊 Матчи</b>\n' +
+      '/match &lt;tId&gt; &lt;mId&gt; &lt;счёт&gt; — внести результат\n' +
+      '/startmatch &lt;tId&gt; &lt;mId&gt; — запустить матч\n' +
+      '/endmatch &lt;tId&gt; &lt;mId&gt; — завершить матч\n' +
+      '/bracket &lt;tId&gt; — сетка турнира\n' +
+      '/matchinfo &lt;tId&gt; &lt;mId&gt; — инфо о матче\n' +
+      '/forcematch &lt;tId&gt; &lt;mId&gt; &lt;счёт&gt; — исправить результат (admin)\n\n' +
+
+      '<b>📋 Заявки</b>\n' +
+      '/draft — подать заявку (wizard)\n' +
+      '/mydrafts — мои заявки\n' +
+      '/cancel — отменить wizard\n\n' +
+
+      '<b>🛡 Модерация (admin)</b>\n' +
+      '/drafts — список ожидающих\n' +
+      '/drafts all — все заявки\n' +
+      '/draftinfo &lt;id&gt; — подробности заявки\n' +
+      '/approve &lt;id&gt; — одобрить\n' +
+      '/reject &lt;id&gt; [причина] — отклонить\n\n' +
+
+      '<b>🔔 Подписки</b>\n' +
+      '/subscribe &lt;teamId&gt;\n' +
+      '/unsubscribe &lt;teamId&gt;\n\n' +
+
+      '/status — состояние бота (admin)',
       { parse_mode: 'HTML' }
     );
   });
 
-  /* ── Wizard команды ── */
+  /* ── Матчи ── */
+  bot.command('match',
+    requireRole(['admin', 'organizer']),
+    rateLimit({ maxRequests: 5, windowMs: 60_000 }),
+    matchCommand,
+  );
+  bot.command('startmatch',  requireRole(['admin', 'organizer']), startMatchCommand);
+  bot.command('endmatch',    requireRole(['admin', 'organizer']), endMatchCommand);
+  bot.command('forcematch',  requireRole(['admin']),              forceMatchCommand);
+  bot.command('bracket',     bracketCommand);   // открытая команда — смотреть могут все
+  bot.command('matchinfo',   matchInfoCommand); // открытая
+
+  /* ── Wizard ── */
   bot.command('draft',   requireRole(['admin', 'organizer']), draftCommand);
   bot.command('cancel',  cancelCommand);
-
-  // /skip — передаём в wizard как обычное сообщение
-  // (wizard проверяет текст '/skip' напрямую)
   bot.command('skip', async (ctx) => {
     const handled = await processWizardText(ctx);
-    if (!handled) {
-      await ctx.reply('Команда /skip доступна только внутри заполнения заявки (/draft).');
-    }
+    if (!handled) await ctx.reply('Команда /skip доступна только внутри заполнения заявки (/draft).');
   });
 
-  /* ── Просмотр черновиков ── */
+  /* ── Черновики ── */
   bot.command('mydrafts',  requireRole(['admin', 'organizer']), myDraftsCommand);
   bot.command('drafts',    requireRole(['admin']), draftsCommand);
   bot.command('draftinfo', requireRole(['admin', 'organizer']), draftInfoCommand);
@@ -85,13 +118,6 @@ function createBot() {
   bot.command('approve', requireRole(['admin']), approveCommand);
   bot.command('reject',  requireRole(['admin']), rejectCommand);
 
-  /* ── Матчи ── */
-  bot.command('match',
-    requireRole(['admin', 'organizer']),
-    rateLimit({ maxRequests: 5, windowMs: 60_000, message: 'Слишком много обновлений матчей подряд.' }),
-    matchCommand,
-  );
-
   /* ── Admin ── */
   bot.command('status', requireRole(['admin']), statusCommand);
 
@@ -99,16 +125,11 @@ function createBot() {
   bot.command('subscribe',   subscribeCommand);
   bot.command('unsubscribe', unsubscribeCommand);
 
-  /* ── Текстовые сообщения → wizard ── */
+  /* ── Текст → wizard ── */
   bot.on('text', async (ctx) => {
-    const text = ctx.message?.text || '';
-    // Команды (кроме /skip и /cancel которые обработаны выше) игнорируем
-    if (text.startsWith('/')) return;
-
+    if ((ctx.message?.text || '').startsWith('/')) return;
     const handled = await processWizardText(ctx);
-    if (!handled) {
-      await ctx.reply('Используйте /help для списка команд.');
-    }
+    if (!handled) await ctx.reply('Используйте /help для списка команд.');
   });
 
   return bot;
