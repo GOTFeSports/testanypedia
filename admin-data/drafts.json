@@ -100,7 +100,7 @@
     },
     {
       "id": "c2d43237-22d4-41e2-8726-49d2475384ce",
-      "status": "pending",
+      "status": "approved",
       "submittedAt": "2026-06-24T07:27:17.720Z",
       "submittedBy": 1598313550,
       "organizerName": "ФКС России",
@@ -119,8 +119,9 @@
         "registrationLink": ""
       },
       "moderatorComment": null,
-      "resolvedAt": null,
-      "resolvedBy": null
+      "resolvedAt": "2026-06-24T07:27:47.498Z",
+      "resolvedBy": 1598313550,
+      "tournamentId": "день-поддержки-сирийского-правительства"
     }
   ]
 }
