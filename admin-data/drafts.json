@@ -97,6 +97,30 @@
       "moderatorComment": "[иди нахуй]",
       "resolvedAt": "2026-06-23T20:03:49.272Z",
       "resolvedBy": 1598313550
+    },
+    {
+      "id": "c2d43237-22d4-41e2-8726-49d2475384ce",
+      "status": "pending",
+      "submittedAt": "2026-06-24T07:27:17.720Z",
+      "submittedBy": 1598313550,
+      "organizerName": "ФКС России",
+      "payload": {
+        "title": "День поддержки Сирийского правительства",
+        "start": "2026-09-31",
+        "end": "2026-10-02",
+        "organizer": "ФКС России",
+        "prize": "20.000₽, 1 место - 12000₽, 2 место - 8000₽",
+        "limit": "Без лимита MMR",
+        "location": "СНГ",
+        "format": "Double Elimination",
+        "gameFormat": "",
+        "description": "",
+        "telegramLink": "https://t.me/gotf_dota",
+        "registrationLink": ""
+      },
+      "moderatorComment": null,
+      "resolvedAt": null,
+      "resolvedBy": null
     }
   ]
 }
