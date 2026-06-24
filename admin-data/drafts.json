@@ -3,7 +3,7 @@
   "drafts": [
     {
       "id": "c295354b-001f-41d7-b849-1c8f515b22a1",
-      "status": "pending",
+      "status": "approved",
       "submittedAt": "2026-06-23T19:39:16.822Z",
       "submittedBy": 1598313550,
       "organizerName": "ФКС-России",
@@ -22,12 +22,13 @@
         "registrationLink": ""
       },
       "moderatorComment": null,
-      "resolvedAt": null,
-      "resolvedBy": null
+      "resolvedAt": "2026-06-23T19:54:45.315Z",
+      "resolvedBy": 1598313550,
+      "tournamentId": "турнир-в-честь-дня-вдв"
     },
     {
       "id": "6bcc81ca-2af2-4900-b85c-f764055caa11",
-      "status": "pending",
+      "status": "rejected",
       "submittedAt": "2026-06-23T19:39:17.454Z",
       "submittedBy": 1598313550,
       "organizerName": "ФКС-России",
@@ -45,13 +46,13 @@
         "telegramLink": "https://t.me/gotf_dota",
         "registrationLink": ""
       },
-      "moderatorComment": null,
-      "resolvedAt": null,
-      "resolvedBy": null
+      "moderatorComment": "[причина]",
+      "resolvedAt": "2026-06-23T20:04:50.493Z",
+      "resolvedBy": 1598313550
     },
     {
       "id": "97626858-f154-4a92-81a5-b7172ba910d9",
-      "status": "pending",
+      "status": "rejected",
       "submittedAt": "2026-06-23T19:39:17.934Z",
       "submittedBy": 1598313550,
       "organizerName": "ФКС-России",
@@ -69,9 +70,33 @@
         "telegramLink": "https://t.me/gotf_dota",
         "registrationLink": ""
       },
-      "moderatorComment": null,
-      "resolvedAt": null,
-      "resolvedBy": null
+      "moderatorComment": "Недостаточно информации",
+      "resolvedAt": "2026-06-23T20:04:21.491Z",
+      "resolvedBy": 1598313550
+    },
+    {
+      "id": "ed2696e6-bb86-4c17-ad05-0929af9a78da",
+      "status": "rejected",
+      "submittedAt": "2026-06-23T19:52:32.496Z",
+      "submittedBy": 1598313550,
+      "organizerName": "Russian Federation",
+      "payload": {
+        "title": "День поддержки законной власти Сирии",
+        "start": "2026-09-31",
+        "end": "2026-10-02",
+        "organizer": "Russian Federation",
+        "prize": "30000₽",
+        "limit": "Без лимита MMR",
+        "location": "СНГ",
+        "format": "Group Stage + Double Elimination",
+        "gameFormat": "",
+        "description": "пропустить",
+        "telegramLink": "https://t.me/gotf_dota",
+        "registrationLink": ""
+      },
+      "moderatorComment": "[иди нахуй]",
+      "resolvedAt": "2026-06-23T20:03:49.272Z",
+      "resolvedBy": 1598313550
     }
   ]
 }

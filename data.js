@@ -7213,5 +7213,27 @@ const tournaments = [
     "registrationStart": "",
     "registrationEnd": "",
     "gameFormat": "Captains Mode"
+  },
+  {
+    "id": "турнир-в-честь-дня-вдв",
+    "title": "Турнир-в-честь-Дня-ВДВ",
+    "start": "2026-08-02",
+    "end": "2026-08-02",
+    "prize": "20000₽",
+    "limit": "До 45.000 MMR на команду",
+    "location": "Россия",
+    "format": "Single Elimination",
+    "gameFormat": "Captains Mode",
+    "organizer": "ФКС-России",
+    "description": "",
+    "links": {
+      "telegram": "https://t.me/gotf_dota",
+      "registration": ""
+    },
+    "winner": "",
+    "prizePool": [],
+    "teamsList": [],
+    "casters": [],
+    "bracketEmbed": ""
   }
 ];
