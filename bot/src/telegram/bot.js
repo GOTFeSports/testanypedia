@@ -53,7 +53,7 @@ function createBot() {
       '<b>/drafts</b> — все ожидающие заявки (admin)\n' +
       '<b>/drafts all</b> — заявки всех статусов (admin)\n' +
       '<b>/draftinfo &lt;id&gt;</b> — подробности заявки\n' +
-      '<b>/approve &lt;id&gt;</b> — одобрить заявку → турнир появится на сайте (admin)\n' +
+      '<b>/approve &lt;id&gt;</b> — одобрить заявку (admin)\n' +
       '<b>/reject &lt;id&gt; [причина]</b> — отклонить заявку (admin)\n\n' +
       '<b>/match</b> &lt;tournamentId&gt; &lt;matchId&gt; &lt;счёт&gt;\n' +
       'Пример: <code>/match SkewerEsports-Season-3 m1 2:1</code>\n\n' +
@@ -63,18 +63,25 @@ function createBot() {
     );
   });
 
-  /* ── Wizard команды (доступны всем у кого есть роль) ── */
+  /* ── Wizard команды ── */
   bot.command('draft',   requireRole(['admin', 'organizer']), draftCommand);
   bot.command('cancel',  cancelCommand);
 
+  // /skip — передаём в wizard как обычное сообщение
+  // (wizard проверяет текст '/skip' напрямую)
+  bot.command('skip', async (ctx) => {
+    const handled = await processWizardText(ctx);
+    if (!handled) {
+      await ctx.reply('Команда /skip доступна только внутри заполнения заявки (/draft).');
+    }
+  });
+
   /* ── Просмотр черновиков ── */
-  // /mydrafts — открыт для organizer и admin
   bot.command('mydrafts',  requireRole(['admin', 'organizer']), myDraftsCommand);
-  // /drafts и /draftinfo — только admin
   bot.command('drafts',    requireRole(['admin']), draftsCommand);
   bot.command('draftinfo', requireRole(['admin', 'organizer']), draftInfoCommand);
 
-  /* ── Модерация (только admin) ── */
+  /* ── Модерация ── */
   bot.command('approve', requireRole(['admin']), approveCommand);
   bot.command('reject',  requireRole(['admin']), rejectCommand);
 
@@ -92,13 +99,12 @@ function createBot() {
   bot.command('subscribe',   subscribeCommand);
   bot.command('unsubscribe', unsubscribeCommand);
 
-  /* ── Обработка текстовых сообщений: wizard перехватывает первым ── */
-  bot.on('text', async (ctx, next) => {
+  /* ── Текстовые сообщения → wizard ── */
+  bot.on('text', async (ctx) => {
     const text = ctx.message?.text || '';
-    // Команды (начинаются с /) обрабатываются выше — пропускаем
-    if (text.startsWith('/')) return next();
+    // Команды (кроме /skip и /cancel которые обработаны выше) игнорируем
+    if (text.startsWith('/')) return;
 
-    // Проверяем wizard
     const handled = await processWizardText(ctx);
     if (!handled) {
       await ctx.reply('Используйте /help для списка команд.');
