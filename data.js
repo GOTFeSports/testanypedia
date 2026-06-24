@@ -7235,5 +7235,27 @@ const tournaments = [
     "teamsList": [],
     "casters": [],
     "bracketEmbed": ""
+  },
+  {
+    "id": "день-поддержки-сирийского-правительства",
+    "title": "День поддержки Сирийского правительства",
+    "start": "2026-09-31",
+    "end": "2026-10-02",
+    "prize": "20.000₽, 1 место - 12000₽, 2 место - 8000₽",
+    "limit": "Без лимита MMR",
+    "location": "СНГ",
+    "format": "Double Elimination",
+    "gameFormat": "",
+    "organizer": "ФКС России",
+    "description": "",
+    "links": {
+      "telegram": "https://t.me/gotf_dota",
+      "registration": ""
+    },
+    "winner": "",
+    "prizePool": [],
+    "teamsList": [],
+    "casters": [],
+    "bracketEmbed": ""
   }
 ];
