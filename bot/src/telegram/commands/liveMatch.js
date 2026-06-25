@@ -194,47 +194,74 @@ async function bracketCommand(ctx) {
 
     if (!tournament.bracket?.stages?.length) {
       return ctx.reply(
-        `У турнира <b>${tournament.title}</b> нет сетки.\n\n` +
-        `Используется внешний embed: ${tournament.bracketEmbed || 'не задан'}`,
+        `📋 <b>${tournament.title}</b>\n\nСобственная сетка не создана.\n\n` +
+        (tournament.bracketEmbed
+          ? `Внешняя сетка: ${tournament.bracketEmbed}`
+          : `Создать сетку: <code>/createbracket ${tournamentId}</code>`),
         { parse_mode: 'HTML' }
       );
     }
 
-    const BE = loadBracketEngine();
-    const lines = [`🏆 <b>${tournament.title}</b> — сетка\n`];
+    const lines = [`🏆 <b>${tournament.title}</b>\n`];
+    let totalMatches = 0, finishedMatches = 0;
 
     for (const stage of tournament.bracket.stages) {
-      lines.push(`\n<b>── ${stage.name} ──</b>`);
+      lines.push(`\n<b>═══ ${stage.name} ═══</b>`);
 
-      // Группируем матчи по раундам
       const byRound = {};
       for (const m of (stage.matches || [])) {
         const r = m.round ?? 1;
         if (!byRound[r]) byRound[r] = [];
         byRound[r].push(m);
+        totalMatches++;
+        if (m.status === 'finished') finishedMatches++;
       }
 
       const rounds = Object.keys(byRound).map(Number).sort((a, b) => a - b);
+
       for (const r of rounds) {
-        if (rounds.length > 1) lines.push(`\n  Раунд ${r}:`);
-        for (const m of byRound[r]) {
+        const roundMatches = byRound[r];
+        if (rounds.length > 1) {
+          lines.push(`  <i>Раунд ${r}:</i>`);
+        }
+
+        for (const m of roundMatches) {
           const s  = STATUS_EMOJI[m.status] || '❓';
           const tA = m.teamA || 'TBD';
           const tB = m.teamB || 'TBD';
           const sc = `${m.scoreA ?? 0}:${m.scoreB ?? 0}`;
-          let line = `  ${s} <code>${m.id}</code>  ${tA} vs ${tB}  [${sc}]`;
-          if (m.winner)  line += `  🏆 ${m.winner}`;
-          if (m.isFinal) line += '  🏁';
+
+          let line = `  ${s} `;
+
+          if (m.status === 'finished' && m.winner) {
+            // Подсвечиваем победителя жирным
+            const aW = m.winner === m.teamA;
+            line += aW
+              ? `<b>${tA}</b> ${sc} ${tB}`
+              : `${tA} ${sc} <b>${tB}</b>`;
+            line += ` 🏆`;
+          } else {
+            line += `${tA} vs ${tB}`;
+            if (m.status === 'live') line += `  [${sc}]`;
+          }
+
+          if (m.isFinal)     line += ' 🏁';
+          line += `  <code>${m.id}</code>`;
+
           lines.push(line);
         }
       }
     }
 
+    // Прогресс
+    const pct = totalMatches > 0 ? Math.round(finishedMatches / totalMatches * 100) : 0;
+    lines.push(`\n📊 Прогресс: ${finishedMatches}/${totalMatches} матчей (${pct}%)`);
+
     if (tournament.winner) {
       lines.push(`\n🏆 <b>Победитель турнира: ${tournament.winner}</b>`);
     }
 
-    lines.push(`\nПодробности матча: <code>/matchinfo ${tournamentId} &lt;matchId&gt;</code>`);
+    lines.push(`\nПодробности: <code>/matchinfo ${tournamentId} &lt;matchId&gt;</code>`);
 
     await ctx.reply(lines.join('\n'), { parse_mode: 'HTML' });
 
@@ -243,6 +270,8 @@ async function bracketCommand(ctx) {
     await ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
   }
 }
+
+
 
 /* ─── /matchinfo ──────────────────────────────────────────────── */
 

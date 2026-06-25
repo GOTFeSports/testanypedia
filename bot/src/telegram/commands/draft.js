@@ -48,17 +48,44 @@ const STEPS = [
     field: 'prize',
     optional: true,
     prompt:
-      '🏆 <b>Шаг 5/9 — Призовой фонд</b>\n\n' +
-      'Укажите общую сумму или разбивку по местам.\n\n' +
-      '<i>Примеры: «12 000₽», «1 место — 5000₽, 2 место — 2000₽»</i>\n\n' +
-      '➡️ /skip — пропустить (если приз не определён)',
+      '🏆 <b>Шаг 5/12 — Общий призовой фонд</b>\n\n' +
+      'Укажите итоговую сумму призового фонда.\n\n' +
+      '<i>Примеры: «12 000₽», «100 000₽»</i>\n\n' +
+      '➡️ /skip — пропустить',
+    validate: null,
+  },
+  {
+    field: 'prize1',
+    optional: true,
+    prompt:
+      '🥇 <b>Шаг 6/12 — Приз за 1 место</b>\n\n' +
+      '<i>Пример: «60 000₽»</i>\n\n' +
+      '➡️ /skip — пропустить',
+    validate: null,
+  },
+  {
+    field: 'prize2',
+    optional: true,
+    prompt:
+      '🥈 <b>Шаг 7/12 — Приз за 2 место</b>\n\n' +
+      '<i>Пример: «30 000₽»</i>\n\n' +
+      '➡️ /skip — пропустить',
+    validate: null,
+  },
+  {
+    field: 'prize3',
+    optional: true,
+    prompt:
+      '🥉 <b>Шаг 8/12 — Приз за 3 место</b>\n\n' +
+      '<i>Пример: «10 000₽»</i>\n\n' +
+      '➡️ /skip — пропустить',
     validate: null,
   },
   {
     field: 'limit',
     optional: true,
     prompt:
-      '👥 <b>Шаг 6/9 — Лимит MMR / условия участия</b>\n\n' +
+      '👥 <b>Шаг 9/12 — Лимит MMR / условия участия</b>\n\n' +
       'Укажите ограничения на участие.\n\n' +
       '<i>Примеры: «До 30 000 MMR на команду», «До 5 000 MMR на игрока», «Без лимита»</i>\n\n' +
       '➡️ /skip — пропустить',
@@ -68,7 +95,7 @@ const STEPS = [
     field: 'format',
     optional: true,
     prompt:
-      '🎮 <b>Шаг 7/9 — Формат турнира</b>\n\n' +
+      '🎮 <b>Шаг 10/12 — Формат турнира</b>\n\n' +
       'Система проведения.\n\n' +
       '<i>Примеры: «Single Elimination», «Double Elimination», «Round Robin», «Групповой этап + плейофф»</i>\n\n' +
       '➡️ /skip — пропустить',
@@ -78,7 +105,7 @@ const STEPS = [
     field: 'telegramLink',
     optional: true,
     prompt:
-      '💬 <b>Шаг 8/9 — Ссылка на Telegram-канал или группу</b>\n\n' +
+      '💬 <b>Шаг 11/12 — Ссылка на Telegram-канал или группу</b>\n\n' +
       'Где участники найдут актуальную информацию о турнире.\n\n' +
       '<i>Пример: <code>https://t.me/rampagetournaments</code></i>\n\n' +
       '➡️ /skip — пропустить',
@@ -88,7 +115,7 @@ const STEPS = [
     field: 'description',
     optional: true,
     prompt:
-      '📝 <b>Шаг 9/9 — Описание турнира</b>\n\n' +
+      '📝 <b>Шаг 12/12 — Описание турнира</b>\n\n' +
       'Любая дополнительная информация: правила, особенности, требования к участникам.\n\n' +
       '<i>Можно написать несколько предложений</i>\n\n' +
       '➡️ /skip — пропустить',
@@ -118,6 +145,9 @@ async function sendSummary(ctx, data) {
     `🏢 Организатор: ${data.organizer}`,
     `📅 Даты: ${data.start} — ${data.end}`,
     data.prize        ? `🏆 Призовой фонд: ${data.prize}`   : '🏆 Призовой фонд: не указан',
+    data.prize1       ? `🥇 1 место: ${data.prize1}`             : null,
+    data.prize2       ? `🥈 2 место: ${data.prize2}`             : null,
+    data.prize3       ? `🥉 3 место: ${data.prize3}`             : null,
     data.limit        ? `👥 Лимит: ${data.limit}`           : '👥 Лимит: не указан',
     data.format       ? `🎮 Формат: ${data.format}`         : '🎮 Формат: не указан',
     data.telegramLink ? `💬 Telegram: ${data.telegramLink}` : '💬 Telegram: не указан',
@@ -248,6 +278,11 @@ async function handleConfirm(ctx, state, userId) {
           end:              data.end,
           organizer:        data.organizer,
           prize:            data.prize        || '',
+          prizePool: [
+            ...(data.prize1 ? [{ place: 1, amount: data.prize1, team: '' }] : []),
+            ...(data.prize2 ? [{ place: 2, amount: data.prize2, team: '' }] : []),
+            ...(data.prize3 ? [{ place: 3, amount: data.prize3, team: '' }] : []),
+          ],
           limit:            data.limit        || '',
           location:         'СНГ',
           format:           data.format       || '',
