@@ -7747,7 +7747,7 @@ const tournaments = [
               "round": 1,
               "isFinal": false,
               "teamA": "LETO Junior",
-              "teamB": "TBD",
+              "teamB": "HATER ZDES`",
               "scoreA": 0,
               "scoreB": 0,
               "status": "scheduled",
