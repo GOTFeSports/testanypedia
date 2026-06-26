@@ -7761,7 +7761,7 @@ const tournaments = [
               "round": 1,
               "isFinal": false,
               "teamA": "EGOISTO",
-              "teamB": "TBD",
+              "teamB": "Never Back Down",
               "scoreA": 0,
               "scoreB": 0,
               "status": "scheduled",
