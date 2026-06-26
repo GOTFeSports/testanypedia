@@ -122,6 +122,37 @@
       "resolvedAt": "2026-06-24T07:27:47.498Z",
       "resolvedBy": 1598313550,
       "tournamentId": "день-поддержки-сирийского-правительства"
+    },
+    {
+      "id": "9f350ba7-17b7-450d-93e7-f7077907dbcc",
+      "status": "pending",
+      "submittedAt": "2026-06-26T20:57:56.893Z",
+      "submittedBy": 1598313550,
+      "organizerName": "123",
+      "payload": {
+        "title": "123",
+        "start": "2026-08-02",
+        "end": "2026-08-02",
+        "organizer": "123",
+        "prize": "9000₽",
+        "prizePool": [
+          {
+            "place": 1,
+            "amount": "9000₽",
+            "team": ""
+          }
+        ],
+        "limit": "",
+        "location": "СНГ",
+        "format": "",
+        "gameFormat": "",
+        "description": "",
+        "telegramLink": "",
+        "registrationLink": ""
+      },
+      "moderatorComment": null,
+      "resolvedAt": null,
+      "resolvedBy": null
     }
   ]
 }
