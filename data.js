@@ -7746,7 +7746,7 @@ const tournaments = [
               "id": "s2m13",
               "round": 1,
               "isFinal": false,
-              "teamA": "TBD",
+              "teamA": "LETO Junior",
               "teamB": "TBD",
               "scoreA": 0,
               "scoreB": 0,
