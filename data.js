@@ -7760,7 +7760,7 @@ const tournaments = [
               "id": "s2m14",
               "round": 1,
               "isFinal": false,
-              "teamA": "TBD",
+              "teamA": "EGOISTO",
               "teamB": "TBD",
               "scoreA": 0,
               "scoreB": 0,
