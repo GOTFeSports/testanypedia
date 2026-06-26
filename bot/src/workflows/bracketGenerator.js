@@ -342,26 +342,48 @@ function generateGroupStagePlayoff({ groupCount, teamsPerGroup, advancingPerGrou
  * Получить список свободных слотов в bracket.
  * Возвращает [{matchId, slot, currentValue}] где currentValue === 'TBD'.
  */
+/**
+ * Вернуть только стартовые слоты для посева команд.
+ *
+ * Правило: заполняются вручную ТОЛЬКО первый раунд ПЕРВОЙ
+ * не-групповой и не-Swiss стадии.
+ *
+ * Обоснование:
+ * - Группы (isGroup) используют алиасные имена A1/B2 — не TBD-слоты
+ * - Swiss (isSwiss) первый раунд уже имеет сгенерированные "Команда N"
+ * - Double Elimination — у него несколько "первых" стадий (Upper, Lower).
+ *   Нужна только Upper Bracket (первая по порядку стадия)
+ * - Слоты поздних раундов заполняются движком автоматически
+ *
+ * @param {object|null} bracket
+ * @returns {Array<{matchId, slot, stageName, round}>}
+ */
 function getEmptySlots(bracket) {
   const slots = [];
   if (!bracket?.stages) return slots;
 
-  for (const stage of bracket.stages) {
-    if (stage.isGroup) continue; // Группы — особый случай, не TBD-слоты
-    for (const m of (stage.matches || [])) {
-      if (m.teamA === 'TBD' || !m.teamA) {
-        slots.push({ matchId: m.id, slot: 'A', stageName: stage.name });
-      }
-      if (m.teamB === 'TBD' || !m.teamB) {
-        slots.push({ matchId: m.id, slot: 'B', stageName: stage.name });
-      }
+  // Ищем ПЕРВУЮ стадию которую нужно засеивать вручную
+  // (не группа, не Swiss)
+  const seedableStage = bracket.stages.find(
+    s => !s.isGroup && !s.isSwiss && s.matches && s.matches.length > 0
+  );
+
+  if (!seedableStage) return slots;
+
+  const matches  = seedableStage.matches;
+  const minRound = Math.min(...matches.map(m => m.round ?? 1));
+  const startMatches = matches.filter(m => (m.round ?? 1) === minRound);
+
+  for (const m of startMatches) {
+    if (!m.teamA || m.teamA === 'TBD') {
+      slots.push({ matchId: m.id, slot: 'A', stageName: seedableStage.name, round: minRound });
+    }
+    if (!m.teamB || m.teamB === 'TBD') {
+      slots.push({ matchId: m.id, slot: 'B', stageName: seedableStage.name, round: minRound });
     }
   }
 
-  // Только первый раунд (слоты которые заполняются вручную)
-  // Слоты в поздних раундах заполняются движком автоматически
-  const firstRound = slots.filter(() => true); // возвращаем все TBD для /seed
-  return firstRound;
+  return slots;
 }
 
 /**
@@ -425,10 +447,88 @@ function validateGeneratedBracket(bracket) {
   return errors;
 }
 
+
+/* ─── Swiss Stage ──────────────────────────────────────────────── */
+
+/**
+ * Генерирует Swiss Stage bracket.
+ *
+ * Swiss система: все команды начинают вместе, после каждого раунда
+ * команды с одинаковым счётом побед играют друг с другом.
+ * Нет выбывания до накопления нужного кол-ва побед/поражений.
+ *
+ * @param {object} opts
+ * @param {number} opts.teamCount     — количество команд (8, 16)
+ * @param {number} opts.winsToAdvance — побед для выхода (default: 3)
+ * @param {number} opts.lossesToElim  — поражений для выбывания (default: 3)
+ * @returns {object} bracket-объект
+ */
+function generateSwissStage({ teamCount = 8, winsToAdvance = 3, lossesToElim = 3 } = {}) {
+  if (![8, 16].includes(teamCount)) {
+    throw new Error(`Swiss Stage: поддерживается 8/16 команд, получено: ${teamCount}`);
+  }
+
+  // Swiss по природе динамический — пары определяются после каждого раунда.
+  // В структуре данных представляем раунды как "слои" матчей,
+  // где конкретные команды TBD кроме первого раунда.
+  // Первый раунд: случайные пары (по порядку слотов).
+  // Раунды 2+: TBD, заполняются организатором через /match после раунда.
+
+  const totalRounds = winsToAdvance + lossesToElim - 1;
+  const matchesPerRound = Math.floor(teamCount / 2);
+
+  const stages = [];
+  let matchCounter = 1;
+
+  for (let round = 1; round <= totalRounds; round++) {
+    const roundMatches = [];
+    const isFirstRound = round === 1;
+
+    for (let i = 0; i < matchesPerRound; i++) {
+      roundMatches.push({
+        id:          `sw${matchCounter++}`,
+        round,
+        isFinal:     false,
+        swissRound:  round,
+        teamA:       isFirstRound ? `Команда ${i * 2 + 1}` : 'TBD',
+        teamB:       isFirstRound ? `Команда ${i * 2 + 2}` : 'TBD',
+        scoreA:      0,
+        scoreB:      0,
+        status:      'scheduled',
+        winner:      null,
+        scheduledAt: null,
+      });
+    }
+
+    stages.push({
+      name:        `Swiss Раунд ${round}`,
+      swissRound:  round,
+      isSwiss:     true,
+      matches:     roundMatches,
+    });
+  }
+
+  // Финальный матч Swiss (не isFinal — это просто последний раунд)
+  // Реальный финал идёт в отдельном плейоффе если есть
+  // Добавляем фиктивный isFinal чтобы bracket-engine был доволен
+  const lastStage = stages[stages.length - 1];
+  if (lastStage?.matches?.length) {
+    lastStage.matches[0].isFinal = true;
+  }
+
+  return {
+    type:          'swiss',
+    winsToAdvance,
+    lossesToElim,
+    stages,
+  };
+}
+
 module.exports = {
   generateSingleElimination,
   generateDoubleElimination,
   generateGroupStagePlayoff,
+  generateSwissStage,
   getEmptySlots,
   seedTeamInSlot,
   validateGeneratedBracket,

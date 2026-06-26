@@ -4,8 +4,8 @@ const { Telegraf } = require('telegraf');
 const config = require('../config');
 const log    = require('../logger');
 
-const { rateLimit }                                = require('./middleware/rateLimiter');
-const { requireRole }                              = require('./middleware/auth');
+const { rateLimit }    = require('./middleware/rateLimiter');
+const { requireRole }  = require('./middleware/auth');
 
 const {
   matchCommand,
@@ -14,7 +14,7 @@ const {
   forceMatchCommand,
   bracketCommand,
   matchInfoCommand,
-}                                                  = require('./commands/liveMatch');
+} = require('./commands/liveMatch');
 
 const { draftCommand, cancelCommand, processWizardText } = require('./commands/draft');
 const { approveCommand, rejectCommand }            = require('./commands/moderate');
@@ -26,16 +26,12 @@ const { statusCommand }                            = require('./commands/status'
 function createBot() {
   const bot = new Telegraf(config.bot.token);
 
-  // ВАЖНО: глобальный bot.use(rateLimit) убран намеренно.
-  // Раньше он считал ВСЕ сообщения включая wizard-ответы,
-  // из-за чего пользователь получал "Слишком много запросов"
-  // при быстром прохождении шагов /draft.
-  // Теперь rate limit применяется точечно к конкретным командам
-  // которые делают IO-операции (match, approve, createbracket и т.д.)
-  // Текстовые сообщения (wizard-ответы) rate limit не получают.
+  // Глобального bot.use(rateLimit) намеренно нет:
+  // wizard-ответы не должны попадать под ограничение частоты.
+  // Rate limit применяется точечно только к командам с IO-нагрузкой.
 
   bot.catch((err, ctx) => {
-    log.error({ update: ctx.updateType, from: ctx.from?.id, err: err.message }, 'bot: необработанная ошибка');
+    log.error({ update: ctx.updateType, from: ctx.from?.id, err: err.message }, 'bot: ошибка');
     ctx.reply('⚙️ Внутренняя ошибка.').catch(() => {});
   });
 
@@ -60,7 +56,7 @@ function createBot() {
       '/approve · /reject — модерация\n' +
       '/forcematch — исправить результат\n' +
       '/status — состояние бота\n\n' +
-      '/help — полная справка',
+      '/help — справка',
       { parse_mode: 'HTML' }
     );
   });
@@ -73,12 +69,12 @@ function createBot() {
       '/match &lt;tId&gt; &lt;mId&gt; &lt;счёт&gt;\n' +
       '/startmatch &lt;tId&gt; &lt;mId&gt;\n' +
       '/endmatch &lt;tId&gt; &lt;mId&gt;\n' +
-      '/bracket &lt;tId&gt; — сетка турнира\n' +
+      '/bracket &lt;tId&gt;\n' +
       '/matchinfo &lt;tId&gt; &lt;mId&gt;\n' +
       '/forcematch &lt;tId&gt; &lt;mId&gt; &lt;счёт&gt; (admin)\n\n' +
       '<b>🏗 Сетки</b>\n' +
-      '/createbracket &lt;tId&gt; — создать сетку (admin)\n' +
-      '/seed &lt;tId&gt; — назначить команды (admin)\n\n' +
+      '/createbracket &lt;tId&gt;\n' +
+      '/seed &lt;tId&gt;\n\n' +
       '<b>📋 Заявки</b>\n' +
       '/draft — подать заявку (wizard)\n' +
       '/mydrafts — мои заявки\n' +
@@ -88,40 +84,42 @@ function createBot() {
       '/draftinfo &lt;id&gt;\n' +
       '/approve &lt;id&gt;\n' +
       '/reject &lt;id&gt; [причина]\n\n' +
-      '<b>🔔 Подписки</b>\n' +
-      '/subscribe &lt;teamId&gt;\n' +
-      '/unsubscribe &lt;teamId&gt;\n\n' +
-      '/status — состояние бота (admin)',
+      '/status (admin)',
       { parse_mode: 'HTML' }
     );
   });
 
-  /* ── Матчи (rate limit только на команды с IO) ── */
+  /* ── Матчи ──
+     requireRole(['admin','organizer']) — первый барьер (роль в permissions.json).
+     canManageTournament внутри команды — второй барьер (владелец турнира).
+     Это позволяет организатору работать только со своими турнирами. */
   bot.command('match',
     requireRole(['admin', 'organizer']),
     rateLimit({ maxRequests: 10, windowMs: 60_000, namespace: 'match' }),
     matchCommand,
   );
-  bot.command('startmatch',  requireRole(['admin', 'organizer']), startMatchCommand);
-  bot.command('endmatch',    requireRole(['admin', 'organizer']), endMatchCommand);
-  bot.command('forcematch',  requireRole(['admin']),              forceMatchCommand);
-  bot.command('bracket',     bracketCommand);
-  bot.command('matchinfo',   matchInfoCommand);
+  bot.command('startmatch', requireRole(['admin', 'organizer']), startMatchCommand);
+  bot.command('endmatch',   requireRole(['admin', 'organizer']), endMatchCommand);
+  bot.command('forcematch', requireRole(['admin']),              forceMatchCommand);
+  bot.command('bracket',    bracketCommand);   // открытая — смотреть могут все
+  bot.command('matchinfo',  matchInfoCommand); // открытая
 
   /* ── Сетки ── */
   bot.command('createbracket',
-    requireRole(['admin']),
+    requireRole(['admin', 'organizer']),
     rateLimit({ maxRequests: 5, windowMs: 60_000, namespace: 'createbracket' }),
     createBracketCommand,
   );
-  bot.command('seed', requireRole(['admin']), seedCommand);
+  bot.command('seed', requireRole(['admin', 'organizer']), seedCommand);
 
   /* ── Wizard /draft ── */
-  bot.command('draft',   requireRole(['admin', 'organizer']), draftCommand);
-  bot.command('cancel',  cancelCommand);
+  bot.command('draft',  requireRole(['admin', 'organizer']), draftCommand);
+  bot.command('cancel', cancelCommand);
   bot.command('skip', async (ctx) => {
-    // /skip обрабатывается wizard-ами без rate limit
-    const handled = await processWizardText(ctx) || await processBracketOrSeedText(ctx);
+    // /skip не имеет rate limit — это ответ на вопрос wizard-а
+    const handled =
+      await processWizardText(ctx) ||
+      await processBracketOrSeedText(ctx);
     if (!handled) {
       await ctx.reply('Команда /skip доступна только внутри заполнения заявки или посева команд.');
     }
@@ -151,13 +149,12 @@ function createBot() {
   bot.command('subscribe',   subscribeCommand);
   bot.command('unsubscribe', unsubscribeCommand);
 
-  /* ── Текст → wizard (БЕЗ rate limit — это ответы пользователя на вопросы) ── */
+  /* ── Текст → wizard (БЕЗ rate limit) ── */
   bot.on('text', async (ctx) => {
-    const text = ctx.message?.text || '';
-    if (text.startsWith('/')) return;
-
-    // Сначала draft wizard, потом bracket/seed wizard
-    const handled = await processWizardText(ctx) || await processBracketOrSeedText(ctx);
+    if ((ctx.message?.text || '').startsWith('/')) return;
+    const handled =
+      await processWizardText(ctx) ||
+      await processBracketOrSeedText(ctx);
     if (!handled) {
       await ctx.reply('Используйте /help для списка команд.');
     }

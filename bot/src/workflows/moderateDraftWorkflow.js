@@ -40,27 +40,39 @@ function generateTournamentId(title, existingIds = []) {
  */
 function buildTournamentObject(draft, tournamentId) {
   const p = draft.payload;
+
+  // Собираем prizePool из призовых мест если они были указаны в wizard
+  const prizePool = [];
+  if (p.prizePool && Array.isArray(p.prizePool) && p.prizePool.length > 0) {
+    // Уже собран wizard-ом (draft.js формирует из prize1/prize2/prize3)
+    prizePool.push(...p.prizePool);
+  }
+
   return {
-    id:          tournamentId,
-    title:       p.title,
-    start:       p.start,
-    end:         p.end,
-    prize:       p.prize        || '',
-    limit:       p.limit        || '',
-    location:    p.location     || 'СНГ',
-    format:      p.format       || '',
-    gameFormat:  p.gameFormat   || '',
-    organizer:   p.organizer,
-    description: p.description  || '',
+    id:               tournamentId,
+    title:            p.title,
+    start:            p.start,
+    end:              p.end,
+    prize:            p.prize        || '',
+    limit:            p.limit        || '',
+    location:         p.location     || 'СНГ',
+    format:           p.format       || '',
+    gameFormat:       p.gameFormat   || '',
+    organizer:        p.organizer,
+    description:      p.description  || '',
     links: {
       telegram:     p.telegramLink     || '',
       registration: p.registrationLink || '',
     },
-    winner:       '',
-    prizePool:    [],
-    teamsList:    [],
-    casters:      [],
-    bracketEmbed: '',
+    winner:           '',
+    prizePool,
+    teamsList:        [],
+    casters:          [],
+    bracketEmbed:     '',
+    // Владелец турнира — тот кто подал заявку через /draft.
+    // Позволяет ему управлять турниром (createbracket, seed, match и т.д.)
+    // без глобальных прав администратора.
+    ownerTelegramId:  draft.submittedBy || null,
   };
 }
 

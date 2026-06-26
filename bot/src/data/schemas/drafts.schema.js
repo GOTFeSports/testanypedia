@@ -23,6 +23,11 @@ const DraftSchema = z.object({
     description:     z.string().optional().default(''),
     telegramLink:    z.string().url().optional().or(z.literal('')),
     registrationLink:z.string().url().optional().or(z.literal('')),
+    prizePool: z.array(z.object({
+      place:  z.union([z.number().int().positive(), z.string().min(1)]),
+      amount: z.string().min(1),
+      team:   z.string().default(''),
+    })).optional().default([]),
   }),
   moderatorComment: z.string().optional().nullable(),
   resolvedAt:       z.string().datetime().optional().nullable(),

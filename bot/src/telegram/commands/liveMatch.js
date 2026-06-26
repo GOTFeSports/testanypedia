@@ -1,40 +1,20 @@
 'use strict';
 
+const { reportMatchWorkflow }           = require('../../workflows/reportMatchWorkflow');
 const { startMatchWorkflow, endMatchWorkflow, findMatchInTournament } = require('../../workflows/matchStatusWorkflow');
-const { reportMatchWorkflow } = require('../../workflows/reportMatchWorkflow');
-const { loadBracketEngine } = require('../../data/bracketEngineBridge');
-const { getFile } = require('../../github/client');
+const { loadBracketEngine }             = require('../../data/bracketEngineBridge');
+const { getFile }                       = require('../../github/client');
 const { parseJsDataFile, findTournamentById } = require('../../data/jsDataFile');
-const REPO_PATHS = require('../../github/repoPaths');
-const config = require('../../config');
-const log = require('../../logger');
+const { canManageTournament }           = require('../middleware/tournamentAuth');
+const REPO_PATHS                        = require('../../github/repoPaths');
+const config                            = require('../../config');
+const log                               = require('../../logger');
 
-/* ─── вспомогательные функции ─────────────────────────────────── */
-
-function isSuperAdmin(telegramId) {
-  // Супер-админы = первый id из ADMIN_TELEGRAM_IDS (или можно расширить через config)
-  return config.admins.includes(telegramId);
-}
-
+/* ─── Константы ────────────────────────────────────────────────── */
 const STATUS_EMOJI = { scheduled: '🕐', live: '🔴', finished: '✅' };
 const STATUS_RU    = { scheduled: 'Скоро', live: 'Идёт', finished: 'Завершён' };
 
-function matchCard(match, showNext = null) {
-  const status  = STATUS_EMOJI[match.status] || '❓';
-  const statusR = STATUS_RU[match.status]    || match.status;
-  const score   = `${match.scoreA ?? 0}:${match.scoreB ?? 0}`;
-
-  let text =
-    `${status} <b>${match.teamA ?? 'TBD'}</b> vs <b>${match.teamB ?? 'TBD'}</b>\n` +
-    `Счёт: <b>${score}</b> · Статус: ${statusR}\n` +
-    `ID матча: <code>${match.id}</code>`;
-
-  if (match.winner)  text += `\n🏆 Победитель: <b>${match.winner}</b>`;
-  if (match.isFinal) text += '\n🏁 Финальный матч';
-  if (showNext)      text += `\n➡️ Следующий матч: <code>${showNext}</code>`;
-
-  return text;
-}
+/* ─── Вспомогательные ──────────────────────────────────────────── */
 
 async function loadTournamentFromGitHub(tournamentId) {
   const file = await getFile(REPO_PATHS.DATA_JS);
@@ -45,6 +25,97 @@ async function loadTournamentFromGitHub(tournamentId) {
   return tournament;
 }
 
+/** Карточка матча для matchinfo */
+function matchCard(match, showNext) {
+  const status  = STATUS_EMOJI[match.status] || '❓';
+  const statusR = STATUS_RU[match.status]    || match.status;
+  const sc      = `${match.scoreA ?? 0}:${match.scoreB ?? 0}`;
+  let text =
+    `${status} <b>${match.teamA ?? 'TBD'}</b> vs <b>${match.teamB ?? 'TBD'}</b>\n` +
+    `Счёт: <b>${sc}</b> · Статус: ${statusR}\n` +
+    `ID матча: <code>${match.id}</code>`;
+  if (match.winner)  text += `\n🏆 Победитель: <b>${match.winner}</b>`;
+  if (match.isFinal) text += '\n🏁 Финальный матч';
+  if (showNext)      text += `\n➡️ Следующий: <code>${showNext}</code>`;
+  return text;
+}
+
+/**
+ * Проверка прав на управление турниром.
+ * Возвращает { allowed, reason }.
+ */
+function checkAccess(userId, tournament) {
+  return canManageTournament(userId, tournament);
+}
+
+/* ─── /match ───────────────────────────────────────────────────── */
+
+async function matchCommand(ctx) {
+  const parts = (ctx.message?.text || '').trim().split(/\s+/);
+
+  if (parts.length < 4) {
+    return ctx.reply(
+      '❌ Формат: <code>/match &lt;tournamentId&gt; &lt;matchId&gt; &lt;счёт&gt;</code>\n\n' +
+      'Пример: <code>/match SkewerEsports-Season-3 m1 2:1</code>',
+      { parse_mode: 'HTML' }
+    );
+  }
+
+  const [, tournamentId, matchId, scorePart] = parts;
+  const scoreMatch = scorePart.match(/^(\d+):(\d+)$/);
+  if (!scoreMatch) {
+    return ctx.reply(
+      `❌ Некорректный счёт: <code>${scorePart}</code>\nФормат: <code>2:1</code>`,
+      { parse_mode: 'HTML' }
+    );
+  }
+
+  const scoreA = parseInt(scoreMatch[1], 10);
+  const scoreB = parseInt(scoreMatch[2], 10);
+  const userId = ctx.from?.id;
+
+  // Проверяем права
+  let tournament;
+  try {
+    tournament = await loadTournamentFromGitHub(tournamentId);
+  } catch (err) {
+    return ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
+  }
+
+  const access = checkAccess(userId, tournament);
+  if (!access.allowed) {
+    return ctx.reply(
+      `❌ Нет доступа к турниру <code>${tournamentId}</code>\n\n${access.reason}`,
+      { parse_mode: 'HTML' }
+    );
+  }
+
+  log.info({ tournamentId, matchId, scoreA, scoreB }, 'match: команда');
+  await ctx.sendChatAction('typing');
+
+  try {
+    const result = await reportMatchWorkflow({
+      tournamentId, matchId, scoreA, scoreB,
+      actorTelegramId: userId,
+      actorRole: ctx.userRole,
+      force: false,
+    });
+
+    let reply =
+      `✅ Матч <code>${matchId}</code> обновлён\n` +
+      `Счёт: <b>${scoreA}:${scoreB}</b>\n`;
+    if (result.winner)           reply += `Победитель: <b>${result.winner}</b>\n`;
+    if (result.advanced)         reply += `\n➡️ <b>${result.advanced.team}</b> → матч <code>${result.advanced.matchId}</code> (слот ${result.advanced.slot})`;
+    if (result.tournamentWinner) reply += `\n\n🏆 <b>${result.tournamentWinner}</b> — победитель турнира!`;
+    if (result.warning)          reply += `\n\n⚠️ ${result.warning}`;
+
+    await ctx.reply(reply, { parse_mode: 'HTML' });
+  } catch (err) {
+    log.error({ tournamentId, matchId, err: err.message }, 'match: ошибка');
+    await ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
+  }
+}
+
 /* ─── /startmatch ─────────────────────────────────────────────── */
 
 async function startMatchCommand(ctx) {
@@ -52,27 +123,39 @@ async function startMatchCommand(ctx) {
 
   if (parts.length < 3) {
     return ctx.reply(
-      '❌ Формат: <code>/startmatch &lt;tournamentId&gt; &lt;matchId&gt;</code>\n\n' +
-      'Пример: <code>/startmatch SkewerEsports-Season-3 m1</code>',
+      '❌ Формат: <code>/startmatch &lt;tournamentId&gt; &lt;matchId&gt;</code>',
       { parse_mode: 'HTML' }
     );
   }
 
   const [, tournamentId, matchId] = parts;
-  log.info({ tournamentId, matchId, actor: ctx.from?.id }, 'startmatch: команда');
+  const userId = ctx.from?.id;
+
+  let tournament;
+  try {
+    tournament = await loadTournamentFromGitHub(tournamentId);
+  } catch (err) {
+    return ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
+  }
+
+  const access = checkAccess(userId, tournament);
+  if (!access.allowed) {
+    return ctx.reply(
+      `❌ Нет доступа к турниру <code>${tournamentId}</code>\n\n${access.reason}`,
+      { parse_mode: 'HTML' }
+    );
+  }
+
+  log.info({ tournamentId, matchId, actor: userId }, 'startmatch: команда');
   await ctx.sendChatAction('typing');
 
   try {
     const result = await startMatchWorkflow({
       tournamentId, matchId,
-      actorTelegramId: ctx.from.id,
+      actorTelegramId: userId,
       actorRole: ctx.userRole,
     });
-
-    await ctx.reply(
-      `🔴 <b>Матч запущен!</b>\n\n` + matchCard(result.match),
-      { parse_mode: 'HTML' }
-    );
+    await ctx.reply(`🔴 <b>Матч запущен!</b>\n\n${matchCard(result.match)}`, { parse_mode: 'HTML' });
   } catch (err) {
     log.error({ tournamentId, matchId, err: err.message }, 'startmatch: ошибка');
     await ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
@@ -86,27 +169,39 @@ async function endMatchCommand(ctx) {
 
   if (parts.length < 3) {
     return ctx.reply(
-      '❌ Формат: <code>/endmatch &lt;tournamentId&gt; &lt;matchId&gt;</code>\n\n' +
-      'Пример: <code>/endmatch SkewerEsports-Season-3 m1</code>',
+      '❌ Формат: <code>/endmatch &lt;tournamentId&gt; &lt;matchId&gt;</code>',
       { parse_mode: 'HTML' }
     );
   }
 
   const [, tournamentId, matchId] = parts;
-  log.info({ tournamentId, matchId, actor: ctx.from?.id }, 'endmatch: команда');
+  const userId = ctx.from?.id;
+
+  let tournament;
+  try {
+    tournament = await loadTournamentFromGitHub(tournamentId);
+  } catch (err) {
+    return ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
+  }
+
+  const access = checkAccess(userId, tournament);
+  if (!access.allowed) {
+    return ctx.reply(
+      `❌ Нет доступа к турниру <code>${tournamentId}</code>\n\n${access.reason}`,
+      { parse_mode: 'HTML' }
+    );
+  }
+
+  log.info({ tournamentId, matchId, actor: userId }, 'endmatch: команда');
   await ctx.sendChatAction('typing');
 
   try {
     const result = await endMatchWorkflow({
       tournamentId, matchId,
-      actorTelegramId: ctx.from.id,
+      actorTelegramId: userId,
       actorRole: ctx.userRole,
     });
-
-    await ctx.reply(
-      `✅ <b>Матч завершён!</b>\n\n` + matchCard(result.match),
-      { parse_mode: 'HTML' }
-    );
+    await ctx.reply(`✅ <b>Матч завершён!</b>\n\n${matchCard(result.match)}`, { parse_mode: 'HTML' });
   } catch (err) {
     log.error({ tournamentId, matchId, err: err.message }, 'endmatch: ошибка');
     await ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
@@ -121,37 +216,37 @@ async function forceMatchCommand(ctx) {
   if (parts.length < 4) {
     return ctx.reply(
       '❌ Формат: <code>/forcematch &lt;tournamentId&gt; &lt;matchId&gt; &lt;счёт&gt;</code>\n\n' +
-      'Пример: <code>/forcematch SkewerEsports-Season-3 m1 2:1</code>\n\n' +
-      '⚠️ Используйте только для исправления ошибочно внесённых результатов.',
+      '⚠️ Только для исправления ошибочных результатов.',
       { parse_mode: 'HTML' }
     );
-  }
-
-  // Только супер-админы
-  if (!isSuperAdmin(ctx.from?.id)) {
-    return ctx.reply('❌ Команда /forcematch доступна только супер-администраторам.', { parse_mode: 'HTML' });
   }
 
   const [, tournamentId, matchId, scorePart] = parts;
   const scoreMatch = scorePart?.match(/^(\d+):(\d+)$/);
-
   if (!scoreMatch) {
     return ctx.reply(
-      `❌ Некорректный счёт: <code>${scorePart}</code>\nФормат: <code>2:1</code>`,
+      `❌ Некорректный счёт: <code>${scorePart}</code>`,
       { parse_mode: 'HTML' }
     );
+  }
+
+  const userId = ctx.from?.id;
+
+  // forcematch — только глобальные администраторы
+  if (!config.admins.includes(userId)) {
+    return ctx.reply('❌ /forcematch доступен только администраторам.', { parse_mode: 'HTML' });
   }
 
   const scoreA = parseInt(scoreMatch[1], 10);
   const scoreB = parseInt(scoreMatch[2], 10);
 
-  log.warn({ tournamentId, matchId, scoreA, scoreB, actor: ctx.from?.id }, 'forcematch: FORCE операция');
+  log.warn({ tournamentId, matchId, scoreA, scoreB, actor: userId }, 'forcematch: FORCE операция');
   await ctx.sendChatAction('typing');
 
   try {
     const result = await reportMatchWorkflow({
       tournamentId, matchId, scoreA, scoreB,
-      actorTelegramId: ctx.from.id,
+      actorTelegramId: userId,
       actorRole: ctx.userRole,
       force: true,
     });
@@ -159,8 +254,7 @@ async function forceMatchCommand(ctx) {
     let reply =
       `⚠️ <b>[FORCE] Результат перезаписан</b>\n\n` +
       `Матч: <code>${matchId}</code>\n` +
-      `Новый счёт: <b>${scoreA}:${scoreB}</b>\n`;
-
+      `Счёт: <b>${scoreA}:${scoreB}</b>\n`;
     if (result.winner)           reply += `Победитель: <b>${result.winner}</b>\n`;
     if (result.advanced)         reply += `➡️ <b>${result.advanced.team}</b> → матч <code>${result.advanced.matchId}</code>\n`;
     if (result.tournamentWinner) reply += `\n🏆 <b>${result.tournamentWinner}</b> — победитель турнира!`;
@@ -174,13 +268,24 @@ async function forceMatchCommand(ctx) {
 
 /* ─── /bracket ────────────────────────────────────────────────── */
 
+/**
+ * Генерирует читаемое имя раунда по его номеру и общему кол-ву раундов.
+ * Например: последний раунд = "Финал", предпоследний = "Полуфиналы" и т.д.
+ */
+function roundName(round, totalRounds) {
+  const fromEnd = totalRounds - round;
+  if (fromEnd === 0) return 'Финал';
+  if (fromEnd === 1) return 'Полуфиналы';
+  if (fromEnd === 2) return 'Четвертьфиналы';
+  return `Раунд ${round}`;
+}
+
 async function bracketCommand(ctx) {
   const parts = (ctx.message?.text || '').trim().split(/\s+/);
 
   if (parts.length < 2) {
     return ctx.reply(
-      '❌ Формат: <code>/bracket &lt;tournamentId&gt;</code>\n\n' +
-      'Пример: <code>/bracket SkewerEsports-Season-3</code>',
+      '❌ Формат: <code>/bracket &lt;tournamentId&gt;</code>',
       { parse_mode: 'HTML' }
     );
   }
@@ -206,8 +311,9 @@ async function bracketCommand(ctx) {
     let totalMatches = 0, finishedMatches = 0;
 
     for (const stage of tournament.bracket.stages) {
-      lines.push(`\n<b>═══ ${stage.name} ═══</b>`);
+      lines.push(`<b>═══ ${stage.name} ═══</b>`);
 
+      // Группируем по раунду
       const byRound = {};
       for (const m of (stage.matches || [])) {
         const r = m.round ?? 1;
@@ -217,51 +323,49 @@ async function bracketCommand(ctx) {
         if (m.status === 'finished') finishedMatches++;
       }
 
-      const rounds = Object.keys(byRound).map(Number).sort((a, b) => a - b);
+      const rounds      = Object.keys(byRound).map(Number).sort((a, b) => a - b);
+      const totalRounds = rounds.length;
 
       for (const r of rounds) {
-        const roundMatches = byRound[r];
-        if (rounds.length > 1) {
-          lines.push(`  <i>Раунд ${r}:</i>`);
-        }
+        // Человекочитаемое имя раунда
+        const rName = totalRounds > 1 ? roundName(r, totalRounds) : null;
+        if (rName) lines.push(`\n<i>${rName}:</i>`);
 
-        for (const m of roundMatches) {
-          const s  = STATUS_EMOJI[m.status] || '❓';
+        for (const m of byRound[r]) {
           const tA = m.teamA || 'TBD';
           const tB = m.teamB || 'TBD';
-          const sc = `${m.scoreA ?? 0}:${m.scoreB ?? 0}`;
 
-          let line = `  ${s} `;
+          let line;
 
           if (m.status === 'finished' && m.winner) {
-            // Подсвечиваем победителя жирным
-            const aW = m.winner === m.teamA;
-            line += aW
-              ? `<b>${tA}</b> ${sc} ${tB}`
-              : `${tA} ${sc} <b>${tB}</b>`;
-            line += ` 🏆`;
+            // Победитель жирным, счёт в середине
+            const aWon = m.winner === m.teamA;
+            line = aWon
+              ? `✅ <b>${tA}</b> ${m.scoreA}:${m.scoreB} ${tB}`
+              : `✅ ${tA} ${m.scoreA}:${m.scoreB} <b>${tB}</b>`;
+          } else if (m.status === 'live') {
+            line = `🔴 ${tA} ${m.scoreA ?? 0}:${m.scoreB ?? 0} ${tB}`;
           } else {
-            line += `${tA} vs ${tB}`;
-            if (m.status === 'live') line += `  [${sc}]`;
+            line = `🕐 ${tA} vs ${tB}`;
           }
 
-          if (m.isFinal)     line += ' 🏁';
-          line += `  <code>${m.id}</code>`;
-
-          lines.push(line);
+          if (m.isFinal && m.status !== 'finished') line += ' 🏁';
+          lines.push(`  ${line}`);
         }
       }
+
+      lines.push(''); // пустая строка между стадиями
     }
 
     // Прогресс
     const pct = totalMatches > 0 ? Math.round(finishedMatches / totalMatches * 100) : 0;
-    lines.push(`\n📊 Прогресс: ${finishedMatches}/${totalMatches} матчей (${pct}%)`);
+    lines.push(`📊 <b>Прогресс:</b> ${finishedMatches}/${totalMatches} матчей завершено (${pct}%)`);
 
     if (tournament.winner) {
-      lines.push(`\n🏆 <b>Победитель турнира: ${tournament.winner}</b>`);
+      lines.push(`\n🏆 <b>Победитель: ${tournament.winner}</b>`);
     }
 
-    lines.push(`\nПодробности: <code>/matchinfo ${tournamentId} &lt;matchId&gt;</code>`);
+    lines.push(`\n<code>/matchinfo ${tournamentId} &lt;matchId&gt;</code> — подробности матча`);
 
     await ctx.reply(lines.join('\n'), { parse_mode: 'HTML' });
 
@@ -271,8 +375,6 @@ async function bracketCommand(ctx) {
   }
 }
 
-
-
 /* ─── /matchinfo ──────────────────────────────────────────────── */
 
 async function matchInfoCommand(ctx) {
@@ -280,8 +382,7 @@ async function matchInfoCommand(ctx) {
 
   if (parts.length < 3) {
     return ctx.reply(
-      '❌ Формат: <code>/matchinfo &lt;tournamentId&gt; &lt;matchId&gt;</code>\n\n' +
-      'Пример: <code>/matchinfo SkewerEsports-Season-3 m1</code>',
+      '❌ Формат: <code>/matchinfo &lt;tournamentId&gt; &lt;matchId&gt;</code>',
       { parse_mode: 'HTML' }
     );
   }
@@ -302,7 +403,7 @@ async function matchInfoCommand(ctx) {
 
     if (!found) {
       return ctx.reply(
-        `❌ Матч <code>${matchId}</code> не найден в сетке турнира <b>${tournament.title}</b>.\n\n` +
+        `❌ Матч <code>${matchId}</code> не найден.\n\n` +
         `Посмотреть сетку: <code>/bracket ${tournamentId}</code>`,
         { parse_mode: 'HTML' }
       );
@@ -311,14 +412,15 @@ async function matchInfoCommand(ctx) {
     const match = found.match;
     const stage = found.stage;
 
-    // Вычисляем следующий матч
     let nextMatchId = null;
     if (!match.isFinal && match.status !== 'finished') {
       const adv = BE.resolveAdvancement(tournament.bracket, matchId);
       nextMatchId = adv?.matchId ?? null;
     }
 
-    const lines = [
+    const userId  = ctx.from?.id;
+    const access  = canManageTournament(userId, tournament);
+    const lines   = [
       `🎮 <b>${tournament.title}</b>`,
       `Стадия: ${stage.name}`,
       '',
@@ -327,17 +429,15 @@ async function matchInfoCommand(ctx) {
       `Турнир: <code>${tournamentId}</code>`,
     ];
 
-    // Подсказки по действиям
-    const isAdmin = ctx.userRole === 'admin' || ctx.userRole === 'organizer';
-    if (isAdmin) {
+    if (access.allowed) {
       if (match.status === 'scheduled') {
-        lines.push('', `▶️ Запустить: <code>/startmatch ${tournamentId} ${matchId}</code>`);
-        lines.push(`📊 Внести счёт: <code>/match ${tournamentId} ${matchId} X:X</code>`);
+        lines.push('', `▶️ <code>/startmatch ${tournamentId} ${matchId}</code>`);
+        lines.push(`📊 <code>/match ${tournamentId} ${matchId} X:X</code>`);
       } else if (match.status === 'live') {
-        lines.push('', `📊 Обновить счёт: <code>/match ${tournamentId} ${matchId} X:X</code>`);
-        lines.push(`⏹ Завершить: <code>/endmatch ${tournamentId} ${matchId}</code>`);
-      } else if (match.status === 'finished') {
-        lines.push('', `⚠️ Исправить: <code>/forcematch ${tournamentId} ${matchId} X:X</code>`);
+        lines.push('', `📊 <code>/match ${tournamentId} ${matchId} X:X</code>`);
+        lines.push(`⏹ <code>/endmatch ${tournamentId} ${matchId}</code>`);
+      } else if (match.status === 'finished' && config.admins.includes(userId)) {
+        lines.push('', `⚠️ <code>/forcematch ${tournamentId} ${matchId} X:X</code>`);
       }
     }
 
@@ -345,59 +445,6 @@ async function matchInfoCommand(ctx) {
 
   } catch (err) {
     log.error({ tournamentId, matchId, err: err.message }, 'matchinfo: ошибка');
-    await ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
-  }
-}
-
-/* ─── /match (обновлённый обработчик) ────────────────────────── */
-
-async function matchCommand(ctx) {
-  const parts = (ctx.message?.text || '').trim().split(/\s+/);
-
-  if (parts.length < 4) {
-    return ctx.reply(
-      '❌ Формат: <code>/match &lt;tournamentId&gt; &lt;matchId&gt; &lt;счёт&gt;</code>\n\n' +
-      'Пример: <code>/match SkewerEsports-Season-3 m1 2:1</code>',
-      { parse_mode: 'HTML' }
-    );
-  }
-
-  const [, tournamentId, matchId, scorePart] = parts;
-  const scoreMatch = scorePart.match(/^(\d+):(\d+)$/);
-
-  if (!scoreMatch) {
-    return ctx.reply(
-      `❌ Некорректный счёт: <code>${scorePart}</code>\nФормат: <code>2:1</code>`,
-      { parse_mode: 'HTML' }
-    );
-  }
-
-  const scoreA = parseInt(scoreMatch[1], 10);
-  const scoreB = parseInt(scoreMatch[2], 10);
-
-  log.info({ tournamentId, matchId, scoreA, scoreB }, 'match: команда');
-  await ctx.sendChatAction('typing');
-
-  try {
-    const result = await reportMatchWorkflow({
-      tournamentId, matchId, scoreA, scoreB,
-      actorTelegramId: ctx.from.id,
-      actorRole: ctx.userRole,
-      force: false,
-    });
-
-    let reply =
-      `✅ Матч <code>${matchId}</code> обновлён\n` +
-      `Счёт: <b>${scoreA}:${scoreB}</b>\n`;
-
-    if (result.winner)           reply += `Победитель: <b>${result.winner}</b>\n`;
-    if (result.advanced)         reply += `\n➡️ <b>${result.advanced.team}</b> → матч <code>${result.advanced.matchId}</code> (слот ${result.advanced.slot})`;
-    if (result.tournamentWinner) reply += `\n\n🏆 <b>${result.tournamentWinner}</b> — победитель турнира!`;
-    if (result.warning)          reply += `\n\n⚠️ ${result.warning}`;
-
-    await ctx.reply(reply, { parse_mode: 'HTML' });
-  } catch (err) {
-    log.error({ tournamentId, matchId, err: err.message }, 'match: ошибка');
     await ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
   }
 }
