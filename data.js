@@ -47,7 +47,225 @@ const tournaments = [
         "link": ""
       }
     ],
-    "teamsList": []
+    "teamsList": [],
+    "bracket": {
+      "type": "single",
+      "stages": [
+        {
+          "name": "Плейофф",
+          "matches": [
+            {
+              "id": "m1",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m9",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "m2",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m9",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "m3",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m10",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "m4",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m10",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "m5",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m11",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "m6",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m11",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "m7",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m12",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "m8",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m12",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "m9",
+              "round": 2,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m13",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "m10",
+              "round": 2,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m13",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "m11",
+              "round": 2,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m14",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "m12",
+              "round": 2,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m14",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "m13",
+              "round": 3,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m15",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "m14",
+              "round": 3,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m15",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "m15",
+              "round": 4,
+              "isFinal": true,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ]
+        }
+      ]
+    }
   },
   {
     "id": "Enrage-Lowrank-69",
@@ -182,7 +400,113 @@ const tournaments = [
         "team": ""
       }
     ],
-    "gameFormat": "Elimination Draft"
+    "gameFormat": "Elimination Draft",
+    "bracket": {
+      "type": "single",
+      "stages": [
+        {
+          "name": "Плейофф",
+          "matches": [
+            {
+              "id": "m1",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m5",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "m2",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m5",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "m3",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m6",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "m4",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m6",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "m5",
+              "round": 2,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m7",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "m6",
+              "round": 2,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "m7",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "m7",
+              "round": 3,
+              "isFinal": true,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ]
+        }
+      ]
+    }
   },
   {
     "id": "AnyLvL-GOTF-Special-3",
