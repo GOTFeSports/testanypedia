@@ -1064,10 +1064,10 @@ const tournaments = [
               "isSwissMatch": true,
               "teamA": "Team Sexy",
               "teamB": "Never Back Down",
-              "scoreA": 0,
-              "scoreB": 0,
-              "status": "scheduled",
-              "winner": null,
+              "scoreA": 2,
+              "scoreB": 1,
+              "status": "finished",
+              "winner": "Team Sexy",
               "scheduledAt": null
             }
           ]
