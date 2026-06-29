@@ -859,7 +859,194 @@ const tournaments = [
     ],
     "registrationStart": "2026-06-28",
     "registrationEnd": "2026-07-20",
-    "gameFormat": "Captains Draft"
+    "gameFormat": "Captains Draft",
+    "bracket": {
+      "type": "multi",
+      "stages": [
+        {
+          "name": "Swiss Раунд 1",
+          "swissRound": 1,
+          "isSwiss": true,
+          "isFinal": false,
+          "matches": [
+            {
+              "id": "s1m1",
+              "round": 1,
+              "swissRound": 1,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Команда 1",
+              "teamB": "Команда 2",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m2",
+              "round": 1,
+              "swissRound": 1,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Команда 3",
+              "teamB": "Команда 4",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m3",
+              "round": 1,
+              "swissRound": 1,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Команда 5",
+              "teamB": "Команда 6",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m4",
+              "round": 1,
+              "swissRound": 1,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Команда 7",
+              "teamB": "Команда 8",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ],
+          "_generatedType": "swiss"
+        },
+        {
+          "name": "Плейофф",
+          "matches": [
+            {
+              "id": "s2m5",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "s2m7",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "s2m6",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "s2m7",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "s2m7",
+              "round": 2,
+              "isFinal": true,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ],
+          "_generatedType": "single"
+        }
+      ],
+      "swissConfig": {
+        "winsToAdvance": 2,
+        "lossesToElim": 2,
+        "teamCount": 8,
+        "teams": [
+          {
+            "name": "Команда 1",
+            "wins": 0,
+            "losses": 0,
+            "active": true,
+            "advanced": false,
+            "eliminated": false
+          },
+          {
+            "name": "Команда 2",
+            "wins": 0,
+            "losses": 0,
+            "active": true,
+            "advanced": false,
+            "eliminated": false
+          },
+          {
+            "name": "Команда 3",
+            "wins": 0,
+            "losses": 0,
+            "active": true,
+            "advanced": false,
+            "eliminated": false
+          },
+          {
+            "name": "Команда 4",
+            "wins": 0,
+            "losses": 0,
+            "active": true,
+            "advanced": false,
+            "eliminated": false
+          },
+          {
+            "name": "Команда 5",
+            "wins": 0,
+            "losses": 0,
+            "active": true,
+            "advanced": false,
+            "eliminated": false
+          },
+          {
+            "name": "Команда 6",
+            "wins": 0,
+            "losses": 0,
+            "active": true,
+            "advanced": false,
+            "eliminated": false
+          },
+          {
+            "name": "Команда 7",
+            "wins": 0,
+            "losses": 0,
+            "active": true,
+            "advanced": false,
+            "eliminated": false
+          },
+          {
+            "name": "Команда 8",
+            "wins": 0,
+            "losses": 0,
+            "active": true,
+            "advanced": false,
+            "eliminated": false
+          }
+        ]
+      }
+    }
   },
   {
     "id": "Bedlam-Summer-Cup-1x1",
