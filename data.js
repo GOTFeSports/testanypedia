@@ -1036,6 +1036,41 @@ const tournaments = [
               "scheduledAt": null
             }
           ]
+        },
+        {
+          "name": "Swiss Раунд 3",
+          "swissRound": 3,
+          "isSwiss": true,
+          "matches": [
+            {
+              "id": "sw12",
+              "round": 3,
+              "swissRound": 3,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Podosinovik",
+              "teamB": "LETO Junior",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "sw13",
+              "round": 3,
+              "swissRound": 3,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Team Sexy",
+              "teamB": "Never Back Down",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ]
         }
       ],
       "swissConfig": {
@@ -1046,14 +1081,14 @@ const tournaments = [
           {
             "name": "Podosinovik",
             "wins": 1,
-            "losses": 0,
+            "losses": 1,
             "advanced": false,
             "eliminated": false,
             "active": true
           },
           {
             "name": "LETO Junior",
-            "wins": 0,
+            "wins": 1,
             "losses": 1,
             "advanced": false,
             "eliminated": false,
@@ -1061,39 +1096,39 @@ const tournaments = [
           },
           {
             "name": "Gitlz",
-            "wins": 1,
+            "wins": 2,
             "losses": 0,
-            "advanced": false,
+            "advanced": true,
             "eliminated": false,
-            "active": true
+            "active": false
           },
           {
             "name": "Bedlam Red",
             "wins": 0,
-            "losses": 1,
+            "losses": 2,
             "advanced": false,
-            "eliminated": false,
-            "active": true
+            "eliminated": true,
+            "active": false
           },
           {
             "name": "Hater Zdes`",
             "wins": 0,
-            "losses": 1,
+            "losses": 2,
             "advanced": false,
-            "eliminated": false,
-            "active": true
+            "eliminated": true,
+            "active": false
           },
           {
             "name": "EGOISTO Team",
-            "wins": 1,
+            "wins": 2,
             "losses": 0,
-            "advanced": false,
+            "advanced": true,
             "eliminated": false,
-            "active": true
+            "active": false
           },
           {
             "name": "Team Sexy",
-            "wins": 0,
+            "wins": 1,
             "losses": 1,
             "advanced": false,
             "eliminated": false,
@@ -1102,7 +1137,7 @@ const tournaments = [
           {
             "name": "Never Back Down",
             "wins": 1,
-            "losses": 0,
+            "losses": 1,
             "advanced": false,
             "eliminated": false,
             "active": true
