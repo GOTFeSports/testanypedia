@@ -917,7 +917,7 @@ const tournaments = [
               "swissRound": 1,
               "isFinal": false,
               "isSwissMatch": true,
-              "teamA": "Команда 7",
+              "teamA": "Team Sexy",
               "teamB": "Команда 8",
               "scoreA": 0,
               "scoreB": 0,
@@ -1029,7 +1029,7 @@ const tournaments = [
             "eliminated": false
           },
           {
-            "name": "Команда 7",
+            "name": "Team Sexy",
             "wins": 0,
             "losses": 0,
             "active": true,
