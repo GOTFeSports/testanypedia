@@ -919,10 +919,10 @@ const tournaments = [
               "isSwissMatch": true,
               "teamA": "Team Sexy",
               "teamB": "Never Back Down",
-              "scoreA": 0,
-              "scoreB": 0,
-              "status": "scheduled",
-              "winner": null,
+              "scoreA": 1,
+              "scoreB": 2,
+              "status": "finished",
+              "winner": "Never Back Down",
               "scheduledAt": null
             }
           ],
@@ -950,7 +950,7 @@ const tournaments = [
               "round": 1,
               "isFinal": false,
               "teamA": "EGOISTO Team",
-              "teamB": "TBD",
+              "teamB": "Never Back Down",
               "scoreA": 0,
               "scoreB": 0,
               "status": "scheduled",
