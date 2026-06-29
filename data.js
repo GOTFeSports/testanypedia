@@ -415,7 +415,7 @@ const tournaments = [
               "teamB": "Azutive Fans",
               "scoreA": 0,
               "scoreB": 0,
-              "status": "scheduled",
+              "status": "live",
               "winner": null,
               "scheduledAt": null,
               "nextMatchId": "m5",
