@@ -904,7 +904,7 @@ const tournaments = [
               "isFinal": false,
               "isSwissMatch": true,
               "teamA": "Hater Zdes`",
-              "teamB": "Команда 6",
+              "teamB": "EGOISTO Team",
               "scoreA": 0,
               "scoreB": 0,
               "status": "scheduled",
@@ -1021,7 +1021,7 @@ const tournaments = [
             "eliminated": false
           },
           {
-            "name": "Команда 6",
+            "name": "EGOISTO Team",
             "wins": 0,
             "losses": 0,
             "active": true,
