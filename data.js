@@ -1015,10 +1015,10 @@ const tournaments = [
               "isSwissMatch": true,
               "teamA": "LETO Junior",
               "teamB": "Bedlam Red",
-              "scoreA": 0,
+              "scoreA": 2,
               "scoreB": 0,
-              "status": "scheduled",
-              "winner": null,
+              "status": "finished",
+              "winner": "LETO Junior",
               "scheduledAt": null
             },
             {
