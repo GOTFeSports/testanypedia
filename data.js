@@ -890,7 +890,7 @@ const tournaments = [
               "isFinal": false,
               "isSwissMatch": true,
               "teamA": "Gitlz",
-              "teamB": "Команда 4",
+              "teamB": "Bedlam Red",
               "scoreA": 0,
               "scoreB": 0,
               "status": "scheduled",
@@ -1005,7 +1005,7 @@ const tournaments = [
             "eliminated": false
           },
           {
-            "name": "Команда 4",
+            "name": "Bedlam Red",
             "wins": 0,
             "losses": 0,
             "active": true,
