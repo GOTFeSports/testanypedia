@@ -918,7 +918,7 @@ const tournaments = [
               "isFinal": false,
               "isSwissMatch": true,
               "teamA": "Team Sexy",
-              "teamB": "Команда 8",
+              "teamB": "Never Back Down",
               "scoreA": 0,
               "scoreB": 0,
               "status": "scheduled",
@@ -1037,7 +1037,7 @@ const tournaments = [
             "eliminated": false
           },
           {
-            "name": "Команда 8",
+            "name": "Never Back Down",
             "wins": 0,
             "losses": 0,
             "active": true,
