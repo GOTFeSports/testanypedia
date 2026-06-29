@@ -876,7 +876,7 @@ const tournaments = [
               "isFinal": false,
               "isSwissMatch": true,
               "teamA": "Podosinovik",
-              "teamB": "Команда 2",
+              "teamB": "LETO Junior",
               "scoreA": 0,
               "scoreB": 0,
               "status": "scheduled",
@@ -989,7 +989,7 @@ const tournaments = [
             "eliminated": false
           },
           {
-            "name": "Команда 2",
+            "name": "LETO Junior",
             "wins": 0,
             "losses": 0,
             "active": true,
