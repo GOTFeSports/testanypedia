@@ -19,7 +19,7 @@ const {
 const { draftCommand, cancelCommand, processWizardText } = require('./commands/draft');
 const { approveCommand, rejectCommand }            = require('./commands/moderate');
 const { draftsCommand, draftInfoCommand, myDraftsCommand } = require('./commands/drafts');
-const { createBracketCommand, seedCommand, processBracketOrSeedText } = require('./commands/createBracket');
+const { createBracketCommand, seedCommand, randomSeedCommand, swissNextCommand, swissStatusCommand, processBracketOrSeedText } = require('./commands/createBracket');
 const { subscribeCommand, unsubscribeCommand }     = require('./commands/subscribe');
 const { statusCommand }                            = require('./commands/status');
 
@@ -111,6 +111,13 @@ function createBot() {
     createBracketCommand,
   );
   bot.command('seed', requireRole(['admin', 'organizer']), seedCommand);
+  bot.command('randomseed',
+    requireRole(['admin', 'organizer']),
+    rateLimit({ maxRequests: 3, windowMs: 60_000, namespace: 'randomseed' }),
+    randomSeedCommand,
+  );
+  bot.command('swissnext',   requireRole(['admin', 'organizer']), swissNextCommand);
+  bot.command('swissstatus', swissStatusCommand);
 
   /* ── Wizard /draft ── */
   bot.command('draft',  requireRole(['admin', 'organizer']), draftCommand);

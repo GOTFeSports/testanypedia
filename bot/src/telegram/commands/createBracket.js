@@ -3,20 +3,22 @@
 const {
   generateSingleElimination,
   generateDoubleElimination,
-  generateGroupStagePlayoff,
+  generateGroupStage,
   generateSwissStage,
+  generateSwissNextRound,
+  isSwissRoundComplete,
+  formatSwissStandings,
   getEmptySlots,
   seedTeamInSlot,
+  randomShuffleTeams,
   validateGeneratedBracket,
 } = require('../../workflows/bracketGenerator');
-const { loadBracketEngine }  = require('../../data/bracketEngineBridge');
 const { enqueueCommit }      = require('../../github/commitQueue');
 const { buildJsMutateFn, findTournamentById, parseJsDataFile } = require('../../data/jsDataFile');
 const { getFile }            = require('../../github/client');
 const { logAction }          = require('../../activityLog/logger');
 const { canManageTournament } = require('../middleware/tournamentAuth');
 const REPO_PATHS             = require('../../github/repoPaths');
-const config                 = require('../../config');
 const log                    = require('../../logger');
 
 const WIZARD_TTL_MS = 10 * 60 * 1000;
@@ -29,14 +31,15 @@ const STAGE_TYPES = {
   '4': { key: 'swiss',  label: 'Swiss Stage' },
 };
 
-/* ─── Wizard состояния ─────────────────────────────────────────── */
+/* ─── Состояния wizard-ов ──────────────────────────────────────── */
 const bracketWizards = new Map();
+const seedStates     = new Map();
 
 function isExpired(state) {
   return Date.now() - state.startedAt > WIZARD_TTL_MS;
 }
 
-/* ─── Загрузка турнира из GitHub ───────────────────────────────── */
+/* ─── Загрузка турнира ─────────────────────────────────────────── */
 async function loadTournament(tournamentId) {
   const file = await getFile(REPO_PATHS.DATA_JS);
   if (!file) throw new Error('data.js не найден');
@@ -44,6 +47,23 @@ async function loadTournament(tournamentId) {
   const tournament  = findTournamentById(tournaments, tournamentId);
   if (!tournament) throw new Error(`Турнир "${tournamentId}" не найден`);
   return tournament;
+}
+
+/* ─── Форматирование итогового плана сетки (UX) ───────────────── */
+function formatBracketPlan(stageConfigs) {
+  const lines = [];
+  stageConfigs.forEach((s, i) => {
+    let desc = s.label;
+    if (s.type === 'single' || s.type === 'double') desc += ` (${s.teamCount} команд)`;
+    if (s.type === 'group')  desc += ` (${s.groupCount} гр. × ${s.teamsPerGroup} команд)`;
+    if (s.type === 'swiss')  desc += ` (${s.teamCount} команд, ${s.winsToAdvance}W/${s.lossesToElim}L)`;
+    lines.push(desc);
+    if (i < stageConfigs.length - 1) {
+      const adv = s.advancingCount ? `топ-${s.advancingCount}` : 'победители';
+      lines.push(`  ↓ ${adv}`);
+    }
+  });
+  return lines.join('\n');
 }
 
 /* ─── /createbracket ───────────────────────────────────────────── */
@@ -62,7 +82,6 @@ async function createBracketCommand(ctx) {
 
   await ctx.sendChatAction('typing');
 
-  // Проверяем существование турнира и права
   let tournament;
   try {
     tournament = await loadTournament(tournamentId);
@@ -79,7 +98,6 @@ async function createBracketCommand(ctx) {
     );
   }
 
-  // Если сетка уже есть — проверяем наличие сыгранных матчей
   if (tournament.bracket?.stages?.length) {
     const hasPlayed = tournament.bracket.stages
       .flatMap(s => s.matches || [])
@@ -88,22 +106,15 @@ async function createBracketCommand(ctx) {
     if (hasPlayed) {
       return ctx.reply(
         `⚠️ У турнира <code>${tournamentId}</code> есть сетка с сыгранными матчами.\n\n` +
-        `Пересоздание запрещено — это уничтожит результаты.\n\n` +
-        `Для исправления отдельного матча: <code>/forcematch ${tournamentId} &lt;matchId&gt; &lt;счёт&gt;</code>`,
+        `Пересоздание запрещено.`,
         { parse_mode: 'HTML' }
       );
     }
 
-    // Сетка есть, матчи не сыграны — спрашиваем подтверждение
     bracketWizards.set(userId, {
-      step: 'confirm_overwrite',
-      tournamentId,
-      startedAt: Date.now(),
-      stageCount: 0,
-      stages: [],    // [{type, params}]
-      currentStage: 0,
+      step: 'confirm_overwrite', tournamentId,
+      startedAt: Date.now(), stageCount: 0, stages: [], currentStage: 0,
     });
-
     return ctx.reply(
       `⚠️ У турнира <code>${tournamentId}</code> уже есть сетка.\n\n` +
       `Пересоздать? Напишите <b>да</b> или <b>нет</b>.`,
@@ -111,16 +122,10 @@ async function createBracketCommand(ctx) {
     );
   }
 
-  // Запускаем wizard
   bracketWizards.set(userId, {
-    step: 'choose_stage_count',
-    tournamentId,
-    startedAt: Date.now(),
-    stageCount: 0,
-    stages: [],
-    currentStage: 0,
+    step: 'choose_stage_count', tournamentId,
+    startedAt: Date.now(), stageCount: 0, stages: [], currentStage: 0,
   });
-
   await askStageCount(ctx, tournamentId);
 }
 
@@ -128,20 +133,17 @@ async function askStageCount(ctx, tournamentId) {
   await ctx.reply(
     `🏗 <b>Создание сетки</b> · <code>${tournamentId}</code>\n\n` +
     `Сколько этапов в турнире?\n\n` +
-    `<i>Примеры:\n` +
-    `• 1 — только финальный плейофф\n` +
-    `• 2 — групповой этап + плейофф\n` +
-    `• 3 — группа → группа → плейофф</i>\n\n` +
-    `Введите число от 1 до 4:`,
+    `<i>• 1 — только финальный плейофф\n` +
+    `• 2 — Swiss/Group → Playoff\n` +
+    `• 3 — Group → Group → Playoff</i>\n\n` +
+    `Введите число (1–4):`,
     { parse_mode: 'HTML' }
   );
 }
 
 async function askStageType(ctx, state) {
-  const n = state.currentStage + 1;
   await ctx.reply(
-    `📋 <b>Этап ${n} из ${state.stageCount}</b>\n\n` +
-    `Выберите тип:\n\n` +
+    `📋 <b>Этап ${state.currentStage + 1} из ${state.stageCount}</b>\n\n` +
     `<b>1</b> — Single Elimination\n` +
     `<b>2</b> — Double Elimination\n` +
     `<b>3</b> — Group Stage\n` +
@@ -167,15 +169,14 @@ async function processBracketWizardText(ctx) {
   }
 
   switch (state.step) {
-    case 'confirm_overwrite':   return handleConfirmOverwrite(ctx, state, userId, text);
-    case 'choose_stage_count':  return handleStageCount(ctx, state, userId, text);
-    case 'choose_stage_type':   return handleStageType(ctx, state, userId, text);
-    case 'choose_team_count':   return handleTeamCount(ctx, state, userId, text);
-    case 'choose_group_count':  return handleGroupCount(ctx, state, userId, text);
+    case 'confirm_overwrite':      return handleConfirmOverwrite(ctx, state, userId, text);
+    case 'choose_stage_count':     return handleStageCount(ctx, state, userId, text);
+    case 'choose_stage_type':      return handleStageType(ctx, state, userId, text);
+    case 'choose_team_count':      return handleTeamCount(ctx, state, userId, text);
+    case 'choose_group_count':     return handleGroupCount(ctx, state, userId, text);
     case 'choose_teams_per_group': return handleTeamsPerGroup(ctx, state, userId, text);
-    case 'choose_advancing':    return handleAdvancing(ctx, state, userId, text);
-    case 'choose_swiss_teams':  return handleSwissTeams(ctx, state, userId, text);
-    case 'choose_swiss_wins':   return handleSwissWins(ctx, state, userId, text);
+    case 'choose_swiss_teams':     return handleSwissTeams(ctx, state, userId, text);
+    case 'choose_swiss_wins':      return handleSwissWins(ctx, state, userId, text);
     default:
       bracketWizards.delete(userId);
       return false;
@@ -183,12 +184,12 @@ async function processBracketWizardText(ctx) {
 }
 
 async function handleConfirmOverwrite(ctx, state, userId, text) {
-  if (['да', 'yes', '+'].includes(text)) {
+  if (['да','yes','+'].includes(text)) {
     state.step = 'choose_stage_count';
     await askStageCount(ctx, state.tournamentId);
   } else {
     bracketWizards.delete(userId);
-    await ctx.reply('Отменено. Существующая сетка не изменена.');
+    await ctx.reply('Отменено.');
   }
   return true;
 }
@@ -199,9 +200,9 @@ async function handleStageCount(ctx, state, userId, text) {
     await ctx.reply('❌ Введите число от 1 до 4:', { parse_mode: 'HTML' });
     return true;
   }
-  state.stageCount = n;
+  state.stageCount   = n;
   state.currentStage = 0;
-  state.step = 'choose_stage_type';
+  state.step         = 'choose_stage_type';
   await askStageType(ctx, state);
   return true;
 }
@@ -212,37 +213,25 @@ async function handleStageType(ctx, state, userId, text) {
     await ctx.reply('❌ Введите 1, 2, 3 или 4:', { parse_mode: 'HTML' });
     return true;
   }
-
-  // Начинаем собирать параметры для этой стадии
   state.currentStageType = choice.key;
   state.stages[state.currentStage] = { type: choice.key, label: choice.label };
 
-  // Запрашиваем параметры в зависимости от типа
   if (choice.key === 'single' || choice.key === 'double') {
     const allowed = choice.key === 'double' ? '4 или 8' : '4, 8, 16 или 32';
     state.step = 'choose_team_count';
-    await ctx.reply(
-      `👥 <b>${choice.label}</b>\n\nКоличество команд (${allowed}):`,
-      { parse_mode: 'HTML' }
-    );
+    await ctx.reply(`👥 <b>${choice.label}</b>\n\nКоличество команд (${allowed}):`, { parse_mode: 'HTML' });
   } else if (choice.key === 'group') {
     state.step = 'choose_group_count';
-    await ctx.reply(
-      `🗂 <b>Group Stage</b>\n\nКоличество групп (2 или 4):`,
-      { parse_mode: 'HTML' }
-    );
+    await ctx.reply('🗂 <b>Group Stage</b>\n\nКоличество групп (2, 4 или 8):', { parse_mode: 'HTML' });
   } else if (choice.key === 'swiss') {
     state.step = 'choose_swiss_teams';
-    await ctx.reply(
-      `🔄 <b>Swiss Stage</b>\n\nКоличество команд (8 или 16):`,
-      { parse_mode: 'HTML' }
-    );
+    await ctx.reply('🔄 <b>Swiss Stage</b>\n\nКоличество команд (8 или 16):', { parse_mode: 'HTML' });
   }
   return true;
 }
 
 async function handleTeamCount(ctx, state, userId, text) {
-  const n = parseInt(text, 10);
+  const n       = parseInt(text, 10);
   const allowed = state.currentStageType === 'double' ? [4, 8] : [4, 8, 16, 32];
   if (!allowed.includes(n)) {
     await ctx.reply(`❌ Допустимые значения: ${allowed.join(', ')}:`, { parse_mode: 'HTML' });
@@ -254,8 +243,8 @@ async function handleTeamCount(ctx, state, userId, text) {
 
 async function handleGroupCount(ctx, state, userId, text) {
   const n = parseInt(text, 10);
-  if (![2, 4].includes(n)) {
-    await ctx.reply('❌ Введите 2 или 4:', { parse_mode: 'HTML' });
+  if (![2, 4, 8].includes(n)) {
+    await ctx.reply('❌ Введите 2, 4 или 8:', { parse_mode: 'HTML' });
     return true;
   }
   state.stages[state.currentStage].groupCount = n;
@@ -271,18 +260,11 @@ async function handleTeamsPerGroup(ctx, state, userId, text) {
     return true;
   }
   state.stages[state.currentStage].teamsPerGroup = n;
-  state.step = 'choose_advancing';
-  await ctx.reply('🎯 Сколько команд выходит из каждой группы (1 или 2):', { parse_mode: 'HTML' });
-  return true;
-}
-
-async function handleAdvancing(ctx, state, userId, text) {
-  const n = parseInt(text, 10);
-  if (![1, 2].includes(n)) {
-    await ctx.reply('❌ Введите 1 или 2:', { parse_mode: 'HTML' });
-    return true;
-  }
-  state.stages[state.currentStage].advancingPerGroup = n;
+  // Количество выходящих = teamCount следующей стадии если она есть
+  // Спросим у пользователя
+  state.step = 'choose_teams_per_group_done';
+  // Сразу переходим к следующей стадии (advancing = teamCount следующей стадии)
+  state.stages[state.currentStage].advancingCount = null; // заполнится позже
   return advanceToNextStage(ctx, state, userId);
 }
 
@@ -295,8 +277,7 @@ async function handleSwissTeams(ctx, state, userId, text) {
   state.stages[state.currentStage].teamCount = n;
   state.step = 'choose_swiss_wins';
   await ctx.reply(
-    '🎯 Побед для выхода из Swiss (обычно 3):\n\n' +
-    'Введите число или /skip для значения по умолчанию (3):',
+    '🎯 Побед для выхода из Swiss (обычно 3):\n\n/skip — использовать 3',
     { parse_mode: 'HTML' }
   );
   return true;
@@ -304,36 +285,28 @@ async function handleSwissTeams(ctx, state, userId, text) {
 
 async function handleSwissWins(ctx, state, userId, text) {
   const isSkip = text === '/skip';
-  const n = isSkip ? 3 : parseInt(text, 10);
+  const n      = isSkip ? 3 : parseInt(text, 10);
   if (!isSkip && (isNaN(n) || n < 2 || n > 5)) {
     await ctx.reply('❌ Введите число от 2 до 5 или /skip:', { parse_mode: 'HTML' });
     return true;
   }
   state.stages[state.currentStage].winsToAdvance = n;
-  state.stages[state.currentStage].lossesToElim  = n; // симметрично
+  state.stages[state.currentStage].lossesToElim  = n;
+  state.stages[state.currentStage].advancingCount = `топ-?`;
   return advanceToNextStage(ctx, state, userId);
 }
 
-/**
- * Переходим к следующей стадии или финализируем если все стадии собраны.
- */
 async function advanceToNextStage(ctx, state, userId) {
   state.currentStage++;
-
   if (state.currentStage < state.stageCount) {
     state.step = 'choose_stage_type';
     await askStageType(ctx, state);
     return true;
   }
-
-  // Все стадии собраны — показываем итог и создаём
   await finalizeBracket(ctx, state, userId);
   return true;
 }
 
-/**
- * Генерирует bracket из собранных стадий и коммитит в data.js.
- */
 async function finalizeBracket(ctx, state, userId) {
   bracketWizards.delete(userId);
   await ctx.sendChatAction('typing');
@@ -341,92 +314,98 @@ async function finalizeBracket(ctx, state, userId) {
   const { tournamentId, stages } = state;
 
   try {
-    // Показываем итоговый план
-    const plan = stages.map((s, i) => `  ${i+1}. ${s.label}`).join('\n');
-    log.info({ tournamentId, stages: stages.map(s=>s.type) }, 'createBracket: финализация');
+    const allStages  = [];
+    let   matchCnt   = 1;
 
-    // Генерируем bracket для каждой стадии и объединяем.
-    // При объединении нескольких стадий нужно:
-    // 1. Переименовать id матчей чтобы не было дублей между стадиями
-    // 2. Обновить nextMatchId-ссылки после переименования
-    // 3. isFinal=true оставить только в последней стадии (последний финальный матч)
-    const allStages = [];
-    let matchIdCounter = 1;
-
-    for (const stageConfig of stages) {
+    for (let si = 0; si < stages.length; si++) {
+      const sc = stages[si];
       let generated;
 
-      if (stageConfig.type === 'single') {
-        generated = generateSingleElimination(stageConfig.teamCount);
-      } else if (stageConfig.type === 'double') {
-        generated = generateDoubleElimination(stageConfig.teamCount);
-      } else if (stageConfig.type === 'group') {
-        generated = generateGroupStagePlayoff({
-          groupCount:        stageConfig.groupCount,
-          teamsPerGroup:     stageConfig.teamsPerGroup,
-          advancingPerGroup: stageConfig.advancingPerGroup,
-        });
-      } else if (stageConfig.type === 'swiss') {
-        generated = generateSwissStage({
-          teamCount:    stageConfig.teamCount,
-          winsToAdvance:stageConfig.winsToAdvance || 3,
-          lossesToElim: stageConfig.lossesToElim  || 3,
-        });
+      if (sc.type === 'single') {
+        generated = generateSingleElimination(sc.teamCount);
+      } else if (sc.type === 'double') {
+        generated = generateDoubleElimination(sc.teamCount);
+      } else if (sc.type === 'group') {
+        generated = generateGroupStage({ groupCount: sc.groupCount, teamsPerGroup: sc.teamsPerGroup });
+      } else if (sc.type === 'swiss') {
+        generated = generateSwissStage({ teamCount: sc.teamCount, winsToAdvance: sc.winsToAdvance || 3, lossesToElim: sc.lossesToElim || 3 });
       }
 
-      // Переименовываем id матчей внутри каждой сгенерированной стадии
-      // чтобы гарантировать глобальную уникальность при объединении
+      // Переименовываем id матчей для уникальности при объединении
       for (const stage of generated.stages) {
-        // Строим карту переименований: oldId → newId
         const idMap = {};
         for (const m of (stage.matches || [])) {
-          const newId = `s${stages.indexOf(stageConfig)+1}m${matchIdCounter++}`;
+          const newId = `s${si + 1}m${matchCnt++}`;
           idMap[m.id] = newId;
-          m.id = newId;
+          m.id        = newId;
         }
-        // Обновляем ссылки nextMatchId/loserMatchId
+        // Обновляем ссылки
         for (const m of (stage.matches || [])) {
           if (m.nextMatchId  && idMap[m.nextMatchId])  m.nextMatchId  = idMap[m.nextMatchId];
           if (m.loserMatchId && idMap[m.loserMatchId]) m.loserMatchId = idMap[m.loserMatchId];
+          m.isFinal = false; // проставим только для последней стадии ниже
         }
-        // isFinal пока убираем у всех — проставим только в последней стадии ниже
-        for (const m of (stage.matches || [])) {
-          m.isFinal = false;
+        // Обновляем id в Swiss первом раунде
+        if (stage.isSwiss && generated.swissConfig) {
+          // Swiss-specific: первый раунд ссылается на команды из swissConfig
+          // это уже обновлено выше через teamA/teamB (это имена, не id)
         }
-        allStages.push(stage);
+        allStages.push({ ...stage, _generatedType: sc.type });
+      }
+
+      // Копируем swissConfig если Swiss
+      if (generated.swissConfig) {
+        allStages._swissConfig = generated.swissConfig;
       }
     }
 
-    // Проставляем isFinal только в ПОСЛЕДНЕЙ стадии (последний финал)
-    // Ищем финальный матч последней стадии по старой логике: у него нет nextMatchId
-    const lastStage = allStages[allStages.length - 1];
-    if (lastStage?.matches?.length) {
-      // Среди матчей без nextMatchId берём самый "поздний" (максимальный round)
-      const noNext = lastStage.matches.filter(m => !m.nextMatchId);
-      if (noNext.length) {
-        const maxRound = Math.max(...noNext.map(m => m.round ?? 1));
-        const finalMatch = noNext.find(m => (m.round ?? 1) === maxRound);
-        if (finalMatch) finalMatch.isFinal = true;
+    // isFinal только в последней не-Swiss стадии
+    const lastNonSwiss = [...allStages].reverse().find(s => !s.isSwiss);
+    if (lastNonSwiss?.matches?.length) {
+      const noNext   = lastNonSwiss.matches.filter(m => !m.nextMatchId);
+      const maxRound = Math.max(...noNext.map(m => m.round ?? 1));
+      const fin      = noNext.find(m => (m.round ?? 1) === maxRound);
+      if (fin) fin.isFinal = true;
+    } else if (allStages.some(s => s.isSwiss)) {
+      // Только Swiss — последний матч последнего раунда = isFinal
+      const lastSwiss = [...allStages].reverse().find(s => s.isSwiss);
+      if (lastSwiss?.matches?.length) {
+        lastSwiss.matches[lastSwiss.matches.length - 1].isFinal = true;
       }
     }
 
-    // Если несколько типов — используем 'multi', иначе тип первой стадии
     const bracketType = stages.length === 1 ? stages[0].type : 'multi';
-    const bracket = { type: bracketType, stages: allStages };
+    const bracket = {
+      type: bracketType,
+      stages: allStages,
+      ...(allStages._swissConfig ? { swissConfig: allStages._swissConfig } : {}),
+    };
 
-    // Валидация
+    // Если есть Swiss в многостадийном — переносим swissConfig в bracket
+    for (let si = 0; si < stages.length; si++) {
+      if (stages[si].type === 'swiss') {
+        const sw = generateSwissStage({
+          teamCount:    stages[si].teamCount,
+          winsToAdvance:stages[si].winsToAdvance || 3,
+          lossesToElim: stages[si].lossesToElim  || 3,
+        });
+        bracket.swissConfig = sw.swissConfig;
+        break;
+      }
+    }
+
     const errors = validateGeneratedBracket(bracket);
     if (errors.length) throw new Error(`Ошибки сетки:\n${errors.join('\n')}`);
 
     const totalMatches = allStages.reduce((a, s) => a + (s.matches?.length || 0), 0);
+    const plan         = formatBracketPlan(stages);
 
-    // Коммитим
     const mutateFn = buildJsMutateFn(
       REPO_PATHS.DATA_JS,
       (tournaments) => {
-        const tournament = findTournamentById(tournaments, tournamentId);
-        if (!tournament) throw new Error(`Турнир "${tournamentId}" не найден`);
-        tournament.bracket = bracket;
+        const t = findTournamentById(tournaments, tournamentId);
+        if (!t) throw new Error(`Турнир "${tournamentId}" не найден`);
+        t.bracket = bracket;
         return tournaments;
       },
       `bracket: ${tournamentId} — ${stages.map(s=>s.label).join(' → ')} (${totalMatches} матчей)`,
@@ -437,20 +416,18 @@ async function finalizeBracket(ctx, state, userId) {
     try {
       await logAction({
         actorTelegramId: userId,
-        actorRole:       ctx.userRole || 'admin',
-        action:     'bracket.created',
-        targetType: 'tournament',
-        targetId:   tournamentId,
-        details:    { stages: stages.map(s=>s.type), totalMatches, commitSha },
+        actorRole: ctx.userRole || 'admin',
+        action: 'bracket.created', targetType: 'tournament', targetId: tournamentId,
+        details: { stages: stages.map(s=>s.type), totalMatches, commitSha },
       });
     } catch (_) {}
 
     await ctx.reply(
       `✅ <b>Сетка создана!</b>\n\n` +
-      `Турнир: <code>${tournamentId}</code>\n` +
-      `Этапы:\n${plan}\n` +
-      `Матчей всего: ${totalMatches}\n\n` +
+      `<b>${plan}</b>\n\n` +
+      `Матчей: ${totalMatches}\n\n` +
       `Назначить команды: <code>/seed ${tournamentId}</code>\n` +
+      `Случайная жеребьёвка: <code>/randomseed ${tournamentId}</code>\n` +
       `Просмотр: <code>/bracket ${tournamentId}</code>`,
       { parse_mode: 'HTML' }
     );
@@ -461,20 +438,14 @@ async function finalizeBracket(ctx, state, userId) {
   }
 }
 
-/* ─── /seed ────────────────────────────────────────────────────── */
-
-const seedStates = new Map();
+/* ─── /seed (переработан) ──────────────────────────────────────── */
 
 async function seedCommand(ctx) {
   const parts        = (ctx.message?.text || '').trim().split(/\s+/);
   const tournamentId = parts[1];
 
   if (!tournamentId) {
-    return ctx.reply(
-      '❌ Укажите id турнира.\n\n' +
-      'Использование: <code>/seed &lt;tournamentId&gt;</code>',
-      { parse_mode: 'HTML' }
-    );
+    return ctx.reply('❌ Укажите id турнира.\n\n<code>/seed &lt;tournamentId&gt;</code>', { parse_mode: 'HTML' });
   }
 
   await ctx.sendChatAction('typing');
@@ -486,53 +457,60 @@ async function seedCommand(ctx) {
     return ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
   }
 
-  // Проверяем права
   const userId = ctx.from?.id;
   const access = canManageTournament(userId, tournament);
   if (!access.allowed) {
-    return ctx.reply(
-      `❌ Нет доступа к турниру <code>${tournamentId}</code>\n\n${access.reason}`,
-      { parse_mode: 'HTML' }
-    );
+    return ctx.reply(`❌ Нет доступа к турниру <code>${tournamentId}</code>\n\n${access.reason}`, { parse_mode: 'HTML' });
   }
 
   if (!tournament.bracket?.stages?.length) {
     return ctx.reply(
-      `❌ У турнира <code>${tournamentId}</code> нет сетки.\n\n` +
-      `Создайте сначала: <code>/createbracket ${tournamentId}</code>`,
+      `❌ У турнира нет сетки.\n\nСоздайте: <code>/createbracket ${tournamentId}</code>`,
       { parse_mode: 'HTML' }
     );
   }
 
-  // Только первый раунд каждой стадии
   const slots = getEmptySlots(tournament.bracket);
 
-  if (slots.length === 0) {
+  if (!slots.length) {
     return ctx.reply(
-      `✅ Все стартовые слоты турнира <code>${tournamentId}</code> заполнены.\n\n` +
-      `Просмотр сетки: <code>/bracket ${tournamentId}</code>`,
+      `✅ Все стартовые слоты заполнены.\n\nПросмотр: <code>/bracket ${tournamentId}</code>`,
       { parse_mode: 'HTML' }
     );
   }
 
-  const lines = slots.map((s, i) =>
-    `${i+1}. Матч <code>${s.matchId}</code> · слот <b>${s.slot}</b> [${s.stageName}]`
-  );
+  const slotType = slots[0].type;
+  let   header   = '';
 
-  seedStates.set(userId, {
-    tournamentId,
-    slots,
-    current:   0,
-    startedAt: Date.now(),
-  });
+  if (slotType === 'swiss') {
+    header = `🔄 <b>Посев команд Swiss Stage</b>\n\nВведите название каждой команды по очереди.\n/skip — оставить текущее значение.\n\n`;
+  } else if (slotType === 'group') {
+    header = `🗂 <b>Посев команд в группы</b>\n\nВведите название каждой команды по очереди.\n/skip — оставить алиас (A1, B2 и т.д.).\n\n`;
+  } else {
+    header = `🎯 <b>Посев команд в плейофф</b>\n\nВведите название каждой команды по очереди.\n/skip — оставить TBD.\n\n`;
+  }
+
+  const preview = slots.slice(0, 5).map((s, i) => {
+    if (s.type === 'swiss')  return `${i+1}. Swiss команда ${s.teamIndex + 1} (сейчас: ${s.current})`;
+    if (s.type === 'group')  return `${i+1}. ${s.stageName}: слот ${s.slotName}`;
+    return `${i+1}. ${s.stageName}: матч <code>${s.matchId}</code>[${s.slot}]`;
+  }).join('\n');
+
+  seedStates.set(userId, { tournamentId, slots, current: 0, startedAt: Date.now() });
 
   await ctx.reply(
-    `🎯 <b>Посев команд</b> · <code>${tournamentId}</code>\n\n` +
-    `Стартовые слоты (${slots.length}):\n${lines.join('\n')}\n\n` +
-    `Заполняем по очереди. /skip — пропустить, /cancel — отменить.\n\n` +
-    `<b>Слот 1:</b> матч <code>${slots[0].matchId}</code>, позиция <b>${slots[0].slot}</b>`,
+    header +
+    `Слотов всего: <b>${slots.length}</b>\n` +
+    preview + (slots.length > 5 ? `\n<i>...и ещё ${slots.length - 5}</i>` : '') +
+    `\n\n<b>Слот 1/${slots.length}:</b> ` + slotLabel(slots[0]),
     { parse_mode: 'HTML' }
   );
+}
+
+function slotLabel(slot) {
+  if (slot.type === 'swiss')  return `Swiss команда ${slot.teamIndex + 1} (сейчас: <b>${slot.current}</b>)`;
+  if (slot.type === 'group')  return `${slot.stageName}, позиция <b>${slot.slotName}</b>`;
+  return `Матч <code>${slot.matchId}</code>, слот <b>${slot.slot}</b>`;
 }
 
 async function processSeedText(ctx) {
@@ -554,18 +532,15 @@ async function processSeedText(ctx) {
   const slot = state.slots[state.current];
 
   if (text === '/skip') {
+    // Пропускаем — оставляем текущее значение
     state.current++;
     if (state.current >= state.slots.length) {
       seedStates.delete(userId);
-      await ctx.reply(
-        `✅ Посев завершён.\n\nПросмотр: <code>/bracket ${state.tournamentId}</code>`,
-        { parse_mode: 'HTML' }
-      );
+      await ctx.reply(`✅ Посев завершён.\n\nПросмотр: <code>/bracket ${state.tournamentId}</code>`, { parse_mode: 'HTML' });
     } else {
       const next = state.slots[state.current];
       await ctx.reply(
-        `⏭ Пропущено.\n\n<b>Слот ${state.current+1}/${state.slots.length}:</b> ` +
-        `матч <code>${next.matchId}</code>, позиция <b>${next.slot}</b>`,
+        `⏭ Пропущено.\n\n<b>Слот ${state.current + 1}/${state.slots.length}:</b> ` + slotLabel(next),
         { parse_mode: 'HTML' }
       );
     }
@@ -580,14 +555,13 @@ async function processSeedText(ctx) {
       (tournaments) => {
         const t = findTournamentById(tournaments, state.tournamentId);
         if (!t?.bracket) throw new Error('Сетка не найдена');
-        seedTeamInSlot(t.bracket, slot.matchId, slot.slot, text);
+        seedTeamInSlot(t.bracket, slot, text);
         return tournaments;
       },
-      `seed: ${state.tournamentId}/${slot.matchId}[${slot.slot}] = "${text}"`,
+      `seed: ${state.tournamentId} [${slot.type}] = "${text}"`,
     );
 
     await enqueueCommit(REPO_PATHS.DATA_JS, mutateFn);
-
     state.current++;
 
     if (state.current >= state.slots.length) {
@@ -596,26 +570,22 @@ async function processSeedText(ctx) {
       try {
         await logAction({
           actorTelegramId: userId,
-          actorRole:       ctx.userRole || 'admin',
-          action:     'bracket.seeded',
-          targetType: 'tournament',
-          targetId:   state.tournamentId,
-          details:    { totalSlots: state.slots.length },
+          actorRole: ctx.userRole || 'admin',
+          action: 'bracket.seeded', targetType: 'tournament', targetId: state.tournamentId,
+          details: { totalSlots: state.slots.length },
         });
       } catch (_) {}
 
       await ctx.reply(
         `✅ <b>Посев завершён!</b>\n\n` +
-        `Последний слот: <code>${slot.matchId}</code>[${slot.slot}] = <b>${text}</b>\n\n` +
         `Просмотр: <code>/bracket ${state.tournamentId}</code>`,
         { parse_mode: 'HTML' }
       );
     } else {
       const next = state.slots[state.current];
       await ctx.reply(
-        `✅ <b>${text}</b> → <code>${slot.matchId}</code>[${slot.slot}]\n\n` +
-        `<b>Слот ${state.current+1}/${state.slots.length}:</b> ` +
-        `матч <code>${next.matchId}</code>, позиция <b>${next.slot}</b>`,
+        `✅ <b>${text}</b> записана.\n\n` +
+        `<b>Слот ${state.current + 1}/${state.slots.length}:</b> ` + slotLabel(next),
         { parse_mode: 'HTML' }
       );
     }
@@ -626,6 +596,221 @@ async function processSeedText(ctx) {
   return true;
 }
 
+/* ─── /randomseed ──────────────────────────────────────────────── */
+
+async function randomSeedCommand(ctx) {
+  const text  = (ctx.message?.text || '').trim();
+  const parts = text.split(/\s+/);
+  const tournamentId = parts[1];
+  // Команды — всё после tournamentId, разделённые запятой
+  const teamsRaw = text.replace(/^\/randomseed\s+\S+\s*/, '').trim();
+
+  if (!tournamentId) {
+    return ctx.reply(
+      '❌ Укажите id турнира и список команд.\n\n' +
+      'Формат:\n<code>/randomseed &lt;tournamentId&gt; Команда1, Команда2, ...</code>\n\n' +
+      'Пример:\n<code>/randomseed SkewerEsports-Season-3 Alpha, Beta, Gamma, Delta</code>',
+      { parse_mode: 'HTML' }
+    );
+  }
+
+  if (!teamsRaw) {
+    return ctx.reply(
+      '❌ Укажите список команд через запятую.\n\n' +
+      `Пример:\n<code>/randomseed ${tournamentId} Team A, Team B, Team C, Team D</code>`,
+      { parse_mode: 'HTML' }
+    );
+  }
+
+  await ctx.sendChatAction('typing');
+
+  let tournament;
+  try {
+    tournament = await loadTournament(tournamentId);
+  } catch (err) {
+    return ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
+  }
+
+  const userId = ctx.from?.id;
+  const access = canManageTournament(userId, tournament);
+  if (!access.allowed) {
+    return ctx.reply(`❌ Нет доступа к турниру <code>${tournamentId}</code>\n\n${access.reason}`, { parse_mode: 'HTML' });
+  }
+
+  if (!tournament.bracket?.stages?.length) {
+    return ctx.reply(
+      `❌ У турнира нет сетки.\n\nСоздайте: <code>/createbracket ${tournamentId}</code>`,
+      { parse_mode: 'HTML' }
+    );
+  }
+
+  const slots = getEmptySlots(tournament.bracket);
+  if (!slots.length) {
+    return ctx.reply('✅ Все слоты уже заполнены.', { parse_mode: 'HTML' });
+  }
+
+  const teams = teamsRaw.split(',').map(t => t.trim()).filter(Boolean);
+
+  if (teams.length < slots.length) {
+    return ctx.reply(
+      `❌ Недостаточно команд.\n\nСлотов: <b>${slots.length}</b>, команд: <b>${teams.length}</b>\n\n` +
+      `Добавьте ещё ${slots.length - teams.length} команд(ы).`,
+      { parse_mode: 'HTML' }
+    );
+  }
+
+  // Случайное перемешивание
+  const shuffled = randomShuffleTeams(teams).slice(0, slots.length);
+
+  try {
+    const mutateFn = buildJsMutateFn(
+      REPO_PATHS.DATA_JS,
+      (tournaments) => {
+        const t = findTournamentById(tournaments, tournamentId);
+        if (!t?.bracket) throw new Error('Сетка не найдена');
+        shuffled.forEach((teamName, i) => {
+          if (slots[i]) seedTeamInSlot(t.bracket, slots[i], teamName);
+        });
+        return tournaments;
+      },
+      `randomseed: ${tournamentId} — жеребьёвка ${shuffled.length} команд`,
+    );
+
+    await enqueueCommit(REPO_PATHS.DATA_JS, mutateFn);
+
+    // Формируем читаемый результат жеребьёвки
+    const resultLines = slots.map((s, i) => {
+      const team = shuffled[i];
+      if (s.type === 'swiss')  return `  ${i+1}. <b>${team}</b>`;
+      if (s.type === 'group')  return `  ${s.stageName} [${s.slotName}] → <b>${team}</b>`;
+      return `  ${s.matchId}[${s.slot}] → <b>${team}</b>`;
+    });
+
+    try {
+      await logAction({
+        actorTelegramId: userId,
+        actorRole: ctx.userRole || 'admin',
+        action: 'bracket.seeded', targetType: 'tournament', targetId: tournamentId,
+        details: { method: 'random', teams: shuffled },
+      });
+    } catch (_) {}
+
+    await ctx.reply(
+      `🎲 <b>Жеребьёвка завершена!</b>\n\n` +
+      resultLines.join('\n') +
+      `\n\nПросмотр сетки: <code>/bracket ${tournamentId}</code>`,
+      { parse_mode: 'HTML' }
+    );
+
+  } catch (err) {
+    log.error({ tournamentId, err: err.message }, 'randomseed: ошибка');
+    await ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
+  }
+}
+
+/* ─── /swissnext — следующий раунд Swiss ────────────────────────── */
+
+async function swissNextCommand(ctx) {
+  const parts        = (ctx.message?.text || '').trim().split(/\s+/);
+  const tournamentId = parts[1];
+
+  if (!tournamentId) {
+    return ctx.reply('❌ Формат: <code>/swissnext &lt;tournamentId&gt;</code>', { parse_mode: 'HTML' });
+  }
+
+  await ctx.sendChatAction('typing');
+
+  let tournament;
+  try {
+    tournament = await loadTournament(tournamentId);
+  } catch (err) {
+    return ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
+  }
+
+  const userId = ctx.from?.id;
+  const access = canManageTournament(userId, tournament);
+  if (!access.allowed) {
+    return ctx.reply(`❌ Нет доступа: ${access.reason}`, { parse_mode: 'HTML' });
+  }
+
+  if (!tournament.bracket?.stages?.some(s => s.isSwiss)) {
+    return ctx.reply('❌ У этого турнира нет Swiss Stage.', { parse_mode: 'HTML' });
+  }
+
+  try {
+    const mutateFn = buildJsMutateFn(
+      REPO_PATHS.DATA_JS,
+      (tournaments) => {
+        const t = findTournamentById(tournaments, tournamentId);
+        if (!t?.bracket) throw new Error('Сетка не найдена');
+        const result = generateSwissNextRound(t.bracket);
+        if (!result.ok) throw new Error(result.message);
+        return tournaments;
+      },
+      `swiss: ${tournamentId} — следующий раунд`,
+    );
+
+    await enqueueCommit(REPO_PATHS.DATA_JS, mutateFn);
+
+    // Перезагружаем для отображения standings
+    const updated = await loadTournament(tournamentId);
+    const standings = formatSwissStandings(updated.bracket);
+
+    await ctx.reply(
+      `✅ <b>Следующий Swiss-раунд сгенерирован!</b>\n\n` +
+      `<b>Текущая таблица:</b>\n${standings}\n\n` +
+      `Просмотр: <code>/bracket ${tournamentId}</code>`,
+      { parse_mode: 'HTML' }
+    );
+
+  } catch (err) {
+    log.error({ tournamentId, err: err.message }, 'swissnext: ошибка');
+    await ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
+  }
+}
+
+/* ─── /swissstatus ─────────────────────────────────────────────── */
+
+async function swissStatusCommand(ctx) {
+  const parts        = (ctx.message?.text || '').trim().split(/\s+/);
+  const tournamentId = parts[1];
+
+  if (!tournamentId) {
+    return ctx.reply('❌ Формат: <code>/swissstatus &lt;tournamentId&gt;</code>', { parse_mode: 'HTML' });
+  }
+
+  await ctx.sendChatAction('typing');
+
+  let tournament;
+  try {
+    tournament = await loadTournament(tournamentId);
+  } catch (err) {
+    return ctx.reply(`❌ ${err.message}`, { parse_mode: 'HTML' });
+  }
+
+  if (!tournament.bracket?.stages?.some(s => s.isSwiss)) {
+    return ctx.reply('❌ У этого турнира нет Swiss Stage.', { parse_mode: 'HTML' });
+  }
+
+  const standings    = formatSwissStandings(tournament.bracket);
+  const { winsToAdvance, lossesToElim } = tournament.bracket.swissConfig || {};
+  const roundsDone   = tournament.bracket.stages.filter(s => s.isSwiss).length;
+  const isComplete   = isSwissRoundComplete(tournament.bracket);
+
+  await ctx.reply(
+    `🔄 <b>Swiss Stage — ${tournament.title}</b>\n\n` +
+    `Раундов сыграно: ${roundsDone}\n` +
+    `Выход: ${winsToAdvance}W | Выбывание: ${lossesToElim}L\n\n` +
+    `<b>Таблица:</b>\n${standings}\n\n` +
+    (isComplete
+      ? `✅ Раунд завершён. Сгенерировать следующий: <code>/swissnext ${tournamentId}</code>`
+      : `⏳ Раунд ещё не завершён.`),
+    { parse_mode: 'HTML' }
+  );
+}
+
+/* ─── Точка входа для wizard-обработчиков ──────────────────────── */
+
 async function processBracketOrSeedText(ctx) {
   const bHandled = await processBracketWizardText(ctx);
   if (bHandled) return true;
@@ -635,5 +820,8 @@ async function processBracketOrSeedText(ctx) {
 module.exports = {
   createBracketCommand,
   seedCommand,
+  randomSeedCommand,
+  swissNextCommand,
+  swissStatusCommand,
   processBracketOrSeedText,
 };

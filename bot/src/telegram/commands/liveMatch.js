@@ -284,10 +284,7 @@ async function bracketCommand(ctx) {
   const parts = (ctx.message?.text || '').trim().split(/\s+/);
 
   if (parts.length < 2) {
-    return ctx.reply(
-      '❌ Формат: <code>/bracket &lt;tournamentId&gt;</code>',
-      { parse_mode: 'HTML' }
-    );
+    return ctx.reply('❌ Формат: <code>/bracket &lt;tournamentId&gt;</code>', { parse_mode: 'HTML' });
   }
 
   const tournamentId = parts[1];
@@ -299,23 +296,41 @@ async function bracketCommand(ctx) {
 
     if (!tournament.bracket?.stages?.length) {
       return ctx.reply(
-        `📋 <b>${tournament.title}</b>\n\nСобственная сетка не создана.\n\n` +
+        `📋 <b>${tournament.title}</b>\n\nСетка не создана.\n\n` +
         (tournament.bracketEmbed
           ? `Внешняя сетка: ${tournament.bracketEmbed}`
-          : `Создать сетку: <code>/createbracket ${tournamentId}</code>`),
+          : `Создать: <code>/createbracket ${tournamentId}</code>`),
         { parse_mode: 'HTML' }
       );
     }
 
-    const lines = [`🏆 <b>${tournament.title}</b>\n`];
-    let totalMatches = 0, finishedMatches = 0;
+    const lines        = [`🏆 <b>${tournament.title}</b>\n`];
+    let totalMatches   = 0;
+    let finishedMatches= 0;
+
+    // Дедупликация стадий по имени — не показываем дубли
+    const seenStageNames = new Set();
 
     for (const stage of tournament.bracket.stages) {
-      lines.push(`<b>═══ ${stage.name} ═══</b>`);
+      // Пропускаем дубликаты стадий (возникают при объединении генераторов)
+      if (seenStageNames.has(stage.name)) continue;
+      seenStageNames.add(stage.name);
+
+      const stageMatches = stage.matches || [];
+      if (!stageMatches.length) continue;
+
+      // Заголовок стадии
+      if (stage.isSwiss) {
+        lines.push(`\n<b>══ 🔄 ${stage.name} ══</b>`);
+      } else if (stage.isGroup) {
+        lines.push(`\n<b>══ 🗂 ${stage.name} ══</b>`);
+      } else {
+        lines.push(`\n<b>══ 🏆 ${stage.name} ══</b>`);
+      }
 
       // Группируем по раунду
       const byRound = {};
-      for (const m of (stage.matches || [])) {
+      for (const m of stageMatches) {
         const r = m.round ?? 1;
         if (!byRound[r]) byRound[r] = [];
         byRound[r].push(m);
@@ -327,18 +342,17 @@ async function bracketCommand(ctx) {
       const totalRounds = rounds.length;
 
       for (const r of rounds) {
-        // Человекочитаемое имя раунда
-        const rName = totalRounds > 1 ? roundName(r, totalRounds) : null;
-        if (rName) lines.push(`\n<i>${rName}:</i>`);
+        const rName = totalRounds > 1
+          ? (stage.isSwiss || stage.isGroup ? `Тур ${r}` : roundName(r, totalRounds))
+          : null;
+        if (rName) lines.push(`  <i>${rName}:</i>`);
 
         for (const m of byRound[r]) {
           const tA = m.teamA || 'TBD';
           const tB = m.teamB || 'TBD';
-
           let line;
 
           if (m.status === 'finished' && m.winner) {
-            // Победитель жирным, счёт в середине
             const aWon = m.winner === m.teamA;
             line = aWon
               ? `✅ <b>${tA}</b> ${m.scoreA}:${m.scoreB} ${tB}`
@@ -353,19 +367,34 @@ async function bracketCommand(ctx) {
           lines.push(`  ${line}`);
         }
       }
+    }
 
-      lines.push(''); // пустая строка между стадиями
+    // Swiss таблица если есть
+    const hasSwiss = tournament.bracket.stages.some(s => s.isSwiss);
+    if (hasSwiss && tournament.bracket.swissConfig) {
+      const { computeSwissStandings } = require('../../workflows/bracketGenerator');
+      const standings = computeSwissStandings(tournament.bracket);
+      if (standings.size) {
+        lines.push('\n<b>📊 Swiss таблица:</b>');
+        const { winsToAdvance, lossesToElim } = tournament.bracket.swissConfig;
+        [...standings.values()]
+          .sort((a, b) => b.wins - a.wins || a.losses - b.losses)
+          .forEach(s => {
+            const icon = s.advanced ? '✅' : s.eliminated ? '❌' : '⏳';
+            lines.push(`  ${icon} ${s.name}: ${s.wins}W–${s.losses}L`);
+          });
+      }
     }
 
     // Прогресс
     const pct = totalMatches > 0 ? Math.round(finishedMatches / totalMatches * 100) : 0;
-    lines.push(`📊 <b>Прогресс:</b> ${finishedMatches}/${totalMatches} матчей завершено (${pct}%)`);
+    lines.push(`\n📊 <b>Прогресс:</b> ${finishedMatches}/${totalMatches} (${pct}%)`);
 
     if (tournament.winner) {
-      lines.push(`\n🏆 <b>Победитель: ${tournament.winner}</b>`);
+      lines.push(`🏆 <b>Победитель: ${tournament.winner}</b>`);
     }
 
-    lines.push(`\n<code>/matchinfo ${tournamentId} &lt;matchId&gt;</code> — подробности матча`);
+    lines.push(`\n<code>/matchinfo ${tournamentId} &lt;matchId&gt;</code>`);
 
     await ctx.reply(lines.join('\n'), { parse_mode: 'HTML' });
 

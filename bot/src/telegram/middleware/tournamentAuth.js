@@ -1,10 +1,10 @@
 'use strict';
 
-const { getFile }    = require('../github/client');
-const { parseJsDataFile, findTournamentById } = require('../data/jsDataFile');
-const REPO_PATHS     = require('../github/repoPaths');
-const config         = require('../config');
-const log            = require('../logger');
+const { getFile }    = require('../../github/client');
+const { parseJsDataFile, findTournamentById } = require('../../data/jsDataFile');
+const REPO_PATHS     = require('../../github/repoPaths');
+const config         = require('../../config');
+const log            = require('../../logger');
 
 /**
  * Централизованная проверка прав на управление конкретным турниром.
