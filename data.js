@@ -906,9 +906,9 @@ const tournaments = [
               "teamA": "Hater Zdes`",
               "teamB": "EGOISTO Team",
               "scoreA": 0,
-              "scoreB": 0,
-              "status": "scheduled",
-              "winner": null,
+              "scoreB": 2,
+              "status": "finished",
+              "winner": "EGOISTO Team",
               "scheduledAt": null
             },
             {
@@ -949,7 +949,7 @@ const tournaments = [
               "id": "s2m6",
               "round": 1,
               "isFinal": false,
-              "teamA": "TBD",
+              "teamA": "EGOISTO Team",
               "teamB": "TBD",
               "scoreA": 0,
               "scoreB": 0,
