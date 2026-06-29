@@ -973,6 +973,69 @@ const tournaments = [
             }
           ],
           "_generatedType": "single"
+        },
+        {
+          "name": "Swiss Раунд 2",
+          "swissRound": 2,
+          "isSwiss": true,
+          "matches": [
+            {
+              "id": "sw8",
+              "round": 2,
+              "swissRound": 2,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Podosinovik",
+              "teamB": "Gitlz",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "sw9",
+              "round": 2,
+              "swissRound": 2,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "EGOISTO Team",
+              "teamB": "Never Back Down",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "sw10",
+              "round": 2,
+              "swissRound": 2,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "LETO Junior",
+              "teamB": "Bedlam Red",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "sw11",
+              "round": 2,
+              "swissRound": 2,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Hater Zdes`",
+              "teamB": "Team Sexy",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ]
         }
       ],
       "swissConfig": {
@@ -982,67 +1045,67 @@ const tournaments = [
         "teams": [
           {
             "name": "Podosinovik",
-            "wins": 0,
+            "wins": 1,
             "losses": 0,
-            "active": true,
             "advanced": false,
-            "eliminated": false
+            "eliminated": false,
+            "active": true
           },
           {
             "name": "LETO Junior",
             "wins": 0,
-            "losses": 0,
-            "active": true,
+            "losses": 1,
             "advanced": false,
-            "eliminated": false
+            "eliminated": false,
+            "active": true
           },
           {
             "name": "Gitlz",
-            "wins": 0,
+            "wins": 1,
             "losses": 0,
-            "active": true,
             "advanced": false,
-            "eliminated": false
+            "eliminated": false,
+            "active": true
           },
           {
             "name": "Bedlam Red",
             "wins": 0,
-            "losses": 0,
-            "active": true,
+            "losses": 1,
             "advanced": false,
-            "eliminated": false
+            "eliminated": false,
+            "active": true
           },
           {
             "name": "Hater Zdes`",
             "wins": 0,
-            "losses": 0,
-            "active": true,
+            "losses": 1,
             "advanced": false,
-            "eliminated": false
+            "eliminated": false,
+            "active": true
           },
           {
             "name": "EGOISTO Team",
-            "wins": 0,
+            "wins": 1,
             "losses": 0,
-            "active": true,
             "advanced": false,
-            "eliminated": false
+            "eliminated": false,
+            "active": true
           },
           {
             "name": "Team Sexy",
             "wins": 0,
-            "losses": 0,
-            "active": true,
+            "losses": 1,
             "advanced": false,
-            "eliminated": false
+            "eliminated": false,
+            "active": true
           },
           {
             "name": "Never Back Down",
-            "wins": 0,
+            "wins": 1,
             "losses": 0,
-            "active": true,
             "advanced": false,
-            "eliminated": false
+            "eliminated": false,
+            "active": true
           }
         ]
       }
