@@ -368,7 +368,7 @@ const tournaments = [
     "prize": "Слот в Special",
     "location": "СНГ",
     "teams": 8,
-    "winner": "",
+    "winner": "EGOISTO Team",
     "format": "Split Bracket",
     "organizer": "AnyLvL Community x GOTF eSports",
     "links": {
@@ -497,10 +497,10 @@ const tournaments = [
               "isFinal": true,
               "teamA": "EGOISTO Team",
               "teamB": "Опята",
-              "scoreA": 0,
+              "scoreA": 1,
               "scoreB": 0,
-              "status": "scheduled",
-              "winner": null,
+              "status": "finished",
+              "winner": "EGOISTO Team",
               "scheduledAt": null
             }
           ]
