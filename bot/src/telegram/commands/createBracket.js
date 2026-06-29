@@ -6,7 +6,9 @@ const {
   generateGroupStage,
   generateSwissStage,
   generateSwissNextRound,
+  computeSwissStandings,
   isSwissRoundComplete,
+  fillPlayoffFromSwiss,
   formatSwissStandings,
   getEmptySlots,
   seedTeamInSlot,
@@ -315,7 +317,6 @@ async function finalizeBracket(ctx, state, userId) {
 
   try {
     const allStages  = [];
-    let   matchCnt   = 1;
 
     for (let si = 0; si < stages.length; si++) {
       const sc = stages[si];
@@ -331,29 +332,14 @@ async function finalizeBracket(ctx, state, userId) {
         generated = generateSwissStage({ teamCount: sc.teamCount, winsToAdvance: sc.winsToAdvance || 3, lossesToElim: sc.lossesToElim || 3 });
       }
 
-      // Переименовываем id матчей для уникальности при объединении
+      // ID уже читаемые (sw-r1-m1, po-final и т.д.) — переименование не нужно
       for (const stage of generated.stages) {
-        const idMap = {};
-        for (const m of (stage.matches || [])) {
-          const newId = `s${si + 1}m${matchCnt++}`;
-          idMap[m.id] = newId;
-          m.id        = newId;
-        }
-        // Обновляем ссылки
-        for (const m of (stage.matches || [])) {
-          if (m.nextMatchId  && idMap[m.nextMatchId])  m.nextMatchId  = idMap[m.nextMatchId];
-          if (m.loserMatchId && idMap[m.loserMatchId]) m.loserMatchId = idMap[m.loserMatchId];
-          m.isFinal = false; // проставим только для последней стадии ниже
-        }
-        // Обновляем id в Swiss первом раунде
-        if (stage.isSwiss && generated.swissConfig) {
-          // Swiss-specific: первый раунд ссылается на команды из swissConfig
-          // это уже обновлено выше через teamA/teamB (это имена, не id)
-        }
+        // Сбрасываем isFinal — проставим только для последней стадии ниже
+        for (const m of (stage.matches || [])) { m.isFinal = false; }
         allStages.push({ ...stage, _generatedType: sc.type });
       }
 
-      // Копируем swissConfig если Swiss
+      // Сохраняем swissConfig если Swiss
       if (generated.swissConfig) {
         allStages._swissConfig = generated.swissConfig;
       }
@@ -738,13 +724,30 @@ async function swissNextCommand(ctx) {
   }
 
   try {
+    let replyText = '';
+
     const mutateFn = buildJsMutateFn(
       REPO_PATHS.DATA_JS,
       (tournaments) => {
         const t = findTournamentById(tournaments, tournamentId);
         if (!t?.bracket) throw new Error('Сетка не найдена');
+
+        // Пробуем сгенерировать следующий раунд
         const result = generateSwissNextRound(t.bracket);
-        if (!result.ok) throw new Error(result.message);
+
+        if (!result.ok) {
+          // Следующий раунд не нужен — Swiss завершён.
+          // Заполняем плейофф победителями Swiss (если есть)
+          const fillResult = fillPlayoffFromSwiss(t.bracket);
+          replyText = fillResult.filled > 0
+            ? `🏆 Swiss завершён! ${fillResult.message}
+
+Плейофф готов: <code>/bracket ${tournamentId}</code>`
+            : `ℹ️ ${result.message}`;
+          return tournaments;
+        }
+
+        replyText = `✅ <b>${result.message}</b>`;
         return tournaments;
       },
       `swiss: ${tournamentId} — следующий раунд`,
@@ -752,14 +755,13 @@ async function swissNextCommand(ctx) {
 
     await enqueueCommit(REPO_PATHS.DATA_JS, mutateFn);
 
-    // Перезагружаем для отображения standings
-    const updated = await loadTournament(tournamentId);
+    // Перезагружаем для таблицы
+    const updated  = await loadTournament(tournamentId);
     const standings = formatSwissStandings(updated.bracket);
 
     await ctx.reply(
-      `✅ <b>Следующий Swiss-раунд сгенерирован!</b>\n\n` +
-      `<b>Текущая таблица:</b>\n${standings}\n\n` +
-      `Просмотр: <code>/bracket ${tournamentId}</code>`,
+      replyText + `\n\n<b>Таблица Swiss:</b>\n${standings}\n\n` +
+      `<code>/bracket ${tournamentId}</code>`,
       { parse_mode: 'HTML' }
     );
 

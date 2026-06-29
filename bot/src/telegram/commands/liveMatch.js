@@ -364,6 +364,8 @@ async function bracketCommand(ctx) {
           }
 
           if (m.isFinal && m.status !== 'finished') line += ' 🏁';
+          // ID матча рядом — для использования в /match и /matchinfo
+          line += `  <code>${m.id}</code>`;
           lines.push(`  ${line}`);
         }
       }

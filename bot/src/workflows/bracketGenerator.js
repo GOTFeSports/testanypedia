@@ -3,32 +3,46 @@
 /**
  * bracketGenerator.js — генерация структур bracket.
  *
- * Все генерируемые структуры используют явные ссылки nextMatchId/nextMatchSlot
- * для bracket-engine.js (приоритетный путь в resolveAdvancement).
+ * ID матчей — человекочитаемые:
+ *   Swiss:   sw-r1-m1, sw-r2-m3, ...
+ *   Playoff: po-r1-m1, po-sf1, po-final, ...
+ *   Group:   ga-m1, gb-m2, ...  (ga = Group A)
+ *   Double:  ub-r1-m1 (upper), lb-r1-m1 (lower), gf (grand final)
  *
- * Типы стадий:
- *   single  — Single Elimination
- *   double  — Double Elimination (Upper + Lower + Grand Final)
- *   group   — Group Stage (round-robin внутри каждой группы)
- *   swiss   — Swiss Stage (динамические пары по записям побед/поражений)
+ * ВАЖНО — Swiss НЕ использует nextMatchId/nextMatchSlot.
+ * Продвижение в плейофф происходит вручную через /swissnext,
+ * который после завершения всех раундов Swiss записывает
+ * победителей в слоты плейоффа (если он есть в том же bracket).
+ * bracket-engine НЕ вызывается для Swiss-матчей.
  */
 
 /* ─── Single Elimination ───────────────────────────────────────── */
 
-function generateSingleElimination(teamCount) {
+/**
+ * @param {number} teamCount — 4 | 8 | 16 | 32 | 64
+ * @param {string} [prefix='po'] — префикс для id матчей
+ */
+function generateSingleElimination(teamCount, prefix = 'po') {
   if (![4, 8, 16, 32, 64].includes(teamCount)) {
     throw new Error(`Single Elimination: поддерживается 4/8/16/32/64 команд, получено: ${teamCount}`);
   }
 
-  const rounds            = Math.log2(teamCount);
-  const matchIdsByRound   = {};
-  let   matchIndex        = 1;
+  const rounds          = Math.log2(teamCount);
+  const matchIdsByRound = {};
+  let   matchIndex      = 1;
 
   for (let round = 1; round <= rounds; round++) {
     const count = teamCount / Math.pow(2, round);
     matchIdsByRound[round] = [];
     for (let i = 0; i < count; i++) {
-      matchIdsByRound[round].push(`m${matchIndex++}`);
+      // Читаемые id для последних раундов
+      let id;
+      if (round === rounds)     id = `${prefix}-final`;
+      else if (round === rounds - 1 && count === 2) id = `${prefix}-sf${i + 1}`;
+      else if (round === rounds - 2 && count === 4) id = `${prefix}-qf${i + 1}`;
+      else id = `${prefix}-r${round}-m${matchIndex}`;
+      matchIndex++;
+      matchIdsByRound[round].push(id);
     }
   }
 
@@ -61,15 +75,15 @@ function generateSingleElimination(teamCount) {
 function makeMatch(id, round, opts = {}) {
   return {
     id, round,
-    isFinal:      opts.isFinal      ?? false,
-    teamA:        opts.teamA        ?? 'TBD',
-    teamB:        opts.teamB        ?? 'TBD',
+    isFinal: opts.isFinal ?? false,
+    teamA:   opts.teamA   ?? 'TBD',
+    teamB:   opts.teamB   ?? 'TBD',
     scoreA: 0, scoreB: 0,
     status: 'scheduled', winner: null, scheduledAt: null,
-    ...(opts.nextMatchId   ? { nextMatchId:   opts.nextMatchId }   : {}),
-    ...(opts.nextMatchSlot ? { nextMatchSlot: opts.nextMatchSlot } : {}),
-    ...(opts.loserMatchId  ? { loserMatchId:  opts.loserMatchId }  : {}),
-    ...(opts.loserMatchSlot? { loserMatchSlot:opts.loserMatchSlot }: {}),
+    ...(opts.nextMatchId    ? { nextMatchId:    opts.nextMatchId }    : {}),
+    ...(opts.nextMatchSlot  ? { nextMatchSlot:  opts.nextMatchSlot }  : {}),
+    ...(opts.loserMatchId   ? { loserMatchId:   opts.loserMatchId }   : {}),
+    ...(opts.loserMatchSlot ? { loserMatchSlot: opts.loserMatchSlot } : {}),
   };
 }
 
@@ -77,52 +91,52 @@ function generateDoubleElimination(teamCount) {
   if (![4, 8].includes(teamCount)) {
     throw new Error(`Double Elimination: поддерживается 4/8 команд, получено: ${teamCount}`);
   }
-  return teamCount === 4 ? generateDoubleElim4() : generateDoubleElim8();
+  return teamCount === 4 ? _doubleElim4() : _doubleElim8();
 }
 
-function generateDoubleElim4() {
+function _doubleElim4() {
   return {
     type: 'double',
     stages: [
       { name: 'Upper Bracket', matches: [
-        makeMatch('u1', 1, { nextMatchId:'u-final', nextMatchSlot:'A', loserMatchId:'l1', loserMatchSlot:'A' }),
-        makeMatch('u2', 1, { nextMatchId:'u-final', nextMatchSlot:'B', loserMatchId:'l1', loserMatchSlot:'B' }),
-        makeMatch('u-final', 2, { nextMatchId:'grand-final', nextMatchSlot:'A', loserMatchId:'l-final', loserMatchSlot:'B' }),
+        makeMatch('ub-r1-m1', 1, { nextMatchId:'ub-final', nextMatchSlot:'A', loserMatchId:'lb-r1-m1', loserMatchSlot:'A' }),
+        makeMatch('ub-r1-m2', 1, { nextMatchId:'ub-final', nextMatchSlot:'B', loserMatchId:'lb-r1-m1', loserMatchSlot:'B' }),
+        makeMatch('ub-final',  2, { nextMatchId:'gf',       nextMatchSlot:'A', loserMatchId:'lb-final', loserMatchSlot:'B' }),
       ]},
       { name: 'Lower Bracket', matches: [
-        makeMatch('l1', 1, { nextMatchId:'l-final', nextMatchSlot:'A' }),
-        makeMatch('l-final', 2, { nextMatchId:'grand-final', nextMatchSlot:'B' }),
+        makeMatch('lb-r1-m1', 1, { nextMatchId:'lb-final', nextMatchSlot:'A' }),
+        makeMatch('lb-final',  2, { nextMatchId:'gf',       nextMatchSlot:'B' }),
       ]},
       { name: 'Grand Final', matches: [
-        makeMatch('grand-final', 1, { isFinal: true }),
+        makeMatch('gf', 1, { isFinal: true }),
       ]},
     ],
   };
 }
 
-function generateDoubleElim8() {
+function _doubleElim8() {
   return {
     type: 'double',
     stages: [
       { name: 'Upper Bracket', matches: [
-        makeMatch('u1', 1, { nextMatchId:'u5', nextMatchSlot:'A', loserMatchId:'l1', loserMatchSlot:'A' }),
-        makeMatch('u2', 1, { nextMatchId:'u5', nextMatchSlot:'B', loserMatchId:'l1', loserMatchSlot:'B' }),
-        makeMatch('u3', 1, { nextMatchId:'u6', nextMatchSlot:'A', loserMatchId:'l2', loserMatchSlot:'A' }),
-        makeMatch('u4', 1, { nextMatchId:'u6', nextMatchSlot:'B', loserMatchId:'l2', loserMatchSlot:'B' }),
-        makeMatch('u5', 2, { nextMatchId:'u-final', nextMatchSlot:'A', loserMatchId:'l3', loserMatchSlot:'B' }),
-        makeMatch('u6', 2, { nextMatchId:'u-final', nextMatchSlot:'B', loserMatchId:'l4', loserMatchSlot:'B' }),
-        makeMatch('u-final', 3, { nextMatchId:'grand-final', nextMatchSlot:'A', loserMatchId:'l-final', loserMatchSlot:'B' }),
+        makeMatch('ub-r1-m1', 1, { nextMatchId:'ub-r2-m1', nextMatchSlot:'A', loserMatchId:'lb-r1-m1', loserMatchSlot:'A' }),
+        makeMatch('ub-r1-m2', 1, { nextMatchId:'ub-r2-m1', nextMatchSlot:'B', loserMatchId:'lb-r1-m1', loserMatchSlot:'B' }),
+        makeMatch('ub-r1-m3', 1, { nextMatchId:'ub-r2-m2', nextMatchSlot:'A', loserMatchId:'lb-r1-m2', loserMatchSlot:'A' }),
+        makeMatch('ub-r1-m4', 1, { nextMatchId:'ub-r2-m2', nextMatchSlot:'B', loserMatchId:'lb-r1-m2', loserMatchSlot:'B' }),
+        makeMatch('ub-r2-m1', 2, { nextMatchId:'ub-final', nextMatchSlot:'A', loserMatchId:'lb-r2-m1', loserMatchSlot:'B' }),
+        makeMatch('ub-r2-m2', 2, { nextMatchId:'ub-final', nextMatchSlot:'B', loserMatchId:'lb-r2-m2', loserMatchSlot:'B' }),
+        makeMatch('ub-final',  3, { nextMatchId:'gf',       nextMatchSlot:'A', loserMatchId:'lb-final', loserMatchSlot:'B' }),
       ]},
       { name: 'Lower Bracket', matches: [
-        makeMatch('l1', 1, { nextMatchId:'l3', nextMatchSlot:'A' }),
-        makeMatch('l2', 1, { nextMatchId:'l4', nextMatchSlot:'A' }),
-        makeMatch('l3', 2, { nextMatchId:'l5', nextMatchSlot:'A' }),
-        makeMatch('l4', 2, { nextMatchId:'l5', nextMatchSlot:'B' }),
-        makeMatch('l5', 3, { nextMatchId:'l-final', nextMatchSlot:'A' }),
-        makeMatch('l-final', 4, { nextMatchId:'grand-final', nextMatchSlot:'B' }),
+        makeMatch('lb-r1-m1', 1, { nextMatchId:'lb-r2-m1', nextMatchSlot:'A' }),
+        makeMatch('lb-r1-m2', 1, { nextMatchId:'lb-r2-m2', nextMatchSlot:'A' }),
+        makeMatch('lb-r2-m1', 2, { nextMatchId:'lb-r3-m1', nextMatchSlot:'A' }),
+        makeMatch('lb-r2-m2', 2, { nextMatchId:'lb-r3-m1', nextMatchSlot:'B' }),
+        makeMatch('lb-r3-m1', 3, { nextMatchId:'lb-final', nextMatchSlot:'A' }),
+        makeMatch('lb-final',  4, { nextMatchId:'gf',       nextMatchSlot:'B' }),
       ]},
       { name: 'Grand Final', matches: [
-        makeMatch('grand-final', 1, { isFinal: true }),
+        makeMatch('gf', 1, { isFinal: true }),
       ]},
     ],
   };
@@ -130,17 +144,6 @@ function generateDoubleElim8() {
 
 /* ─── Group Stage ──────────────────────────────────────────────── */
 
-/**
- * Генерирует групповой этап.
- * Каждая группа — round-robin внутри себя.
- * Команды в группах хранятся как алиасы A1/A2/B1/B2 — замена на реальные
- * через /seed или /randomseed.
- *
- * Поле groupTeams хранит массив слотов каждой группы — именно их засеивают.
- *
- * НЕ генерирует плейофф внутри себя — плейофф создаётся как отдельная стадия
- * через finalizeBracket (многостадийный wizard).
- */
 function generateGroupStage({ groupCount, teamsPerGroup }) {
   if (![2, 4, 8].includes(groupCount)) {
     throw new Error(`Group Stage: поддерживается 2/4/8 групп, получено: ${groupCount}`);
@@ -149,58 +152,47 @@ function generateGroupStage({ groupCount, teamsPerGroup }) {
     throw new Error(`Group Stage: поддерживается 4/6/8 команд в группе, получено: ${teamsPerGroup}`);
   }
 
-  const groupLetters = ['A','B','C','D','E','F','G','H'];
-  const stages       = [];
-  let   matchCounter = 1;
+  const letters = ['a','b','c','d','e','f','g','h'];
+  const stages  = [];
+  let   mIdx    = 1;
 
   for (let g = 0; g < groupCount; g++) {
-    const letter    = groupLetters[g];
-    const groupName = `Группа ${letter}`;
-    // Алиасные имена слотов: A1, A2, ... — реальные команды вписываются через /seed
-    const teamSlots = Array.from({ length: teamsPerGroup }, (_, i) => `${letter}${i + 1}`);
+    const letter    = letters[g];
+    const Letter    = letter.toUpperCase();
+    const teamSlots = Array.from({ length: teamsPerGroup }, (_, i) => `${Letter}${i + 1}`);
     const matches   = [];
 
-    // Round-robin: раунды распределяются по схеме "круговой" —
-    // при чётном числе команд: N-1 раундов, каждый по N/2 матчей.
-    // При нечётном: N раундов по (N-1)/2 матчей (одна команда отдыхает).
     const n      = teamsPerGroup;
     const rounds = n % 2 === 0 ? n - 1 : n;
-
-    // Алгоритм круговой: фиксируем первую команду, вращаем остальных
     const roster = [...teamSlots];
     const fixed  = roster[0];
     const rotate = roster.slice(1);
 
     for (let r = 0; r < rounds; r++) {
-      const currentRoster = [fixed, ...rotate];
-      const pairs = [];
-      const half  = Math.floor(currentRoster.length / 2);
+      const cur  = [fixed, ...rotate];
+      const half = Math.floor(cur.length / 2);
       for (let i = 0; i < half; i++) {
-        pairs.push([currentRoster[i], currentRoster[currentRoster.length - 1 - i]]);
-      }
-      pairs.forEach(([tA, tB]) => {
         matches.push({
-          id:          `g${letter}-m${matchCounter++}`,
-          round:       r + 1,
-          isFinal:     false,
-          isGroupMatch:true,
-          groupName,
-          groupLetter: letter,
-          teamA:       tA,
-          teamB:       tB,
+          id:           `g${letter}-m${mIdx++}`,
+          round:        r + 1,
+          isFinal:      false,
+          isGroupMatch: true,
+          groupName:    `Группа ${Letter}`,
+          groupLetter:  Letter,
+          teamA:        cur[i],
+          teamB:        cur[cur.length - 1 - i],
           scoreA: 0, scoreB: 0,
           status: 'scheduled', winner: null, scheduledAt: null,
         });
-      });
-      // Поворот: последний элемент перемещается на вторую позицию
+      }
       rotate.unshift(rotate.pop());
     }
 
     stages.push({
-      name:       groupName,
-      groupLetter:letter,
-      teamSlots,           // слоты для посева — A1, A2, ...
-      isGroup:    true,
+      name:        `Группа ${Letter}`,
+      groupLetter: Letter,
+      teamSlots,
+      isGroup:     true,
       matches,
     });
   }
@@ -208,149 +200,117 @@ function generateGroupStage({ groupCount, teamsPerGroup }) {
   return { type: 'group', stages };
 }
 
-/**
- * Устаревший алиас для обратной совместимости с wizard который использует
- * generateGroupStagePlayoff. Теперь плейофф — отдельная стадия.
- */
-function generateGroupStagePlayoff({ groupCount, teamsPerGroup, advancingPerGroup = 2 }) {
+// Обратная совместимость
+function generateGroupStagePlayoff({ groupCount, teamsPerGroup }) {
   return generateGroupStage({ groupCount, teamsPerGroup });
 }
 
-/* ─── Swiss Stage (динамическая модель) ────────────────────────── */
+/* ─── Swiss Stage ──────────────────────────────────────────────── */
 
 /**
- * Генерирует Swiss Stage с настоящей динамической логикой.
+ * Генерирует Swiss Stage.
  *
- * Структура данных:
- *   bracket.swissConfig = { winsToAdvance, lossesToElim, teamCount, teams }
- *   bracket.stages = [ { name, isSwiss, swissRound, matches } ]
- *
- * Первый раунд генерируется сразу (случайные/последовательные пары).
- * Следующие раунды генерируются через generateSwissNextRound() после
- * внесения всех результатов текущего раунда.
- *
- * Пары строятся: команды с одинаковой записью (побед-поражений) играют друг с другом.
- * Команды, набравшие winsToAdvance, вышли. Набравшие lossesToElim — выбыли.
+ * Принципиальные отличия от SE:
+ * - Swiss-матчи НЕ имеют nextMatchId/nextMatchSlot — без автопродвижения
+ * - Следующий раунд строится через generateSwissNextRound() после завершения всех матчей
+ * - Плейофф заполняется ТОЛЬКО командами достигшими порога побед (через fillPlayoffFromSwiss)
+ * - ID: sw-r1-m1, sw-r1-m2, sw-r2-m1, ...
  */
 function generateSwissStage({ teamCount = 8, winsToAdvance = 3, lossesToElim = 3 } = {}) {
   if (![8, 16].includes(teamCount)) {
     throw new Error(`Swiss Stage: поддерживается 8/16 команд, получено: ${teamCount}`);
   }
 
-  // Инициализируем команды с записями
   const teams = Array.from({ length: teamCount }, (_, i) => ({
-    name:   `Команда ${i + 1}`,  // заменяется через /seed или /randomseed
-    wins:   0,
-    losses: 0,
-    active: true,   // false когда выбыл или вышел
-    advanced: false, // вышел в следующую стадию
+    name:       `Команда ${i + 1}`,
+    wins:       0,
+    losses:     0,
+    advanced:   false,
     eliminated: false,
   }));
 
-  // Генерируем первый раунд: пары подряд по позиции
   const round1Matches = [];
-  let matchCounter = 1;
   for (let i = 0; i < teamCount; i += 2) {
     round1Matches.push({
-      id:          `sw${matchCounter++}`,
-      round:       1,
-      swissRound:  1,
-      isFinal:     false,
-      isSwissMatch:true,
-      teamA:       teams[i].name,
-      teamB:       teams[i + 1].name,
+      id:           `sw-r1-m${Math.floor(i / 2) + 1}`,
+      round:        1,
+      swissRound:   1,
+      isFinal:      false,
+      isSwissMatch: true,
+      // НЕТ nextMatchId — Swiss не использует автопродвижение bracket-engine
+      teamA:        teams[i].name,
+      teamB:        teams[i + 1].name,
       scoreA: 0, scoreB: 0,
       status: 'scheduled', winner: null, scheduledAt: null,
     });
   }
 
   return {
-    type:        'swiss',
+    type:         'swiss',
     winsToAdvance,
     lossesToElim,
-    swissConfig: { winsToAdvance, lossesToElim, teamCount, teams },
+    swissConfig:  { winsToAdvance, lossesToElim, teamCount, teams },
     stages: [{
       name:       'Swiss Раунд 1',
       swissRound: 1,
       isSwiss:    true,
-      isFinal:    false,  // финал Swiss определяется особо
       matches:    round1Matches,
     }],
   };
 }
 
-/**
- * Вычислить текущие записи команд из всех сыгранных матчей Swiss.
- * Возвращает Map<teamName, { wins, losses, active, advanced, eliminated }>
- */
+/** Пересчитать записи команд из всех Swiss-матчей */
 function computeSwissStandings(bracket) {
   if (!bracket?.swissConfig) return new Map();
-
   const { winsToAdvance, lossesToElim, teams } = bracket.swissConfig;
-  // Восстанавливаем записи из результатов матчей
-  const standings = new Map();
-  teams.forEach(t => {
-    standings.set(t.name, { name: t.name, wins: 0, losses: 0, advanced: false, eliminated: false });
-  });
+  const map = new Map();
+  teams.forEach(t => map.set(t.name, { name: t.name, wins: 0, losses: 0, advanced: false, eliminated: false }));
 
   for (const stage of (bracket.stages || [])) {
     if (!stage.isSwiss) continue;
     for (const m of (stage.matches || [])) {
       if (m.status !== 'finished' || !m.winner) continue;
       const loser = m.winner === m.teamA ? m.teamB : m.teamA;
-      if (standings.has(m.winner)) standings.get(m.winner).wins++;
-      if (standings.has(loser))    standings.get(loser).losses++;
+      if (map.has(m.winner)) map.get(m.winner).wins++;
+      if (map.has(loser))    map.get(loser).losses++;
     }
   }
 
-  // Помечаем статус
-  for (const [, s] of standings) {
+  for (const [, s] of map) {
     if (s.wins   >= winsToAdvance) s.advanced    = true;
     if (s.losses >= lossesToElim)  s.eliminated  = true;
     s.active = !s.advanced && !s.eliminated;
   }
 
-  return standings;
+  return map;
 }
 
-/**
- * Проверить — все матчи текущего Swiss-раунда завершены?
- */
+/** Все матчи текущего Swiss-раунда завершены? */
 function isSwissRoundComplete(bracket) {
   if (!bracket?.stages) return false;
   const swissStages = bracket.stages.filter(s => s.isSwiss);
   if (!swissStages.length) return false;
-  const lastRound = swissStages[swissStages.length - 1];
-  return lastRound.matches.every(m => m.status === 'finished');
+  const last = swissStages[swissStages.length - 1];
+  return last.matches.every(m => m.status === 'finished');
 }
 
 /**
  * Сгенерировать следующий Swiss-раунд.
- * Пары: команды с одинаковой записью (wins-losses) играют друг с другом.
- * Команды которые уже вышли или выбыли — не участвуют.
- *
- * @param {object} bracket - мутируется (добавляется новая стадия)
- * @returns {{ ok: boolean, message: string, newStage: object|null }}
+ * Пары: команды с одинаковой записью побед-поражений.
+ * ID: sw-rN-m1, sw-rN-m2, ...
  */
 function generateSwissNextRound(bracket) {
-  if (!bracket?.swissConfig) {
-    return { ok: false, message: 'Это не Swiss bracket', newStage: null };
-  }
-  if (!isSwissRoundComplete(bracket)) {
-    return { ok: false, message: 'Не все матчи текущего раунда завершены', newStage: null };
-  }
+  if (!bracket?.swissConfig) return { ok: false, message: 'Не Swiss bracket', newStage: null };
+  if (!isSwissRoundComplete(bracket)) return { ok: false, message: 'Не все матчи текущего раунда завершены', newStage: null };
 
   const standings = computeSwissStandings(bracket);
-  const { winsToAdvance, lossesToElim } = bracket.swissConfig;
+  const active    = [...standings.values()].filter(s => s.active);
+  if (active.length < 2) return { ok: false, message: 'Недостаточно активных команд', newStage: null };
 
-  // Команды которые ещё играют
-  const active = [...standings.values()].filter(s => s.active);
+  const swissStages  = bracket.stages.filter(s => s.isSwiss);
+  const nextRound    = swissStages.length + 1;
 
-  if (active.length < 2) {
-    return { ok: false, message: 'Недостаточно активных команд для следующего раунда', newStage: null };
-  }
-
-  // Группируем по записи (wins-losses)
+  // Группируем по записи, сортируем по убыванию побед
   const byRecord = new Map();
   for (const s of active) {
     const key = `${s.wins}-${s.losses}`;
@@ -358,106 +318,128 @@ function generateSwissNextRound(bracket) {
     byRecord.get(key).push(s.name);
   }
 
-  // Строим пары внутри каждой группы записей
-  const matches      = [];
-  const swissStages  = bracket.stages.filter(s => s.isSwiss);
-  const nextRoundNum = swissStages.length + 1;
-  let   matchCounter = bracket.stages.flatMap(s => s.matches || []).length + 1;
-
-  // Сортируем группы по убыванию числа побед (начинаем с "лидеров")
   const sortedKeys = [...byRecord.keys()].sort((a, b) => {
     const [wa] = a.split('-').map(Number);
     const [wb] = b.split('-').map(Number);
     return wb - wa;
   });
 
+  const matches = [];
+  let   mIdx    = 1;
+
   for (const key of sortedKeys) {
     const group = byRecord.get(key);
-    // При нечётном числе — последняя команда "перетекает" в следующую группу
     for (let i = 0; i + 1 < group.length; i += 2) {
       matches.push({
-        id:          `sw${matchCounter++}`,
-        round:       nextRoundNum,
-        swissRound:  nextRoundNum,
-        isFinal:     false,
-        isSwissMatch:true,
-        teamA:       group[i],
-        teamB:       group[i + 1],
+        id:           `sw-r${nextRound}-m${mIdx++}`,
+        round:        nextRound,
+        swissRound:   nextRound,
+        isFinal:      false,
+        isSwissMatch: true,
+        // НЕТ nextMatchId
+        teamA:        group[i],
+        teamB:        group[i + 1],
         scoreA: 0, scoreB: 0,
         status: 'scheduled', winner: null, scheduledAt: null,
       });
     }
   }
 
-  if (!matches.length) {
-    return { ok: false, message: 'Не удалось составить пары (возможно все команды завершили Swiss)', newStage: null };
-  }
+  if (!matches.length) return { ok: false, message: 'Нет активных команд для следующего раунда', newStage: null };
 
   const newStage = {
-    name:       `Swiss Раунд ${nextRoundNum}`,
-    swissRound: nextRoundNum,
+    name:       `Swiss Раунд ${nextRound}`,
+    swissRound: nextRound,
     isSwiss:    true,
     matches,
   };
 
   bracket.stages.push(newStage);
-
-  // Обновляем swissConfig.teams из standings
   bracket.swissConfig.teams = [...standings.values()];
 
-  return { ok: true, message: `Раунд ${nextRoundNum} сгенерирован (${matches.length} матчей)`, newStage };
+  return { ok: true, message: `Раунд ${nextRound} создан (${matches.length} матчей)`, newStage };
 }
 
 /**
- * Получить итоговую таблицу Swiss как текст для Telegram.
+ * Заполнить слоты плейоффа командами достигшими порога побед в Swiss.
+ * Вызывается из /swissnext когда Swiss полностью завершён.
+ *
+ * @param {object} bracket — bracket с Swiss + Playoff стадиями
+ * @returns {{ ok, filled, message }}
  */
+function fillPlayoffFromSwiss(bracket) {
+  if (!bracket?.swissConfig) return { ok: false, filled: 0, message: 'Нет Swiss конфигурации' };
+
+  const standings = computeSwissStandings(bracket);
+  const advanced  = [...standings.values()]
+    .filter(s => s.advanced)
+    .sort((a, b) => b.wins - a.wins || a.losses - b.losses); // лучшие первыми
+
+  if (!advanced.length) return { ok: false, filled: 0, message: 'Нет команд достигших порога побед' };
+
+  // Ищем playoff стадию (не Swiss, не Group)
+  const playoffStages = bracket.stages.filter(s => !s.isSwiss && !s.isGroup);
+  if (!playoffStages.length) return { ok: true, filled: 0, message: 'Плейофф не найден в bracket (Swiss без плейоффа)' };
+
+  // Первый раунд плейоффа
+  const firstPlayoff = playoffStages[0];
+  const firstRound   = Math.min(...firstPlayoff.matches.map(m => m.round ?? 1));
+  const r1matches    = firstPlayoff.matches.filter(m => (m.round ?? 1) === firstRound);
+
+  // Заполняем слоты TBD по порядку
+  let filled = 0;
+  const slots = [];
+  for (const m of r1matches) {
+    if (!m.teamA || m.teamA === 'TBD') slots.push({ matchId: m.id, slot: 'A', match: m });
+    if (!m.teamB || m.teamB === 'TBD') slots.push({ matchId: m.id, slot: 'B', match: m });
+  }
+
+  for (let i = 0; i < Math.min(slots.length, advanced.length); i++) {
+    const { match, slot } = slots[i];
+    if (slot === 'A') match.teamA = advanced[i].name;
+    else              match.teamB = advanced[i].name;
+    filled++;
+  }
+
+  return { ok: true, filled, message: `${filled} команд посеяно в плейофф` };
+}
+
+/** Форматирование таблицы Swiss для Telegram */
 function formatSwissStandings(bracket) {
   const standings = computeSwissStandings(bracket);
   if (!standings.size) return 'Нет данных';
 
-  const { winsToAdvance, lossesToElim } = bracket.swissConfig;
-  const rows = [...standings.values()].sort((a, b) => (b.wins - b.losses) - (a.wins - a.losses));
-  const lines = rows.map(s => {
-    const status = s.advanced ? '✅' : s.eliminated ? '❌' : '⏳';
-    return `${status} ${s.name}: ${s.wins}W — ${s.losses}L`;
-  });
-  return lines.join('\n');
+  const { winsToAdvance, lossesToElim } = bracket.swissConfig || {};
+  return [...standings.values()]
+    .sort((a, b) => b.wins - a.wins || a.losses - b.losses)
+    .map(s => {
+      const icon = s.advanced ? '✅' : s.eliminated ? '❌' : '⏳';
+      return `${icon} ${s.name}: ${s.wins}W — ${s.losses}L`;
+    })
+    .join('\n');
 }
 
-/* ─── Посев: получить слоты ────────────────────────────────────── */
+/* ─── Посев ─────────────────────────────────────────────────────── */
 
 /**
- * Вернуть список слотов для ручного посева.
- *
- * Логика приоритета:
- * 1. Если есть Swiss стадии → возвращаем команды Swiss (teamSlots из swissConfig)
- * 2. Если есть Group стадии → возвращаем слоты каждой группы (isGroup: true)
- * 3. Иначе → возвращаем TBD-слоты первого раунда первой незаполненной стадии
- *
- * Это гарантирует что /seed всегда начинает с самого начала.
+ * Приоритет: Swiss → Group → первый раунд Playoff.
+ * Swiss и Group НЕ засеиваются в плейофф — только их стартовые слоты.
  */
 function getEmptySlots(bracket) {
   if (!bracket?.stages?.length) return [];
 
-  // Приоритет 1: Swiss — команды первого раунда
+  // Приоритет 1: Swiss-команды
   const swissStages = bracket.stages.filter(s => s.isSwiss);
-  if (swissStages.length) {
-    const firstSwiss = swissStages[0];
-    const slots = [];
-    if (bracket.swissConfig?.teams) {
-      bracket.swissConfig.teams.forEach((t, i) => {
-        slots.push({
-          type:     'swiss',
-          teamIndex: i,
-          current:  t.name,
-          label:    `Команда ${i + 1}`,
-        });
-      });
-    }
-    return slots;
+  if (swissStages.length && bracket.swissConfig?.teams) {
+    return bracket.swissConfig.teams.map((t, i) => ({
+      type:      'swiss',
+      teamIndex: i,
+      current:   t.name,
+      label:     `Команда ${i + 1}`,
+    }));
   }
 
-  // Приоритет 2: Group Stage — слоты каждой группы
+  // Приоритет 2: Group-слоты
   const groupStages = bracket.stages.filter(s => s.isGroup);
   if (groupStages.length) {
     const slots = [];
@@ -469,136 +451,113 @@ function getEmptySlots(bracket) {
           slotIndex:  i,
           slotName,
           stageName:  stage.name,
-          current:    slotName, // текущее значение (алиас или реальное имя)
+          current:    slotName,
         });
       });
     }
     return slots;
   }
 
-  // Приоритет 3: TBD-слоты первого раунда первой Play-стадии
-  const playstage = bracket.stages.find(s => !s.isGroup && !s.isSwiss && s.matches?.length);
-  if (!playstage) return [];
+  // Приоритет 3: первый раунд первой Playoff-стадии
+  const playStage = bracket.stages.find(s => !s.isGroup && !s.isSwiss && s.matches?.length);
+  if (!playStage) return [];
 
-  const matches  = playstage.matches;
-  const minRound = Math.min(...matches.map(m => m.round ?? 1));
+  const minRound = Math.min(...playStage.matches.map(m => m.round ?? 1));
   const slots    = [];
-
-  for (const m of matches.filter(m => (m.round ?? 1) === minRound)) {
-    if (!m.teamA || m.teamA === 'TBD') {
-      slots.push({ type:'match', matchId: m.id, slot:'A', stageName: playstage.name });
-    }
-    if (!m.teamB || m.teamB === 'TBD') {
-      slots.push({ type:'match', matchId: m.id, slot:'B', stageName: playstage.name });
-    }
+  for (const m of playStage.matches.filter(m => (m.round ?? 1) === minRound)) {
+    if (!m.teamA || m.teamA === 'TBD') slots.push({ type:'match', matchId:m.id, slot:'A', stageName:playStage.name });
+    if (!m.teamB || m.teamB === 'TBD') slots.push({ type:'match', matchId:m.id, slot:'B', stageName:playStage.name });
   }
-
   return slots;
 }
 
-/**
- * Вписать команду в слот (поддерживает все три типа слотов).
- */
+/** Вписать команду в слот */
 function seedTeamInSlot(bracket, slotDescriptor, teamName) {
   if (slotDescriptor.type === 'swiss') {
-    const { teamIndex } = slotDescriptor;
-    const team = bracket.swissConfig?.teams?.[teamIndex];
-    if (!team) throw new Error(`Swiss слот ${teamIndex} не найден`);
-    const oldName = team.name;
+    const team = bracket.swissConfig?.teams?.[slotDescriptor.teamIndex];
+    if (!team) throw new Error(`Swiss слот ${slotDescriptor.teamIndex} не найден`);
+    const old = team.name;
     team.name = teamName;
-    // Обновляем имя в матчах первого раунда
-    const firstSwiss = bracket.stages.find(s => s.isSwiss && s.swissRound === 1);
-    if (firstSwiss) {
-      for (const m of firstSwiss.matches) {
-        if (m.teamA === oldName) m.teamA = teamName;
-        if (m.teamB === oldName) m.teamB = teamName;
-      }
+    const r1 = bracket.stages.find(s => s.isSwiss && s.swissRound === 1);
+    if (r1) for (const m of r1.matches) {
+      if (m.teamA === old) m.teamA = teamName;
+      if (m.teamB === old) m.teamB = teamName;
     }
     return;
   }
 
   if (slotDescriptor.type === 'group') {
-    const { stageIndex, slotIndex, slotName } = slotDescriptor;
-    const stage = bracket.stages[stageIndex];
-    if (!stage) throw new Error(`Стадия ${stageIndex} не найдена`);
-    const oldName = stage.teamSlots[slotIndex];
-    stage.teamSlots[slotIndex] = teamName;
-    // Обновляем имя во всех матчах группы
+    const stage = bracket.stages[slotDescriptor.stageIndex];
+    if (!stage) throw new Error(`Стадия ${slotDescriptor.stageIndex} не найдена`);
+    const old = stage.teamSlots[slotDescriptor.slotIndex];
+    stage.teamSlots[slotDescriptor.slotIndex] = teamName;
     for (const m of (stage.matches || [])) {
-      if (m.teamA === oldName) m.teamA = teamName;
-      if (m.teamB === oldName) m.teamB = teamName;
+      if (m.teamA === old) m.teamA = teamName;
+      if (m.teamB === old) m.teamB = teamName;
     }
     return;
   }
 
-  // type === 'match' — обычный TBD-слот
-  const { matchId, slot } = slotDescriptor;
+  // type === 'match'
   for (const stage of bracket.stages) {
     for (const m of (stage.matches || [])) {
-      if (m.id === matchId) {
-        if (slot === 'A') m.teamA = teamName;
-        else              m.teamB = teamName;
+      if (m.id === slotDescriptor.matchId) {
+        if (slotDescriptor.slot === 'A') m.teamA = teamName;
+        else                             m.teamB = teamName;
         return;
       }
     }
   }
-  throw new Error(`Матч "${matchId}" не найден`);
+  throw new Error(`Матч "${slotDescriptor.matchId}" не найден`);
 }
 
-/**
- * Случайное перемешивание слотов (для /randomseed).
- * Принимает массив имён команд, возвращает список операций посева.
- */
+/** Fisher-Yates shuffle */
 function randomShuffleTeams(teams) {
-  const shuffled = [...teams];
-  for (let i = shuffled.length - 1; i > 0; i--) {
+  const a = [...teams];
+  for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    [a[i], a[j]] = [a[j], a[i]];
   }
-  return shuffled;
+  return a;
 }
 
 /* ─── Валидация ─────────────────────────────────────────────────── */
 
 function validateGeneratedBracket(bracket) {
   const errors = [];
-  if (!bracket?.stages?.length) {
-    errors.push('bracket.stages пуст');
-    return errors;
-  }
+  if (!bracket?.stages?.length) { errors.push('bracket.stages пуст'); return errors; }
 
-  const seenIds = new Set();
-  const allIds  = new Set();
+  const seen = new Set();
+  const all  = new Set();
 
   for (const stage of bracket.stages) {
     for (const m of (stage.matches || [])) {
-      if (!m.id) { errors.push(`Матч без id в стадии "${stage.name}"`); continue; }
-      if (seenIds.has(m.id)) errors.push(`Дублирующийся id матча: "${m.id}"`);
-      seenIds.add(m.id);
-      allIds.add(m.id);
+      if (!m.id)           { errors.push(`Матч без id в стадии "${stage.name}"`); continue; }
+      if (seen.has(m.id))  errors.push(`Дублирующийся id: "${m.id}"`);
+      seen.add(m.id);
+      all.add(m.id);
     }
   }
 
   for (const stage of bracket.stages) {
     for (const m of (stage.matches || [])) {
-      if (m.nextMatchId && !allIds.has(m.nextMatchId)) {
+      if (m.nextMatchId && !all.has(m.nextMatchId))
         errors.push(`Матч "${m.id}": nextMatchId "${m.nextMatchId}" не существует`);
-      }
     }
   }
 
-  const finals = [];
+  const hasSwiss  = bracket.stages.some(s => s.isSwiss);
+  const hasGroup  = bracket.stages.some(s => s.isGroup);
+  const finals    = [];
   for (const stage of bracket.stages) {
     for (const m of (stage.matches || [])) {
       if (m.isFinal) finals.push(m.id);
     }
   }
 
-  // Swiss: финальный матч определяется иначе (последний раунд Swiss)
-  const hasSwiss = bracket.stages.some(s => s.isSwiss);
-  if (!hasSwiss) {
-    if (finals.length === 0) errors.push('Нет матча с isFinal: true');
-    if (finals.length  > 1) errors.push(`Несколько финальных матчей: ${finals.join(', ')}`);
+  if (!hasSwiss && !hasGroup) {
+    if (!finals.length) errors.push('Нет матча с isFinal: true');
+    if (finals.length > 1) errors.push(`Несколько финалов: ${finals.join(', ')}`);
   }
 
   return errors;
@@ -610,11 +569,12 @@ module.exports = {
   generateSingleElimination,
   generateDoubleElimination,
   generateGroupStage,
-  generateGroupStagePlayoff,  // совместимость
+  generateGroupStagePlayoff,
   generateSwissStage,
   generateSwissNextRound,
   computeSwissStandings,
   isSwissRoundComplete,
+  fillPlayoffFromSwiss,
   formatSwissStandings,
   getEmptySlots,
   seedTeamInSlot,
