@@ -877,10 +877,10 @@ const tournaments = [
               "isSwissMatch": true,
               "teamA": "Podosinovik",
               "teamB": "LETO Junior",
-              "scoreA": 0,
+              "scoreA": 2,
               "scoreB": 0,
-              "status": "scheduled",
-              "winner": null,
+              "status": "finished",
+              "winner": "Podosinovik",
               "scheduledAt": null
             },
             {
@@ -935,7 +935,7 @@ const tournaments = [
               "id": "s2m5",
               "round": 1,
               "isFinal": false,
-              "teamA": "TBD",
+              "teamA": "Podosinovik",
               "teamB": "TBD",
               "scoreA": 0,
               "scoreB": 0,
