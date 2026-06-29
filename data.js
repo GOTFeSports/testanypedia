@@ -875,7 +875,7 @@ const tournaments = [
               "swissRound": 1,
               "isFinal": false,
               "isSwissMatch": true,
-              "teamA": "Команда 1",
+              "teamA": "Podosinovik",
               "teamB": "Команда 2",
               "scoreA": 0,
               "scoreB": 0,
@@ -981,7 +981,7 @@ const tournaments = [
         "teamCount": 8,
         "teams": [
           {
-            "name": "Команда 1",
+            "name": "Podosinovik",
             "wins": 0,
             "losses": 0,
             "active": true,
