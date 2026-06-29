@@ -859,7 +859,292 @@ const tournaments = [
     ],
     "registrationStart": "2026-06-28",
     "registrationEnd": "2026-07-20",
-    "gameFormat": "Captains Draft"
+    "gameFormat": "Captains Draft",
+    "bracket": {
+      "type": "multi",
+      "stages": [
+        {
+          "name": "Swiss Раунд 1",
+          "swissRound": 1,
+          "isSwiss": true,
+          "isFinal": false,
+          "matches": [
+            {
+              "id": "s1m1",
+              "round": 1,
+              "swissRound": 1,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Podosinovik",
+              "teamB": "LETO Junior",
+              "scoreA": 2,
+              "scoreB": 0,
+              "status": "finished",
+              "winner": "Podosinovik",
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m2",
+              "round": 1,
+              "swissRound": 1,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Gitlz",
+              "teamB": "Bedlam Red",
+              "scoreA": 2,
+              "scoreB": 1,
+              "status": "finished",
+              "winner": "Gitlz",
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m3",
+              "round": 1,
+              "swissRound": 1,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Hater Zdes`",
+              "teamB": "EGOISTO Team",
+              "scoreA": 0,
+              "scoreB": 2,
+              "status": "finished",
+              "winner": "EGOISTO Team",
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m4",
+              "round": 1,
+              "swissRound": 1,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Team Sexy",
+              "teamB": "Never Back Down",
+              "scoreA": 1,
+              "scoreB": 2,
+              "status": "finished",
+              "winner": "Never Back Down",
+              "scheduledAt": null
+            }
+          ],
+          "_generatedType": "swiss"
+        },
+        {
+          "name": "Плейофф",
+          "matches": [
+            {
+              "id": "s2m5",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "Podosinovik",
+              "teamB": "Gitlz",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "s2m7",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "s2m6",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "EGOISTO Team",
+              "teamB": "Never Back Down",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "s2m7",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "s2m7",
+              "round": 2,
+              "isFinal": true,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ],
+          "_generatedType": "single"
+        },
+        {
+          "name": "Swiss Раунд 2",
+          "swissRound": 2,
+          "isSwiss": true,
+          "matches": [
+            {
+              "id": "sw8",
+              "round": 2,
+              "swissRound": 2,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Podosinovik",
+              "teamB": "Gitlz",
+              "scoreA": 1,
+              "scoreB": 2,
+              "status": "finished",
+              "winner": "Gitlz",
+              "scheduledAt": null
+            },
+            {
+              "id": "sw9",
+              "round": 2,
+              "swissRound": 2,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "EGOISTO Team",
+              "teamB": "Never Back Down",
+              "scoreA": 2,
+              "scoreB": 1,
+              "status": "finished",
+              "winner": "EGOISTO Team",
+              "scheduledAt": null
+            },
+            {
+              "id": "sw10",
+              "round": 2,
+              "swissRound": 2,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "LETO Junior",
+              "teamB": "Bedlam Red",
+              "scoreA": 2,
+              "scoreB": 0,
+              "status": "finished",
+              "winner": "LETO Junior",
+              "scheduledAt": null
+            },
+            {
+              "id": "sw11",
+              "round": 2,
+              "swissRound": 2,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Hater Zdes`",
+              "teamB": "Team Sexy",
+              "scoreA": 1,
+              "scoreB": 2,
+              "status": "finished",
+              "winner": "Team Sexy",
+              "scheduledAt": null
+            }
+          ]
+        },
+        {
+          "name": "Swiss Раунд 3",
+          "swissRound": 3,
+          "isSwiss": true,
+          "matches": [
+            {
+              "id": "sw12",
+              "round": 3,
+              "swissRound": 3,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Podosinovik",
+              "teamB": "LETO Junior",
+              "scoreA": 1,
+              "scoreB": 2,
+              "status": "finished",
+              "winner": "LETO Junior",
+              "scheduledAt": null
+            },
+            {
+              "id": "sw13",
+              "round": 3,
+              "swissRound": 3,
+              "isFinal": false,
+              "isSwissMatch": true,
+              "teamA": "Team Sexy",
+              "teamB": "Never Back Down",
+              "scoreA": 2,
+              "scoreB": 1,
+              "status": "finished",
+              "winner": "Team Sexy",
+              "scheduledAt": null
+            }
+          ]
+        }
+      ],
+      "swissConfig": {
+        "winsToAdvance": 2,
+        "lossesToElim": 2,
+        "teamCount": 8,
+        "teams": [
+          {
+            "name": "Podosinovik",
+            "wins": 1,
+            "losses": 1,
+            "advanced": false,
+            "eliminated": false,
+            "active": true
+          },
+          {
+            "name": "LETO Junior",
+            "wins": 1,
+            "losses": 1,
+            "advanced": false,
+            "eliminated": false,
+            "active": true
+          },
+          {
+            "name": "Gitlz",
+            "wins": 2,
+            "losses": 0,
+            "advanced": true,
+            "eliminated": false,
+            "active": false
+          },
+          {
+            "name": "Bedlam Red",
+            "wins": 0,
+            "losses": 2,
+            "advanced": false,
+            "eliminated": true,
+            "active": false
+          },
+          {
+            "name": "Hater Zdes`",
+            "wins": 0,
+            "losses": 2,
+            "advanced": false,
+            "eliminated": true,
+            "active": false
+          },
+          {
+            "name": "EGOISTO Team",
+            "wins": 2,
+            "losses": 0,
+            "advanced": true,
+            "eliminated": false,
+            "active": false
+          },
+          {
+            "name": "Team Sexy",
+            "wins": 1,
+            "losses": 1,
+            "advanced": false,
+            "eliminated": false,
+            "active": true
+          },
+          {
+            "name": "Never Back Down",
+            "wins": 1,
+            "losses": 1,
+            "advanced": false,
+            "eliminated": false,
+            "active": true
+          }
+        ]
+      }
+    }
   },
   {
     "id": "Bedlam-Summer-Cup-1x1",
