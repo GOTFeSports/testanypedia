@@ -7558,7 +7558,234 @@ const tournaments = [
     "prizePool": [],
     "teamsList": [],
     "casters": [],
-    "bracketEmbed": ""
+    "bracketEmbed": "",
+    "bracket": {
+      "type": "multi",
+      "stages": [
+        {
+          "name": "Swiss Раунд 1",
+          "swissRound": 1,
+          "isSwiss": true,
+          "matches": [
+            {
+              "id": "s1m1",
+              "round": 1,
+              "isFinal": false,
+              "swissRound": 1,
+              "teamA": "Команда 1",
+              "teamB": "Команда 2",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m2",
+              "round": 1,
+              "isFinal": false,
+              "swissRound": 1,
+              "teamA": "Команда 3",
+              "teamB": "Команда 4",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m3",
+              "round": 1,
+              "isFinal": false,
+              "swissRound": 1,
+              "teamA": "Команда 5",
+              "teamB": "Команда 6",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m4",
+              "round": 1,
+              "isFinal": false,
+              "swissRound": 1,
+              "teamA": "Команда 7",
+              "teamB": "Команда 8",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ]
+        },
+        {
+          "name": "Swiss Раунд 2",
+          "swissRound": 2,
+          "isSwiss": true,
+          "matches": [
+            {
+              "id": "s1m5",
+              "round": 2,
+              "isFinal": false,
+              "swissRound": 2,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m6",
+              "round": 2,
+              "isFinal": false,
+              "swissRound": 2,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m7",
+              "round": 2,
+              "isFinal": false,
+              "swissRound": 2,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m8",
+              "round": 2,
+              "isFinal": false,
+              "swissRound": 2,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ]
+        },
+        {
+          "name": "Swiss Раунд 3",
+          "swissRound": 3,
+          "isSwiss": true,
+          "matches": [
+            {
+              "id": "s1m9",
+              "round": 3,
+              "isFinal": false,
+              "swissRound": 3,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m10",
+              "round": 3,
+              "isFinal": false,
+              "swissRound": 3,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m11",
+              "round": 3,
+              "isFinal": false,
+              "swissRound": 3,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m12",
+              "round": 3,
+              "isFinal": false,
+              "swissRound": 3,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ]
+        },
+        {
+          "name": "Плейофф",
+          "matches": [
+            {
+              "id": "s2m13",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "LETO Junior",
+              "teamB": "HATER ZDES`",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "s2m15",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "s2m14",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "EGOISTO",
+              "teamB": "Never Back Down",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "s2m15",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "s2m15",
+              "round": 2,
+              "isFinal": true,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ]
+        }
+      ]
+    }
   },
   {
     "id": "день-поддержки-сирийского-правительства",
@@ -7580,6 +7807,269 @@ const tournaments = [
     "prizePool": [],
     "teamsList": [],
     "casters": [],
-    "bracketEmbed": ""
+    "bracketEmbed": "",
+    "bracket": {
+      "type": "multi",
+      "stages": [
+        {
+          "name": "Группа A",
+          "matches": [
+            {
+              "id": "s1m1",
+              "round": 1,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "A1",
+              "teamB": "A2",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m2",
+              "round": 1,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "A1",
+              "teamB": "A3",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m3",
+              "round": 2,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "A1",
+              "teamB": "A4",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m4",
+              "round": 2,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "A2",
+              "teamB": "A3",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m5",
+              "round": 3,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "A2",
+              "teamB": "A4",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m6",
+              "round": 3,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "A3",
+              "teamB": "A4",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ],
+          "isGroup": true
+        },
+        {
+          "name": "Группа B",
+          "matches": [
+            {
+              "id": "s1m7",
+              "round": 1,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "B1",
+              "teamB": "B2",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m8",
+              "round": 1,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "B1",
+              "teamB": "B3",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m9",
+              "round": 2,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "B1",
+              "teamB": "B4",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m10",
+              "round": 2,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "B2",
+              "teamB": "B3",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m11",
+              "round": 3,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "B2",
+              "teamB": "B4",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            },
+            {
+              "id": "s1m12",
+              "round": 3,
+              "isFinal": false,
+              "groupMatch": true,
+              "teamA": "B3",
+              "teamB": "B4",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ],
+          "isGroup": true
+        },
+        {
+          "name": "Плейофф",
+          "matches": [
+            {
+              "id": "s1m13",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "s1m15",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "s1m14",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "s1m15",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "s1m15",
+              "round": 2,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ]
+        },
+        {
+          "name": "Плейофф",
+          "matches": [
+            {
+              "id": "s2m16",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "s2m18",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "s2m17",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "s2m18",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "s2m18",
+              "round": 2,
+              "isFinal": true,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ]
+        }
+      ]
+    }
   }
 ];
