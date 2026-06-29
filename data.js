@@ -891,10 +891,10 @@ const tournaments = [
               "isSwissMatch": true,
               "teamA": "Gitlz",
               "teamB": "Bedlam Red",
-              "scoreA": 0,
-              "scoreB": 0,
-              "status": "scheduled",
-              "winner": null,
+              "scoreA": 2,
+              "scoreB": 1,
+              "status": "finished",
+              "winner": "Gitlz",
               "scheduledAt": null
             },
             {
@@ -936,7 +936,7 @@ const tournaments = [
               "round": 1,
               "isFinal": false,
               "teamA": "Podosinovik",
-              "teamB": "TBD",
+              "teamB": "Gitlz",
               "scoreA": 0,
               "scoreB": 0,
               "status": "scheduled",
