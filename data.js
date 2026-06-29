@@ -1029,10 +1029,10 @@ const tournaments = [
               "isSwissMatch": true,
               "teamA": "Hater Zdes`",
               "teamB": "Team Sexy",
-              "scoreA": 0,
-              "scoreB": 0,
-              "status": "scheduled",
-              "winner": null,
+              "scoreA": 1,
+              "scoreB": 2,
+              "status": "finished",
+              "winner": "Team Sexy",
               "scheduledAt": null
             }
           ]
