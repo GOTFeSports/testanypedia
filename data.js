@@ -1001,10 +1001,10 @@ const tournaments = [
               "isSwissMatch": true,
               "teamA": "EGOISTO Team",
               "teamB": "Never Back Down",
-              "scoreA": 0,
-              "scoreB": 0,
-              "status": "scheduled",
-              "winner": null,
+              "scoreA": 2,
+              "scoreB": 1,
+              "status": "finished",
+              "winner": "EGOISTO Team",
               "scheduledAt": null
             },
             {
