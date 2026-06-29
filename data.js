@@ -903,7 +903,7 @@ const tournaments = [
               "swissRound": 1,
               "isFinal": false,
               "isSwissMatch": true,
-              "teamA": "Команда 5",
+              "teamA": "Hater Zdes`",
               "teamB": "Команда 6",
               "scoreA": 0,
               "scoreB": 0,
@@ -1013,7 +1013,7 @@ const tournaments = [
             "eliminated": false
           },
           {
-            "name": "Команда 5",
+            "name": "Hater Zdes`",
             "wins": 0,
             "losses": 0,
             "active": true,
