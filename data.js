@@ -392,12 +392,22 @@ const tournaments = [
       {
         "place": 1,
         "amount": "Слот в Special",
-        "team": ""
+        "team": "EGOISTO Team"
       },
       {
         "place": 2,
         "amount": "Слот в Special",
-        "team": ""
+        "team": "Опята"
+      },
+      {
+        "place": 3,
+        "amount": "",
+        "team": "sigma aura"
+      },
+      {
+        "place": 4,
+        "amount": "",
+        "team": "Team Sexy"
       }
     ],
     "gameFormat": "Elimination Draft",
@@ -497,8 +507,8 @@ const tournaments = [
               "isFinal": true,
               "teamA": "EGOISTO Team",
               "teamB": "Опята",
-              "scoreA": 1,
-              "scoreB": 0,
+              "scoreA": 10,
+              "scoreB": 1,
               "status": "finished",
               "winner": "EGOISTO Team",
               "scheduledAt": null
