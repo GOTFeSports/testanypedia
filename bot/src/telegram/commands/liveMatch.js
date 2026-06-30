@@ -107,6 +107,10 @@ async function matchCommand(ctx) {
     if (result.winner)           reply += `Победитель: <b>${result.winner}</b>\n`;
     if (result.advanced)         reply += `\n➡️ <b>${result.advanced.team}</b> → матч <code>${result.advanced.matchId}</code> (слот ${result.advanced.slot})`;
     if (result.tournamentWinner) reply += `\n\n🏆 <b>${result.tournamentWinner}</b> — победитель турнира!`;
+    if (result.prizesAutoFilled?.filled) {
+      const pl = Object.entries(result.prizesAutoFilled.places).map(([p,t])=>`${p} место — ${t}`).join('\n');
+      reply += `\n\n🎖 <b>Призёры определены:</b>\n${pl}`;
+    }
     if (result.warning)          reply += `\n\n⚠️ ${result.warning}`;
 
     await ctx.reply(reply, { parse_mode: 'HTML' });

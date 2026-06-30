@@ -736,14 +736,16 @@ async function swissNextCommand(ctx) {
         const result = generateSwissNextRound(t.bracket);
 
         if (!result.ok) {
-          // Следующий раунд не нужен — Swiss завершён.
-          // Заполняем плейофф победителями Swiss (если есть)
+          // generateSwissNextRound отказал — пробуем заполнить плейофф.
+          // fillPlayoffFromSwiss сам проверяет что ВСЕ команды финализированы
+          // (advanced/eliminated) и откажет если кто-то ещё активен —
+          // защита от преждевременного заполнения плейоффа.
           const fillResult = fillPlayoffFromSwiss(t.bracket);
           replyText = fillResult.filled > 0
             ? `🏆 Swiss завершён! ${fillResult.message}
 
 Плейофф готов: <code>/bracket ${tournamentId}</code>`
-            : `ℹ️ ${result.message}`;
+            : `ℹ️ ${fillResult.message || result.message}`;
           return tournaments;
         }
 

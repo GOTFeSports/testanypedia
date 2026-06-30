@@ -4,6 +4,7 @@ const { enqueueCommit } = require('../github/commitQueue');
 const { buildJsMutateFn, findTournamentById } = require('../data/jsDataFile');
 const { loadTournamentSync, loadBracketEngine } = require('../data/bracketEngineBridge');
 const { logAction } = require('../activityLog/logger');
+const { autoFillPrizes, isTournamentComplete } = require('./prizeAutoFill');
 const REPO_PATHS = require('../github/repoPaths');
 const log = require('../logger');
 
@@ -81,11 +82,27 @@ async function reportMatchWorkflow({
         throw new Error(result.error || 'Неизвестная ошибка движка сетки');
       }
 
+      let prizeResult = null;
+
+      // Автоматическое определение призёров, если турнир только что завершился
+      // (финальный матч стал finished с определённым победителем).
+      // Срабатывает независимо от формата сетки — Single/Double Elimination,
+      // Swiss+Playoff, Group+Playoff — extractSingleElimPlaces ищет isFinal
+      // в любой не-Swiss/не-Group стадии.
+      if (isTournamentComplete(tournament.bracket)) {
+        const fillRes = autoFillPrizes(tournament);
+        if (fillRes.filled) {
+          prizeResult = fillRes;
+          log.info({ tournamentId, places: fillRes.places }, 'reportMatchWorkflow: призёры автозаполнены');
+        }
+      }
+
       engineResult = {
         winner:           result.winner,
         advanced:         result.advanced,
         tournamentWinner: result.tournamentWinner,
         warning:          result.warning,
+        prizesAutoFilled: prizeResult,
       };
 
       return tournaments;
@@ -112,6 +129,7 @@ async function reportMatchWorkflow({
         matchId, scoreA, scoreB, force,
         winner:           engineResult?.winner          ?? null,
         tournamentWinner: engineResult?.tournamentWinner ?? null,
+        prizesAutoFilled: engineResult?.prizesAutoFilled?.places ?? null,
         commitSha,
       },
     });

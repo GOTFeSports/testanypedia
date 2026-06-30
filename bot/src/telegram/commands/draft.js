@@ -1,136 +1,198 @@
 'use strict';
 
 const { submitDraftWorkflow } = require('../../workflows/submitDraftWorkflow');
-const { getUserPermission } = require('../middleware/auth');
+const { getUserPermission }   = require('../middleware/auth');
 const log = require('../../logger');
 
+/**
+ * Wizard создания турнира — полная карточка.
+ * Обязательные поля: title, start, end, teams, format, organizer
+ * Всё остальное — /skip
+ */
+
 const wizardStates = new Map();
-const WIZARD_TTL_MS = 10 * 60 * 1000;
+const WIZARD_TTL_MS = 15 * 60 * 1000; // 15 минут
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_RE = /^\d{2}:\d{2}$/;
+const URL_RE  = /^https?:\/\/.+/;
+const INT_RE  = /^\d+$/;
 
 const STEPS = [
   {
     field: 'title',
     prompt:
-      '📌 <b>Шаг 1/9 — Название турнира</b>\n\n' +
-      'Введите полное название турнира.\n\n' +
-      '<i>Примеры: «RAMPAGE PULIK #5», «Enrage Lowrank Cup #12», «Турнир в честь Дня ВДВ»</i>',
-    validate: v => v.length < 3 ? 'Название слишком короткое (минимум 3 символа)' : null,
+      '📌 <b>Шаг 1/20 — Название турнира</b>\n\n' +
+      '<i>Пример: «RAMPAGE PULIK #5», «Enrage Lowrank Cup»</i>',
+    validate: v => v.length < 3 ? 'Минимум 3 символа' : null,
   },
   {
     field: 'organizer',
     prompt:
-      '🏢 <b>Шаг 2/9 — Организатор</b>\n\n' +
-      'Введите название организатора точно так, как оно указано на сайте.\n\n' +
-      '<i>Примеры: «RAMPAGE Tournaments», «Enrage», «ФКС России»</i>',
-    validate: v => v.length < 2 ? 'Слишком короткое название' : null,
+      '🏢 <b>Шаг 2/20 — Организатор</b>\n\n' +
+      '<i>Точное название как на сайте: «RAMPAGE Tournaments», «Enrage»</i>',
+    validate: v => v.length < 2 ? 'Слишком короткое' : null,
   },
   {
     field: 'start',
     prompt:
-      '📅 <b>Шаг 3/9 — Дата начала</b>\n\n' +
-      'Формат: <code>ГГГГ-ММ-ДД</code>\n\n' +
-      '<i>Пример: <code>2026-08-02</code></i>',
-    validate: v => /^\d{4}-\d{2}-\d{2}$/.test(v) ? null : 'Неверный формат. Нужно ГГГГ-ММ-ДД, например 2026-08-02',
+      '📅 <b>Шаг 3/20 — Дата начала</b>\n\n' +
+      'Формат: <code>ГГГГ-ММ-ДД</code>\n<i>Пример: <code>2026-08-02</code></i>',
+    validate: v => DATE_RE.test(v) ? null : 'Формат: ГГГГ-ММ-ДД',
   },
   {
     field: 'end',
     prompt:
-      '📅 <b>Шаг 4/9 — Дата окончания</b>\n\n' +
-      'Формат: <code>ГГГГ-ММ-ДД</code>\n\n' +
-      '<i>Если турнир однодневный — укажите ту же дату что и начало</i>',
-    validate: (v, data) => {
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return 'Неверный формат. Нужно ГГГГ-ММ-ДД, например 2026-08-02';
-      if (data.start && v < data.start) return `Дата окончания (${v}) не может быть раньше начала (${data.start})`;
+      '📅 <b>Шаг 4/20 — Дата окончания</b>\n\n' +
+      'Формат: <code>ГГГГ-ММ-ДД</code>\n<i>Если однодневный — та же дата что начало</i>',
+    validate: (v, d) => {
+      if (!DATE_RE.test(v)) return 'Формат: ГГГГ-ММ-ДД';
+      if (d.start && v < d.start) return `Конец не может быть раньше начала (${d.start})`;
       return null;
     },
   },
   {
-    field: 'prize',
-    optional: true,
+    field: 'teams',
     prompt:
-      '🏆 <b>Шаг 5/12 — Общий призовой фонд</b>\n\n' +
-      'Укажите итоговую сумму призового фонда.\n\n' +
-      '<i>Примеры: «12 000₽», «100 000₽»</i>\n\n' +
-      '➡️ /skip — пропустить',
-    validate: null,
+      '👥 <b>Шаг 5/20 — Количество команд</b>\n\n' +
+      '<i>Пример: 8, 16, 32</i>',
+    validate: v => INT_RE.test(v) && parseInt(v) > 1 ? null : 'Введите число больше 1',
   },
   {
-    field: 'prize1',
-    optional: true,
+    field: 'format',
     prompt:
-      '🥇 <b>Шаг 6/12 — Приз за 1 место</b>\n\n' +
-      '<i>Пример: «60 000₽»</i>\n\n' +
-      '➡️ /skip — пропустить',
+      '🎮 <b>Шаг 6/20 — Формат турнира</b>\n\n' +
+      '<i>Примеры: «Single Elimination», «Double Elimination», «Swiss + Playoff»</i>',
     validate: null,
   },
+  // Необязательные поля
   {
-    field: 'prize2',
+    field: 'startTime',
     optional: true,
     prompt:
-      '🥈 <b>Шаг 7/12 — Приз за 2 место</b>\n\n' +
-      '<i>Пример: «30 000₽»</i>\n\n' +
-      '➡️ /skip — пропустить',
-    validate: null,
+      '🕐 <b>Шаг 7/20 — Время начала</b>\n\n' +
+      'Формат: <code>ЧЧ:ММ</code> (по МСК)\n<i>Пример: <code>18:00</code></i>\n\n➡️ /skip',
+    validate: v => TIME_RE.test(v) ? null : 'Формат: ЧЧ:ММ',
   },
   {
-    field: 'prize3',
+    field: 'registrationStart',
     optional: true,
     prompt:
-      '🥉 <b>Шаг 8/12 — Приз за 3 место</b>\n\n' +
-      '<i>Пример: «10 000₽»</i>\n\n' +
-      '➡️ /skip — пропустить',
-    validate: null,
+      '📝 <b>Шаг 8/20 — Начало регистрации</b>\n\n' +
+      'Формат: <code>ГГГГ-ММ-ДД</code>\n\n➡️ /skip',
+    validate: v => DATE_RE.test(v) ? null : 'Формат: ГГГГ-ММ-ДД',
+  },
+  {
+    field: 'registrationEnd',
+    optional: true,
+    prompt:
+      '📝 <b>Шаг 9/20 — Конец регистрации</b>\n\n' +
+      'Формат: <code>ГГГГ-ММ-ДД</code>\n\n➡️ /skip',
+    validate: v => DATE_RE.test(v) ? null : 'Формат: ГГГГ-ММ-ДД',
   },
   {
     field: 'limit',
     optional: true,
     prompt:
-      '👥 <b>Шаг 9/12 — Лимит MMR / условия участия</b>\n\n' +
-      'Укажите ограничения на участие.\n\n' +
-      '<i>Примеры: «До 30 000 MMR на команду», «До 5 000 MMR на игрока», «Без лимита»</i>\n\n' +
-      '➡️ /skip — пропустить',
+      '📊 <b>Шаг 10/20 — Лимит MMR</b>\n\n' +
+      '<i>Пример: «До 30 000 MMR на команду»</i>\n\n➡️ /skip',
     validate: null,
   },
   {
-    field: 'format',
+    field: 'prize',
     optional: true,
     prompt:
-      '🎮 <b>Шаг 10/12 — Формат турнира</b>\n\n' +
-      'Система проведения.\n\n' +
-      '<i>Примеры: «Single Elimination», «Double Elimination», «Round Robin», «Групповой этап + плейофф»</i>\n\n' +
-      '➡️ /skip — пропустить',
+      '🏆 <b>Шаг 11/20 — Общий призовой фонд</b>\n\n' +
+      '<i>Пример: «100 000₽»</i>\n\n➡️ /skip',
+    validate: null,
+  },
+  {
+    field: 'prize1',
+    optional: true,
+    prompt: '🥇 <b>Шаг 12/20 — Приз за 1 место</b>\n\n<i>Пример: «60 000₽»</i>\n\n➡️ /skip',
+    validate: null,
+  },
+  {
+    field: 'prize2',
+    optional: true,
+    prompt: '🥈 <b>Шаг 13/20 — Приз за 2 место</b>\n\n<i>Пример: «30 000₽»</i>\n\n➡️ /skip',
+    validate: null,
+  },
+  {
+    field: 'prize3',
+    optional: true,
+    prompt: '🥉 <b>Шаг 14/20 — Приз за 3 место</b>\n\n<i>Пример: «10 000₽»</i>\n\n➡️ /skip',
+    validate: null,
+  },
+  {
+    field: 'location',
+    optional: true,
+    prompt: '📍 <b>Шаг 15/20 — Локация</b>\n\n<i>Пример: «СНГ», «Россия», «Онлайн»</i>\n\n➡️ /skip',
+    validate: null,
+  },
+  {
+    field: 'gameFormat',
+    optional: true,
+    prompt:
+      '🎯 <b>Шаг 16/20 — Игровой формат</b>\n\n' +
+      '<i>Пример: «Captains Mode», «All Pick»</i>\n\n➡️ /skip',
     validate: null,
   },
   {
     field: 'telegramLink',
     optional: true,
+    prompt: '💬 <b>Шаг 17/23 — Telegram канал/группа</b>\n\n<i>https://t.me/...</i>\n\n➡️ /skip',
+    validate: v => URL_RE.test(v) ? null : 'Нужна ссылка https://...',
+  },
+  {
+    field: 'discordLink',
+    optional: true,
+    prompt: '🎮 <b>Шаг 18/23 — Discord</b>\n\n<i>https://discord.gg/...</i>\n\n➡️ /skip',
+    validate: v => URL_RE.test(v) ? null : 'Нужна ссылка https://...',
+  },
+  {
+    field: 'rulesLink',
+    optional: true,
+    prompt: '📜 <b>Шаг 19/23 — Ссылка на правила</b>\n\n<i>https://...</i>\n\n➡️ /skip',
+    validate: v => URL_RE.test(v) ? null : 'Нужна ссылка https://...',
+  },
+  {
+    field: 'dotabuffLink',
+    optional: true,
+    prompt: '📊 <b>Шаг 20/23 — Dotabuff турнира</b>\n\n<i>https://www.dotabuff.com/...</i>\n\n➡️ /skip',
+    validate: v => URL_RE.test(v) ? null : 'Нужна ссылка https://...',
+  },
+  {
+    field: 'bracketEmbed',
+    optional: true,
     prompt:
-      '💬 <b>Шаг 11/12 — Ссылка на Telegram-канал или группу</b>\n\n' +
-      'Где участники найдут актуальную информацию о турнире.\n\n' +
-      '<i>Пример: <code>https://t.me/rampagetournaments</code></i>\n\n' +
-      '➡️ /skip — пропустить',
-    validate: v => /^https?:\/\/.+/.test(v) ? null : 'Должна быть ссылка вида https://t.me/...',
+      '🖼 <b>Шаг 21/23 — Embed-ссылка на внешнюю сетку</b>\n\n' +
+      'Используется только если НЕ создаёте сетку через /createbracket.\n\n' +
+      '<i>https://challonge.com/embed/...</i>\n\n➡️ /skip',
+    validate: v => URL_RE.test(v) ? null : 'Нужна ссылка https://...',
+  },
+  {
+    field: 'casters',
+    optional: true,
+    prompt:
+      '🎙 <b>Шаг 22/23 — Кастеры</b>\n\n' +
+      'Через запятую: <code>Имя1, Имя2</code>\n\n➡️ /skip',
+    validate: null,
   },
   {
     field: 'description',
     optional: true,
-    prompt:
-      '📝 <b>Шаг 12/12 — Описание турнира</b>\n\n' +
-      'Любая дополнительная информация: правила, особенности, требования к участникам.\n\n' +
-      '<i>Можно написать несколько предложений</i>\n\n' +
-      '➡️ /skip — пропустить',
+    prompt: '📝 <b>Шаг 23/23 — Описание</b>\n\nДополнительная информация.\n\n➡️ /skip',
     validate: null,
   },
 ];
 
-function isExpired(state) {
-  return Date.now() - state.startedAt > WIZARD_TTL_MS;
-}
+function isExpired(s) { return Date.now() - s.startedAt > WIZARD_TTL_MS; }
 
 function cleanExpired() {
   const now = Date.now();
-  for (const [id, state] of wizardStates.entries()) {
-    if (now - state.startedAt > WIZARD_TTL_MS) wizardStates.delete(id);
+  for (const [id, s] of wizardStates.entries()) {
+    if (now - s.startedAt > WIZARD_TTL_MS) wizardStates.delete(id);
   }
 }
 
@@ -138,29 +200,30 @@ async function sendStep(ctx, stepIndex) {
   await ctx.reply(STEPS[stepIndex].prompt, { parse_mode: 'HTML' });
 }
 
-async function sendSummary(ctx, data) {
+function buildSummary(data) {
   const lines = [
-    '📋 <b>Проверьте заявку перед отправкой:</b>\n',
-    `📌 Название: <b>${data.title}</b>`,
-    `🏢 Организатор: ${data.organizer}`,
-    `📅 Даты: ${data.start} — ${data.end}`,
-    data.prize        ? `🏆 Призовой фонд: ${data.prize}`   : '🏆 Призовой фонд: не указан',
-    data.prize1       ? `🥇 1 место: ${data.prize1}`             : null,
-    data.prize2       ? `🥈 2 место: ${data.prize2}`             : null,
-    data.prize3       ? `🥉 3 место: ${data.prize3}`             : null,
-    data.limit        ? `👥 Лимит: ${data.limit}`           : '👥 Лимит: не указан',
-    data.format       ? `🎮 Формат: ${data.format}`         : '🎮 Формат: не указан',
-    data.telegramLink ? `💬 Telegram: ${data.telegramLink}` : '💬 Telegram: не указан',
-    data.description  ? `📝 Описание: ${data.description}`  : null,
-  ].filter(Boolean);
+    '📋 <b>Проверьте заявку:</b>\n',
+    `📌 <b>${data.title}</b>`,
+    `🏢 ${data.organizer}`,
+    `📅 ${data.start} — ${data.end}`,
+    data.startTime         ? `🕐 Начало: ${data.startTime} МСК`          : null,
+    data.registrationStart ? `📝 Рег.: ${data.registrationStart}` + (data.registrationEnd ? ` — ${data.registrationEnd}` : '') : null,
+    `👥 Команд: ${data.teams}`,
+    `🎮 Формат: ${data.format}`,
+    data.limit             ? `📊 ${data.limit}`                           : null,
+    data.location          ? `📍 ${data.location}`                        : null,
+    data.gameFormat        ? `🎯 ${data.gameFormat}`                      : null,
+    data.prize             ? `🏆 Приз: ${data.prize}`                     : null,
+    data.prize1            ? `🥇 1 место: ${data.prize1}`                 : null,
+    data.prize2            ? `🥈 2 место: ${data.prize2}`                 : null,
+    data.prize3            ? `🥉 3 место: ${data.prize3}`                 : null,
+    data.telegramLink      ? `💬 ${data.telegramLink}`                    : null,
+    data.discordLink       ? `🎮 ${data.discordLink}`                     : null,
+    data.casters           ? `🎙 Кастеры: ${data.casters}`                : null,
+    data.description       ? `\n📝 ${data.description}`                   : null,
+  ].filter(Boolean).join('\n');
 
-  await ctx.reply(
-    lines.join('\n') +
-    '\n\n✅ Всё верно? Напишите <b>да</b> для отправки\n' +
-    '✏️ Хотите изменить — напишите <b>нет</b> и начните заново (/draft)\n' +
-    '❌ Отменить — /cancel',
-    { parse_mode: 'HTML' }
-  );
+  return lines + '\n\n✅ Отправить — <b>да</b>\n❌ Отменить — /cancel';
 }
 
 async function draftCommand(ctx) {
@@ -169,10 +232,10 @@ async function draftCommand(ctx) {
 
   const existing = wizardStates.get(userId);
   if (existing && !isExpired(existing)) {
-    const stepIdx = typeof existing.step === 'number' ? existing.step : null;
+    const si = typeof existing.step === 'number' ? existing.step : null;
     return ctx.reply(
-      `⚠️ У вас уже есть незавершённая заявка${stepIdx !== null ? ` (шаг ${stepIdx + 1}/9)` : ''}.\n\n` +
-      'Продолжите заполнение или введите /cancel для отмены.',
+      `⚠️ У вас уже есть незавершённая заявка${si !== null ? ` (шаг ${si + 1}/20)` : ''}.\n\n` +
+      'Продолжите или введите /cancel для отмены.',
       { parse_mode: 'HTML' }
     );
   }
@@ -181,13 +244,10 @@ async function draftCommand(ctx) {
 
   await ctx.reply(
     '📋 <b>Подача заявки на турнир</b>\n\n' +
-    'Отвечайте на вопросы по одному.\n' +
-    'Необязательные шаги можно пропустить командой /skip.\n' +
-    'Отменить в любой момент: /cancel\n\n' +
-    '─────────────────────',
+    '20 шагов. Необязательные — /skip.\n' +
+    'Отменить: /cancel\n\n──────────────────',
     { parse_mode: 'HTML' }
   );
-
   await sendStep(ctx, 0);
 }
 
@@ -203,21 +263,13 @@ async function cancelCommand(ctx) {
 async function processWizardText(ctx) {
   const userId = ctx.from?.id;
   const state  = wizardStates.get(userId);
+  if (!state || isExpired(state)) { wizardStates.delete(userId); return false; }
 
-  if (!state || isExpired(state)) {
-    wizardStates.delete(userId);
-    return false;
-  }
-
-  // Шаг подтверждения
-  if (state.step === 'confirm') {
-    await handleConfirm(ctx, state, userId);
-    return true;
-  }
+  if (state.step === 'confirm') { await handleConfirm(ctx, state, userId); return true; }
 
   const text    = (ctx.message?.text || '').trim();
   const stepDef = STEPS[state.step];
-  const isSkip  = (text === '/skip');
+  const isSkip  = text === '/skip';
 
   if (text === '/cancel') {
     wizardStates.delete(userId);
@@ -227,20 +279,14 @@ async function processWizardText(ctx) {
 
   if (isSkip) {
     if (!stepDef.optional) {
-      await ctx.reply(
-        `⚠️ Этот шаг обязателен, /skip недоступен.\n\n${stepDef.prompt}`,
-        { parse_mode: 'HTML' }
-      );
+      await ctx.reply(`⚠️ Этот шаг обязателен.\n\n${stepDef.prompt}`, { parse_mode: 'HTML' });
       return true;
     }
     state.data[stepDef.field] = '';
   } else {
     if (stepDef.validate) {
-      const error = stepDef.validate(text, state.data);
-      if (error) {
-        await ctx.reply(`❌ ${error}\n\nПопробуйте ещё раз:`, { parse_mode: 'HTML' });
-        return true;
-      }
+      const err = stepDef.validate(text, state.data);
+      if (err) { await ctx.reply(`❌ ${err}\n\nПовторите:`, { parse_mode: 'HTML' }); return true; }
     }
     state.data[stepDef.field] = text;
   }
@@ -249,7 +295,7 @@ async function processWizardText(ctx) {
 
   if (state.step >= STEPS.length) {
     state.step = 'confirm';
-    await sendSummary(ctx, state.data);
+    await ctx.reply(buildSummary(state.data), { parse_mode: 'HTML' });
     return true;
   }
 
@@ -260,61 +306,74 @@ async function processWizardText(ctx) {
 async function handleConfirm(ctx, state, userId) {
   const text = (ctx.message?.text || '').trim().toLowerCase();
 
-  if (['да', 'yes', '+', 'ок', 'ok'].includes(text)) {
+  if (['да','yes','+','ок','ok'].includes(text)) {
     wizardStates.delete(userId);
     await ctx.sendChatAction('typing');
 
     try {
-      const permission = await getUserPermission(userId);
-      const data       = state.data;
+      const perm = await getUserPermission(userId);
+      const d    = state.data;
+
+      // Собираем prizePool
+      const prizePool = [];
+      if (d.prize1) prizePool.push({ place: 1, amount: d.prize1, team: '' });
+      if (d.prize2) prizePool.push({ place: 2, amount: d.prize2, team: '' });
+      if (d.prize3) prizePool.push({ place: 3, amount: d.prize3, team: '' });
+
+      // Кастеры
+      const casters = d.casters
+        ? d.casters.split(',').map(s => ({ name: s.trim(), link: '' })).filter(c => c.name)
+        : [];
 
       const result = await submitDraftWorkflow({
         submittedBy:   userId,
         actorRole:     ctx.userRole || 'organizer',
-        organizerName: permission?.organizerId || data.organizer,
+        organizerName: perm?.organizerId || d.organizer,
         payload: {
-          title:            data.title,
-          start:            data.start,
-          end:              data.end,
-          organizer:        data.organizer,
-          prize:            data.prize        || '',
-          prizePool: [
-            ...(data.prize1 ? [{ place: 1, amount: data.prize1, team: '' }] : []),
-            ...(data.prize2 ? [{ place: 2, amount: data.prize2, team: '' }] : []),
-            ...(data.prize3 ? [{ place: 3, amount: data.prize3, team: '' }] : []),
-          ],
-          limit:            data.limit        || '',
-          location:         'СНГ',
-          format:           data.format       || '',
-          gameFormat:       '',
-          description:      data.description  || '',
-          telegramLink:     data.telegramLink  || '',
-          registrationLink: '',
+          title:             d.title,
+          start:             d.start,
+          end:               d.end,
+          startTime:         d.startTime         || '',
+          registrationStart: d.registrationStart || '',
+          registrationEnd:   d.registrationEnd   || '',
+          teams:             d.teams             || '',
+          organizer:         d.organizer,
+          format:            d.format            || '',
+          gameFormat:        d.gameFormat        || '',
+          limit:             d.limit             || '',
+          prize:             d.prize             || '',
+          location:          d.location          || 'СНГ',
+          description:       d.description       || '',
+          telegramLink:      d.telegramLink      || '',
+          discordLink:       d.discordLink       || '',
+          rulesLink:         d.rulesLink         || '',
+          dotabuffLink:      d.dotabuffLink      || '',
+          bracketEmbed:      d.bracketEmbed      || '',
+          registrationLink:  '',
+          prizePool,
+          casters,
         },
       });
 
       await ctx.reply(
         `✅ <b>Заявка отправлена!</b>\n\n` +
-        `Турнир: <b>${data.title}</b>\n` +
+        `Турнир: <b>${d.title}</b>\n` +
         `ID черновика:\n<code>${result.draftId}</code>\n\n` +
-        `Администратор проверит заявку и опубликует турнир на сайте.\n` +
-        `Следить за статусом: /mydrafts`,
+        `Администратор проверит и опубликует на сайте.\n` +
+        `Статус: /mydrafts`,
         { parse_mode: 'HTML' }
       );
 
     } catch (err) {
-      log.error({ userId, err: err.message }, 'wizard confirm: ошибка');
-      await ctx.reply(`❌ Ошибка при отправке: <code>${err.message}</code>`, { parse_mode: 'HTML' });
+      log.error({ userId, err: err.message }, 'draft confirm: ошибка');
+      await ctx.reply(`❌ Ошибка: <code>${err.message}</code>`, { parse_mode: 'HTML' });
     }
 
-  } else if (['нет', 'no', '-'].includes(text)) {
+  } else if (['нет','no','-'].includes(text)) {
     wizardStates.delete(userId);
-    await ctx.reply('❌ Заявка отменена.\n\nНачать заново: /draft');
+    await ctx.reply('❌ Отменено. Начать заново: /draft');
   } else {
-    await ctx.reply(
-      'Напишите <b>да</b> чтобы отправить заявку, или <b>нет</b> чтобы отменить.',
-      { parse_mode: 'HTML' }
-    );
+    await ctx.reply('Напишите <b>да</b> или <b>нет</b>.', { parse_mode: 'HTML' });
   }
 }
 

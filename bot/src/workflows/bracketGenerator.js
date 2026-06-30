@@ -299,18 +299,91 @@ function isSwissRoundComplete(bracket) {
  * Пары: команды с одинаковой записью побед-поражений.
  * ID: sw-rN-m1, sw-rN-m2, ...
  */
+/**
+ * Собрать историю всех уже сыгранных пар Swiss (для защиты от повторов).
+ * Возвращает Set строк "TeamA|TeamB" (отсортировано, так что порядок не важен).
+ */
+function getSwissPlayedPairs(bracket) {
+  const pairs = new Set();
+  for (const stage of (bracket.stages || [])) {
+    if (!stage.isSwiss) continue;
+    for (const m of (stage.matches || [])) {
+      if (m.teamA && m.teamB) {
+        pairs.add([m.teamA, m.teamB].sort().join('|'));
+      }
+    }
+  }
+  return pairs;
+}
+
+/**
+ * Построить пары внутри группы команд с одинаковым счётом,
+ * избегая повторных встреч. Использует жадный алгоритм:
+ * для каждой ещё не распределённой команды ищем первого доступного
+ * соперника, с которым она ещё не играла.
+ *
+ * Если внутри своей группы по счёту не находится пары без повтора —
+ * команда "переносится" в соседнюю группу (на одну ступень ниже по
+ * победам) — стандартная практика Swiss-систем при коллизиях.
+ *
+ * @returns {Array<[string,string]>} пары
+ */
+function pairTeamsAvoidingRepeats(sortedGroups, playedPairs) {
+  // sortedGroups: [[team,...], [team,...], ...] — от лучшей записи к худшей
+  const pairs    = [];
+  const unpaired = [];
+
+  // Собираем всех в один список с указанием исходной группы (для tie-break сортировки)
+  let pool = sortedGroups.flatMap((group, gi) => group.map(name => ({ name, gi })));
+
+  while (pool.length > 0) {
+    const current = pool.shift();
+    let opponentIdx = -1;
+
+    // Ищем первого доступного соперника без повторной встречи,
+    // предпочитая ближайших по группе (минимальная разница gi)
+    let bestDiff = Infinity;
+    for (let i = 0; i < pool.length; i++) {
+      const candidate = pool[i];
+      const pairKey   = [current.name, candidate.name].sort().join('|');
+      if (playedPairs.has(pairKey)) continue;
+
+      const diff = Math.abs(candidate.gi - current.gi);
+      if (diff < bestDiff) {
+        bestDiff    = diff;
+        opponentIdx = i;
+        if (diff === 0) break; // идеальное совпадение — та же группа, дальше не ищем
+      }
+    }
+
+    if (opponentIdx === -1) {
+      // Нет доступного соперника без повтора — команда не сыграет в этом раунде
+      // (статистически редкий случай при больших турнирах, но возможен в малых)
+      unpaired.push(current);
+      continue;
+    }
+
+    const opponent = pool.splice(opponentIdx, 1)[0];
+    pairs.push([current.name, opponent.name]);
+    playedPairs.add([current.name, opponent.name].sort().join('|'));
+  }
+
+  return { pairs, unpaired: unpaired.map(u => u.name) };
+}
+
 function generateSwissNextRound(bracket) {
   if (!bracket?.swissConfig) return { ok: false, message: 'Не Swiss bracket', newStage: null };
   if (!isSwissRoundComplete(bracket)) return { ok: false, message: 'Не все матчи текущего раунда завершены', newStage: null };
 
   const standings = computeSwissStandings(bracket);
-  const active    = [...standings.values()].filter(s => s.active);
+  const active     = [...standings.values()].filter(s => s.active);
   if (active.length < 2) return { ok: false, message: 'Недостаточно активных команд', newStage: null };
 
-  const swissStages  = bracket.stages.filter(s => s.isSwiss);
+  const swissStages = bracket.stages.filter(s => s.isSwiss);
   const nextRound    = swissStages.length + 1;
+  const playedPairs  = getSwissPlayedPairs(bracket);
 
-  // Группируем по записи, сортируем по убыванию побед
+  // Группируем по записи (wins-losses), сортируем по убыванию побед
   const byRecord = new Map();
   for (const s of active) {
     const key = `${s.wins}-${s.losses}`;
@@ -324,28 +397,23 @@ function generateSwissNextRound(bracket) {
     return wb - wa;
   });
 
-  const matches = [];
-  let   mIdx    = 1;
+  const sortedGroups = sortedKeys.map(k => byRecord.get(k));
+  const { pairs, unpaired } = pairTeamsAvoidingRepeats(sortedGroups, playedPairs);
 
-  for (const key of sortedKeys) {
-    const group = byRecord.get(key);
-    for (let i = 0; i + 1 < group.length; i += 2) {
-      matches.push({
-        id:           `sw-r${nextRound}-m${mIdx++}`,
-        round:        nextRound,
-        swissRound:   nextRound,
-        isFinal:      false,
-        isSwissMatch: true,
-        // НЕТ nextMatchId
-        teamA:        group[i],
-        teamB:        group[i + 1],
-        scoreA: 0, scoreB: 0,
-        status: 'scheduled', winner: null, scheduledAt: null,
-      });
-    }
+  if (!pairs.length) {
+    return { ok: false, message: 'Нет доступных пар без повторных встреч', newStage: null };
   }
 
-  if (!matches.length) return { ok: false, message: 'Нет активных команд для следующего раунда', newStage: null };
+  const matches = pairs.map(([teamA, teamB], i) => ({
+    id:           `sw-r${nextRound}-m${i + 1}`,
+    round:        nextRound,
+    swissRound:   nextRound,
+    isFinal:      false,
+    isSwissMatch: true,
+    teamA, teamB,
+    scoreA: 0, scoreB: 0,
+    status: 'scheduled', winner: null, scheduledAt: null,
+  }));
 
   const newStage = {
     name:       `Swiss Раунд ${nextRound}`,
@@ -357,7 +425,11 @@ function generateSwissNextRound(bracket) {
   bracket.stages.push(newStage);
   bracket.swissConfig.teams = [...standings.values()];
 
-  return { ok: true, message: `Раунд ${nextRound} создан (${matches.length} матчей)`, newStage };
+  const msg = unpaired.length
+    ? `Раунд ${nextRound} создан (${matches.length} матчей). ⚠️ ${unpaired.length} команд(а) без пары: ${unpaired.join(', ')}`
+    : `Раунд ${nextRound} создан (${matches.length} матчей)`;
+
+  return { ok: true, message: msg, newStage, unpaired };
 }
 
 /**
@@ -371,7 +443,23 @@ function fillPlayoffFromSwiss(bracket) {
   if (!bracket?.swissConfig) return { ok: false, filled: 0, message: 'Нет Swiss конфигурации' };
 
   const standings = computeSwissStandings(bracket);
-  const advanced  = [...standings.values()]
+  const allTeams  = [...standings.values()];
+
+  // КРИТИЧЕСКАЯ ПРОВЕРКА: плейофф заполняется ТОЛЬКО когда Swiss полностью
+  // завершён — то есть каждая команда либо вышла (advanced), либо выбыла
+  // (eliminated). Если есть хотя бы одна активная команда — рано заполнять
+  // плейофф, иначе слоты займут случайные текущие лидеры, а не финальный
+  // состав вышедших.
+  const stillActive = allTeams.filter(t => t.active);
+  if (stillActive.length > 0) {
+    return {
+      ok: false,
+      filled: 0,
+      message: `Swiss ещё не завершён: ${stillActive.length} команд(а) всё ещё играют (${stillActive.map(t=>t.name).join(', ')})`,
+    };
+  }
+
+  const advanced = allTeams
     .filter(s => s.advanced)
     .sort((a, b) => b.wins - a.wins || a.losses - b.losses); // лучшие первыми
 
@@ -572,6 +660,8 @@ module.exports = {
   generateGroupStagePlayoff,
   generateSwissStage,
   generateSwissNextRound,
+  getSwissPlayedPairs,
+  pairTeamsAvoidingRepeats,
   computeSwissStandings,
   isSwissRoundComplete,
   fillPlayoffFromSwiss,
