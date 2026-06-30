@@ -1314,7 +1314,7 @@ const tournaments = [
     "prizePool": [
       {
         "place": 1,
-        "amount": "1.000₽",
+        "amount": "3000",
         "team": "HalalTeam"
       }
     ],
