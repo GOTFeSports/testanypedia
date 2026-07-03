@@ -385,7 +385,7 @@ const tournaments = [
               "teamB": "6GAZAN7",
               "scoreA": 0,
               "scoreB": 0,
-              "status": "scheduled",
+              "status": "live",
               "winner": null,
               "scheduledAt": null,
               "nextMatchId": "po-sf1",
