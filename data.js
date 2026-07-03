@@ -829,6 +829,11 @@ const tournaments = [
         "place": "MVP",
         "amount": "500₽",
         "team": ""
+      },
+      {
+        "place": 3,
+        "amount": "500₽",
+        "team": "D01B@3b"
       }
     ],
     "registrationStart": "",
