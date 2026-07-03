@@ -70,12 +70,14 @@ async function tournamentCommand(ctx) {
     // Призовой фонд
     if (t.prize || (t.prizePool && t.prizePool.length)) {
       lines.push('', `<b>🏆 Призовой фонд:</b> ${t.prize || '—'}`);
-      if (t.prizePool?.length) {
+      if (Array.isArray(t.prizePool) && t.prizePool.length) {
         const sorted = [...t.prizePool].sort((a,b) => (a.place||99) - (b.place||99));
         for (const p of sorted) {
-          const placeLabel = p.place === 1 ? '🥇' : p.place === 2 ? '🥈' : p.place === 3 ? '🥉' : `${p.place}.`;
-          const teamStr = p.team ? ` — <b>${p.team}</b>` : '';
-          lines.push(`  ${placeLabel} ${p.amount || '—'}${teamStr}`);
+          if (!p || typeof p !== 'object') continue;
+          const placeLabel = p.place === 1 ? '🥇' : p.place === 2 ? '🥈' : p.place === 3 ? '🥉' : `${p.place || '?'}.`;
+          const amount  = typeof p.amount === 'string' ? p.amount : '';
+          const team    = typeof p.team   === 'string' && p.team ? ` — <b>${p.team}</b>` : '';
+          lines.push(`  ${placeLabel} ${amount || '—'}${team}`);
         }
       }
     }
@@ -89,17 +91,29 @@ async function tournamentCommand(ctx) {
     }
 
     // Ссылки
+    // Безопасное формирование ссылок — проверяем что значение строка, не объект
     const links = [];
-    if (t.links?.telegram || t.telegramLink)         links.push(`💬 Telegram: ${t.links?.telegram || t.telegramLink}`);
-    if (t.links?.discord)                            links.push(`💬 Discord: ${t.links.discord}`);
-    if (t.links?.registration)                        links.push(`📝 Регистрация: ${t.links.registration}`);
-    if (t.links?.rules)                                links.push(`📜 Правила: ${t.links.rules}`);
-    if (t.links?.dotabuff)                             links.push(`📊 Dotabuff: ${t.links.dotabuff}`);
+    const safeStr = v => (v && typeof v === 'string') ? v : null;
+    const tg  = safeStr(t.links?.telegram) || safeStr(t.telegramLink);
+    const dc  = safeStr(t.links?.discord)  || safeStr(t.discordLink);
+    const reg = safeStr(t.links?.registration) || safeStr(t.registrationLink);
+    const rl  = safeStr(t.links?.rules)    || safeStr(t.rulesLink);
+    const db  = safeStr(t.links?.dotabuff) || safeStr(t.dotabuffLink);
+    const be  = safeStr(t.links?.bracket)  || safeStr(t.bracketEmbed);
+    if (tg)  links.push(`💬 Telegram: ${tg}`);
+    if (dc)  links.push(`💬 Discord: ${dc}`);
+    if (reg) links.push(`📝 Регистрация: ${reg}`);
+    if (rl)  links.push(`📜 Правила: ${rl}`);
+    if (db)  links.push(`📊 Dotabuff: ${db}`);
+    if (be)  links.push(`🖼 Сетка: ${be}`);
     if (links.length) lines.push('', ...links);
 
     // Кастеры
-    if (t.casters?.length) {
-      lines.push('', `🎙 Кастеры: ${t.casters.join(', ')}`);
+    if (t.casters) {
+      const castersStr = Array.isArray(t.casters)
+        ? t.casters.filter(Boolean).join(', ')
+        : typeof t.casters === 'string' ? t.casters : null;
+      if (castersStr) lines.push('', `🎙 Кастеры: ${castersStr}`);
     }
 
     lines.push('', `<code>/bracket ${id}</code> — сетка турнира`);

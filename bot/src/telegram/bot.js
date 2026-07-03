@@ -23,6 +23,7 @@ const { createBracketCommand, seedCommand, randomSeedCommand, swissNextCommand, 
 const { subscribeCommand, unsubscribeCommand }     = require('./commands/subscribe');
 const { statusCommand }                            = require('./commands/status');
 const { tournamentCommand, tournamentsCommand }    = require('./commands/tournamentInfo');
+const { manageCommand, processManageText }         = require('./commands/tournamentManager');
 const { editTournamentCommand, editPrizeCommand, processEditTournamentText } = require('./commands/editTournament');
 const { matchDbCommand, matchGamesCommand }        = require('./commands/matchExtra');
 
@@ -40,6 +41,7 @@ const HELP_USER = [
 
 const HELP_ORGANIZER = [
   '\n<b>🏆 Организаторам</b>',
+  '/manage &lt;tId&gt; — режим управления турниром (без команд)',
   '/draft — подать заявку на турнир',
   '/mydrafts — мои заявки',
   '/createbracket &lt;tId&gt; — создать сетку',
@@ -104,6 +106,10 @@ function createBot() {
   /* ═══════════ USER — открытые команды ═══════════ */
   bot.command('tournament',  tournamentCommand);
   bot.command('tournaments', tournamentsCommand);
+  bot.command('manage',
+    requireRole(['admin', 'organizer']),
+    manageCommand,
+  );
   bot.command('bracket',     bracketCommand);
   bot.command('matchinfo',   matchInfoCommand);
   bot.command('matchgames',  matchGamesCommand);
@@ -163,7 +169,8 @@ function createBot() {
     const handled =
       await processWizardText(ctx) ||
       await processBracketOrSeedText(ctx) ||
-      await processEditTournamentText(ctx);
+      await processEditTournamentText(ctx) ||
+      await processManageText(ctx);
     if (!handled) {
       await ctx.reply('Команда /skip доступна только внутри активного wizard-а.');
     }
@@ -178,7 +185,8 @@ function createBot() {
     const handled =
       await processWizardText(ctx) ||
       await processBracketOrSeedText(ctx) ||
-      await processEditTournamentText(ctx);
+      await processEditTournamentText(ctx) ||
+      await processManageText(ctx);
     if (!handled) {
       await ctx.reply('Используйте /help для списка команд.');
     }
