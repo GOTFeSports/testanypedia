@@ -392,12 +392,22 @@ const tournaments = [
       {
         "place": 1,
         "amount": "Слот в Special",
-        "team": ""
+        "team": "EGOISTO Team"
       },
       {
         "place": 2,
         "amount": "Слот в Special",
-        "team": ""
+        "team": "Опята"
+      },
+      {
+        "place": 3,
+        "amount": "",
+        "team": "sigma aura"
+      },
+      {
+        "place": 4,
+        "amount": "",
+        "team": "Team Sexy"
       }
     ],
     "gameFormat": "Elimination Draft",
@@ -497,8 +507,8 @@ const tournaments = [
               "isFinal": true,
               "teamA": "EGOISTO Team",
               "teamB": "Опята",
-              "scoreA": 1,
-              "scoreB": 0,
+              "scoreA": 10,
+              "scoreB": 1,
               "status": "finished",
               "winner": "EGOISTO Team",
               "scheduledAt": null
@@ -1310,11 +1320,11 @@ const tournaments = [
     },
     "registrationLink": "https://t.me/visagebroken",
     "telegramLink": "https://t.me/rampagetournaments",
-    "description": "RAMPAGE PULIK #3 — турнир для игроков до 3.000 MMR. Формат Double Elimination (BO1), гранд-финал BO3. Призовой фонд 1.000₽ (может быть увеличен). Дата проведения: 6-7 июня 2026. Регистрация через @visagebroken.",
+    "description": "зов",
     "prizePool": [
       {
         "place": 1,
-        "amount": "1.000₽",
+        "amount": "3000",
         "team": "HalalTeam"
       }
     ],
