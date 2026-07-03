@@ -818,12 +818,12 @@ const tournaments = [
       {
         "place": 1,
         "amount": "6.000₽",
-        "team": ""
+        "team": "Gray Matter"
       },
       {
         "place": 2,
         "amount": "2.000₽",
-        "team": ""
+        "team": "TBD"
       },
       {
         "place": "MVP",
