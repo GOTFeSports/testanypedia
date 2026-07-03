@@ -413,7 +413,7 @@ const tournaments = [
               "teamB": "Echo Silence",
               "scoreA": 0,
               "scoreB": 0,
-              "status": "scheduled",
+              "status": "live",
               "winner": null,
               "scheduledAt": null,
               "nextMatchId": "po-sf2",
