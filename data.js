@@ -356,7 +356,114 @@ const tournaments = [
     ],
     "registrationStart": "2026-06-27",
     "registrationEnd": "2026-07-03",
-    "gameFormat": "Elimination Draft"
+    "gameFormat": "Elimination Draft",
+    "bracket": {
+      "type": "single",
+      "stages": [
+        {
+          "name": "Плейофф",
+          "matches": [
+            {
+              "id": "po-qf1",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "po-sf1",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "po-qf2",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "po-sf1",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "po-qf3",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "po-sf2",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "po-qf4",
+              "round": 1,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "po-sf2",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "po-sf1",
+              "round": 2,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "po-final",
+              "nextMatchSlot": "A"
+            },
+            {
+              "id": "po-sf2",
+              "round": 2,
+              "isFinal": false,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null,
+              "nextMatchId": "po-final",
+              "nextMatchSlot": "B"
+            },
+            {
+              "id": "po-final",
+              "round": 3,
+              "isFinal": true,
+              "teamA": "TBD",
+              "teamB": "TBD",
+              "scoreA": 0,
+              "scoreB": 0,
+              "status": "scheduled",
+              "winner": null,
+              "scheduledAt": null
+            }
+          ],
+          "_generatedType": "single"
+        }
+      ]
+    }
   },
   {
     "id": "Special-3-Closed-Qual",
