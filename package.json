@@ -1,0 +1,12 @@
+{
+  "name": "anypedia",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Anypedia — энциклопедия турниров Dota 2 с ограничением по ПТС",
+  "scripts": {
+    "build": "node tools/build-index.mjs",
+    "serve": "python3 -m http.server 8080"
+  },
+  "engines": { "node": ">=18" }
+}
