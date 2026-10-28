@@ -1,18 +1,31 @@
 {
-  "generated": "2026-10-28T11:13:47.867Z",
+  "generated": "2026-10-28T20:06:37.355Z",
   "tournaments": [
+    {
+      "slug": "swiss-test",
+      "name": "Swiss Test Cup",
+      "logo": null,
+      "status": "finished",
+      "date_start": "2026-12-05",
+      "date_end": "2026-12-07",
+      "organizer": "AnyLvL x GOTF eSports",
+      "prize_pool": "20 000 ₽",
+      "pts_cap": 20000,
+      "teams_count": 16,
+      "winner": "Swiss Team 2"
+    },
     {
       "slug": "anylvl-cup",
       "name": "AnyLvL Cup",
-      "logo": "",
+      "logo": null,
       "status": "finished",
       "date_start": "2026-11-14",
       "date_end": "2026-11-15",
       "organizer": "AnyLvL x GOTF eSports",
       "prize_pool": "10 000 ₽",
       "pts_cap": 20000,
-      "teams_count": 8,
-      "winner": "Тестовая команда 6"
+      "teams_count": 12,
+      "winner": "Тестовая команда 1"
     }
   ]
 }

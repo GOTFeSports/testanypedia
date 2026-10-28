@@ -1,0 +1,400 @@
+{
+  "teams": [
+    {
+      "name": "Swiss Team 1",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "alpha_1"
+        },
+        {
+          "nick": "alpha_2"
+        },
+        {
+          "nick": "alpha_3"
+        },
+        {
+          "nick": "alpha_4"
+        },
+        {
+          "nick": "alpha_5"
+        }
+      ],
+      "coach": {
+        "nick": "alpha_coach"
+      }
+    },
+    {
+      "name": "Swiss Team 2",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "bravo_1"
+        },
+        {
+          "nick": "bravo_2"
+        },
+        {
+          "nick": "bravo_3"
+        },
+        {
+          "nick": "bravo_4"
+        },
+        {
+          "nick": "bravo_5"
+        }
+      ],
+      "subs": [
+        {
+          "nick": "bravo_sub1"
+        },
+        {
+          "nick": "bravo_sub2"
+        }
+      ]
+    },
+    {
+      "name": "Swiss Team 3",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "charlie_1"
+        },
+        {
+          "nick": "charlie_2"
+        },
+        {
+          "nick": "charlie_3"
+        },
+        {
+          "nick": "charlie_4"
+        },
+        {
+          "nick": "charlie_5"
+        }
+      ]
+    },
+    {
+      "name": "Swiss Team 4",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "delta_1"
+        },
+        {
+          "nick": "delta_2"
+        },
+        {
+          "nick": "delta_3"
+        },
+        {
+          "nick": "delta_4"
+        },
+        {
+          "nick": "delta_5"
+        }
+      ],
+      "coach": {
+        "nick": "delta_coach"
+      }
+    },
+    {
+      "name": "Swiss Team 5",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "echo_1"
+        },
+        {
+          "nick": "echo_2"
+        },
+        {
+          "nick": "echo_3"
+        },
+        {
+          "nick": "echo_4"
+        },
+        {
+          "nick": "echo_5"
+        }
+      ],
+      "subs": [
+        {
+          "nick": "echo_sub1"
+        },
+        {
+          "nick": "echo_sub2"
+        }
+      ]
+    },
+    {
+      "name": "Swiss Team 6",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "foxtrot_1"
+        },
+        {
+          "nick": "foxtrot_2"
+        },
+        {
+          "nick": "foxtrot_3"
+        },
+        {
+          "nick": "foxtrot_4"
+        },
+        {
+          "nick": "foxtrot_5"
+        }
+      ]
+    },
+    {
+      "name": "Swiss Team 7",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "golf_1"
+        },
+        {
+          "nick": "golf_2"
+        },
+        {
+          "nick": "golf_3"
+        },
+        {
+          "nick": "golf_4"
+        },
+        {
+          "nick": "golf_5"
+        }
+      ],
+      "coach": {
+        "nick": "golf_coach"
+      }
+    },
+    {
+      "name": "Swiss Team 8",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "hotel_1"
+        },
+        {
+          "nick": "hotel_2"
+        },
+        {
+          "nick": "hotel_3"
+        },
+        {
+          "nick": "hotel_4"
+        },
+        {
+          "nick": "hotel_5"
+        }
+      ],
+      "subs": [
+        {
+          "nick": "hotel_sub1"
+        },
+        {
+          "nick": "hotel_sub2"
+        }
+      ]
+    },
+    {
+      "name": "Swiss Team 9",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "india_1"
+        },
+        {
+          "nick": "india_2"
+        },
+        {
+          "nick": "india_3"
+        },
+        {
+          "nick": "india_4"
+        },
+        {
+          "nick": "india_5"
+        }
+      ]
+    },
+    {
+      "name": "Swiss Team 10",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "juliet_1"
+        },
+        {
+          "nick": "juliet_2"
+        },
+        {
+          "nick": "juliet_3"
+        },
+        {
+          "nick": "juliet_4"
+        },
+        {
+          "nick": "juliet_5"
+        }
+      ],
+      "coach": {
+        "nick": "juliet_coach"
+      }
+    },
+    {
+      "name": "Swiss Team 11",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "kilo_1"
+        },
+        {
+          "nick": "kilo_2"
+        },
+        {
+          "nick": "kilo_3"
+        },
+        {
+          "nick": "kilo_4"
+        },
+        {
+          "nick": "kilo_5"
+        }
+      ],
+      "subs": [
+        {
+          "nick": "kilo_sub1"
+        },
+        {
+          "nick": "kilo_sub2"
+        }
+      ]
+    },
+    {
+      "name": "Swiss Team 12",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "lima_1"
+        },
+        {
+          "nick": "lima_2"
+        },
+        {
+          "nick": "lima_3"
+        },
+        {
+          "nick": "lima_4"
+        },
+        {
+          "nick": "lima_5"
+        }
+      ]
+    },
+    {
+      "name": "Swiss Team 13",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "mike_1"
+        },
+        {
+          "nick": "mike_2"
+        },
+        {
+          "nick": "mike_3"
+        },
+        {
+          "nick": "mike_4"
+        },
+        {
+          "nick": "mike_5"
+        }
+      ],
+      "coach": {
+        "nick": "mike_coach"
+      }
+    },
+    {
+      "name": "Swiss Team 14",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "november_1"
+        },
+        {
+          "nick": "november_2"
+        },
+        {
+          "nick": "november_3"
+        },
+        {
+          "nick": "november_4"
+        },
+        {
+          "nick": "november_5"
+        }
+      ],
+      "subs": [
+        {
+          "nick": "november_sub1"
+        },
+        {
+          "nick": "november_sub2"
+        }
+      ]
+    },
+    {
+      "name": "Swiss Team 15",
+      "status": "qualified",
+      "players": [
+        {
+          "nick": "oscar_1"
+        },
+        {
+          "nick": "oscar_2"
+        },
+        {
+          "nick": "oscar_3"
+        },
+        {
+          "nick": "oscar_4"
+        },
+        {
+          "nick": "oscar_5"
+        }
+      ],
+      "qualifier": "Открытая квалификация · 1 место"
+    },
+    {
+      "name": "Swiss Team 16",
+      "status": "qualified",
+      "players": [
+        {
+          "nick": "papa_1"
+        },
+        {
+          "nick": "papa_2"
+        },
+        {
+          "nick": "papa_3"
+        },
+        {
+          "nick": "papa_4"
+        },
+        {
+          "nick": "papa_5"
+        }
+      ],
+      "qualifier": "Открытая квалификация · 2 место",
+      "coach": {
+        "nick": "papa_coach"
+      }
+    }
+  ]
+}

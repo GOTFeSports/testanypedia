@@ -19,6 +19,16 @@ function readJson(p) {
 }
 
 const isUrl = (s) => /^https?:\/\//i.test(s || '');
+
+// Этапы: поддерживаем result.stages и старый формат groups / playoffs
+function stagesOf(result) {
+  if (result?.stages?.length) return result.stages;
+  const out = [];
+  if (result?.groups?.length) out.push({ type: 'groups', groups: result.groups });
+  if (result?.playoffs?.rounds?.length) out.push({ type: 'single_elim', rounds: result.playoffs.rounds });
+  return out;
+}
+
 const list = [];
 const dirs = fs.existsSync(TDIR) ? fs.readdirSync(TDIR, { withFileTypes: true }).filter((d) => d.isDirectory()) : [];
 
@@ -39,20 +49,39 @@ for (const d of dirs) {
   // --- проверки, чтобы опечатки не доехали до сайта ---
   const used = new Set();
   placements.forEach((p) => used.add(p.team));
-  for (const g of result?.groups ?? []) {
-    (g.teams ?? []).forEach((t) => used.add(t));
-    (g.matches ?? []).forEach((m) => [m.team1, m.team2].forEach((t) => t && used.add(t)));
-  }
-  const ids = new Set();
-  const rounds = result?.playoffs?.rounds ?? [];
-  for (const r of rounds) for (const m of r.matches ?? []) if (m.id) ids.add(m.id);
-  for (const r of rounds) {
-    for (const m of r.matches ?? []) {
-      [m.team1, m.team2].forEach((t) => t && used.add(t));
-      if (m.next && !ids.has(m.next)) warn(`матч "${m.id ?? '?'}" ведёт в несуществующий матч "${m.next}"`);
+
+  const checkRounds = (rounds, where) => {
+    const ids = new Set();
+    for (const r of rounds) for (const m of r.matches ?? []) if (m.id) ids.add(m.id);
+    for (const r of rounds) {
+      for (const m of r.matches ?? []) {
+        [m.team1, m.team2].forEach((t) => t && used.add(t));
+        if (m.next && !ids.has(m.next)) warn(`${where}: матч "${m.id ?? '?'}" ведёт в несуществующий матч "${m.next}"`);
+      }
+    }
+  };
+  const checkMatches = (matches) => (matches ?? []).forEach((m) => [m.team1, m.team2].forEach((t) => t && used.add(t)));
+
+  for (const st of stagesOf(result)) {
+    const label = st.name || st.type;
+    if (st.type === 'groups') {
+      for (const g of st.groups ?? []) {
+        (g.teams ?? []).forEach((t) => used.add(t));
+        const f = g.format ?? 'round_robin';
+        if (f === 'single_elim' || f === 'double_elim') checkRounds(g.rounds ?? [], `${label} / ${g.name ?? 'группа'}`);
+        else if (f === 'swiss') (g.rounds ?? []).forEach((r) => checkMatches(r.matches));
+        else checkMatches(g.matches);
+      }
+    } else if (st.type === 'swiss') {
+      (st.teams ?? []).forEach((t) => used.add(t));
+      (st.rounds ?? []).forEach((r) => checkMatches(r.matches));
+    } else if (st.type === 'single_elim' || st.type === 'double_elim') {
+      checkRounds(st.rounds ?? [], label);
+    } else {
+      warn(`неизвестный тип этапа "${st.type}"`);
     }
   }
-  for (const m of result?.matches ?? []) [m.team1, m.team2].forEach((t) => t && used.add(t));
+  checkMatches(result?.matches);
   if (known.size) for (const t of used) if (!known.has(t)) warn(`"${t}" есть в result, но нет в roster`);
 
   const logos = [info.logo, ...teams.map((t) => t.logo)].filter((l) => l && !isUrl(l));
@@ -61,7 +90,7 @@ for (const d of dirs) {
   list.push({
     slug: d.name,
     name: info.name ?? d.name,
-    logo: info.logo ?? null,
+    logo: info.logo || null,
     status: info.status ?? 'upcoming',
     date_start: info.date_start ?? null,
     date_end: info.date_end ?? null,

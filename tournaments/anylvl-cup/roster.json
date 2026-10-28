@@ -5,29 +5,23 @@
       "status": "invited",
       "players": [
         {
-          "nick": "alpha_1",
-          "country": "ua"
+          "nick": "alpha_1"
         },
         {
-          "nick": "alpha_2",
-          "country": "kz"
+          "nick": "alpha_2"
         },
         {
-          "nick": "alpha_3",
-          "country": "by"
+          "nick": "alpha_3"
         },
         {
-          "nick": "alpha_4",
-          "country": "ru"
+          "nick": "alpha_4"
         },
         {
-          "nick": "alpha_5",
-          "country": "ua"
+          "nick": "alpha_5"
         }
       ],
       "coach": {
-        "nick": "alpha_coach",
-        "country": "ru"
+        "nick": "alpha_coach"
       }
     },
     {
@@ -35,122 +29,101 @@
       "status": "invited",
       "players": [
         {
-          "nick": "bravo_1",
-          "country": "kz"
+          "nick": "bravo_1"
         },
         {
-          "nick": "bravo_2",
-          "country": "by"
+          "nick": "bravo_2"
         },
         {
-          "nick": "bravo_3",
-          "country": "ru"
+          "nick": "bravo_3"
         },
         {
-          "nick": "bravo_4",
-          "country": "ua"
+          "nick": "bravo_4"
         },
         {
-          "nick": "bravo_5",
-          "country": "ru"
+          "nick": "bravo_5"
         }
       ],
       "subs": [
         {
-          "nick": "bravo_sub",
-          "country": "ru"
+          "nick": "bravo_sub1"
+        },
+        {
+          "nick": "bravo_sub2"
         }
-      ],
-      "coach": {
-        "nick": "bravo_coach",
-        "country": "ru"
-      }
+      ]
     },
     {
       "name": "Тестовая команда 3",
       "status": "invited",
       "players": [
         {
-          "nick": "charlie_1",
-          "country": "by"
+          "nick": "charlie_1"
         },
         {
-          "nick": "charlie_2",
-          "country": "ru"
+          "nick": "charlie_2"
         },
         {
-          "nick": "charlie_3",
-          "country": "ua"
+          "nick": "charlie_3"
         },
         {
-          "nick": "charlie_4",
-          "country": "ru"
+          "nick": "charlie_4"
         },
         {
-          "nick": "charlie_5",
-          "country": "kz"
+          "nick": "charlie_5"
         }
-      ],
-      "coach": {
-        "nick": "charlie_coach",
-        "country": "ru"
-      }
+      ]
     },
     {
       "name": "Тестовая команда 4",
       "status": "invited",
       "players": [
         {
-          "nick": "delta_1",
-          "country": "ru"
+          "nick": "delta_1"
         },
         {
-          "nick": "delta_2",
-          "country": "ua"
+          "nick": "delta_2"
         },
         {
-          "nick": "delta_3",
-          "country": "ru"
+          "nick": "delta_3"
         },
         {
-          "nick": "delta_4",
-          "country": "kz"
+          "nick": "delta_4"
         },
         {
-          "nick": "delta_5",
-          "country": "ru"
+          "nick": "delta_5"
         }
-      ]
+      ],
+      "coach": {
+        "nick": "delta_coach"
+      }
     },
     {
       "name": "Тестовая команда 5",
       "status": "invited",
       "players": [
         {
-          "nick": "echo_1",
-          "country": "ua"
+          "nick": "echo_1"
         },
         {
-          "nick": "echo_2",
-          "country": "ru"
+          "nick": "echo_2"
         },
         {
-          "nick": "echo_3",
-          "country": "kz"
+          "nick": "echo_3"
         },
         {
-          "nick": "echo_4",
-          "country": "ru"
+          "nick": "echo_4"
         },
         {
-          "nick": "echo_5",
-          "country": "ua"
+          "nick": "echo_5"
         }
       ],
       "subs": [
         {
-          "nick": "echo_sub",
-          "country": "ru"
+          "nick": "echo_sub1"
+        },
+        {
+          "nick": "echo_sub2"
         }
       ]
     },
@@ -159,77 +132,168 @@
       "status": "invited",
       "players": [
         {
-          "nick": "foxtrot_1",
-          "country": "ru"
+          "nick": "foxtrot_1"
         },
         {
-          "nick": "foxtrot_2",
-          "country": "kz"
+          "nick": "foxtrot_2"
         },
         {
-          "nick": "foxtrot_3",
-          "country": "ru"
+          "nick": "foxtrot_3"
         },
         {
-          "nick": "foxtrot_4",
-          "country": "ua"
+          "nick": "foxtrot_4"
         },
         {
-          "nick": "foxtrot_5",
-          "country": "kz"
+          "nick": "foxtrot_5"
         }
       ]
     },
     {
       "name": "Тестовая команда 7",
-      "status": "qualified",
+      "status": "invited",
       "players": [
         {
-          "nick": "golf_1",
-          "country": "kz"
+          "nick": "golf_1"
         },
         {
-          "nick": "golf_2",
-          "country": "ru"
+          "nick": "golf_2"
         },
         {
-          "nick": "golf_3",
-          "country": "ua"
+          "nick": "golf_3"
         },
         {
-          "nick": "golf_4",
-          "country": "kz"
+          "nick": "golf_4"
         },
         {
-          "nick": "golf_5",
-          "country": "by"
+          "nick": "golf_5"
         }
       ],
-      "qualifier": "Открытая квалификация · 1 место"
+      "coach": {
+        "nick": "golf_coach"
+      }
     },
     {
       "name": "Тестовая команда 8",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "hotel_1"
+        },
+        {
+          "nick": "hotel_2"
+        },
+        {
+          "nick": "hotel_3"
+        },
+        {
+          "nick": "hotel_4"
+        },
+        {
+          "nick": "hotel_5"
+        }
+      ],
+      "subs": [
+        {
+          "nick": "hotel_sub1"
+        },
+        {
+          "nick": "hotel_sub2"
+        }
+      ]
+    },
+    {
+      "name": "Тестовая команда 9",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "india_1"
+        },
+        {
+          "nick": "india_2"
+        },
+        {
+          "nick": "india_3"
+        },
+        {
+          "nick": "india_4"
+        },
+        {
+          "nick": "india_5"
+        }
+      ]
+    },
+    {
+      "name": "Тестовая команда 10",
+      "status": "invited",
+      "players": [
+        {
+          "nick": "juliet_1"
+        },
+        {
+          "nick": "juliet_2"
+        },
+        {
+          "nick": "juliet_3"
+        },
+        {
+          "nick": "juliet_4"
+        },
+        {
+          "nick": "juliet_5"
+        }
+      ],
+      "coach": {
+        "nick": "juliet_coach"
+      }
+    },
+    {
+      "name": "Тестовая команда 11",
       "status": "qualified",
       "players": [
         {
-          "nick": "hotel_1",
-          "country": "ru"
+          "nick": "kilo_1"
         },
         {
-          "nick": "hotel_2",
-          "country": "ua"
+          "nick": "kilo_2"
         },
         {
-          "nick": "hotel_3",
-          "country": "kz"
+          "nick": "kilo_3"
         },
         {
-          "nick": "hotel_4",
-          "country": "by"
+          "nick": "kilo_4"
         },
         {
-          "nick": "hotel_5",
-          "country": "ru"
+          "nick": "kilo_5"
+        }
+      ],
+      "qualifier": "Открытая квалификация · 1 место",
+      "subs": [
+        {
+          "nick": "kilo_sub1"
+        },
+        {
+          "nick": "kilo_sub2"
+        }
+      ]
+    },
+    {
+      "name": "Тестовая команда 12",
+      "status": "qualified",
+      "players": [
+        {
+          "nick": "lima_1"
+        },
+        {
+          "nick": "lima_2"
+        },
+        {
+          "nick": "lima_3"
+        },
+        {
+          "nick": "lima_4"
+        },
+        {
+          "nick": "lima_5"
         }
       ],
       "qualifier": "Открытая квалификация · 2 место"

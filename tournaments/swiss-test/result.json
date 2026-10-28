@@ -1,0 +1,542 @@
+{
+  "placements": [
+    {
+      "place": 1,
+      "team": "Swiss Team 2"
+    },
+    {
+      "place": 2,
+      "team": "Swiss Team 7"
+    },
+    {
+      "place": 3,
+      "team": "Swiss Team 5"
+    },
+    {
+      "place": 4,
+      "team": "Swiss Team 4"
+    },
+    {
+      "place": 5,
+      "label": "5–6",
+      "team": "Swiss Team 1"
+    },
+    {
+      "place": 5,
+      "label": "5–6",
+      "team": "Swiss Team 9"
+    },
+    {
+      "place": 7,
+      "label": "7–8",
+      "team": "Swiss Team 11"
+    },
+    {
+      "place": 7,
+      "label": "7–8",
+      "team": "Swiss Team 6"
+    },
+    {
+      "place": 9,
+      "label": "9–16",
+      "team": "Swiss Team 10"
+    },
+    {
+      "place": 9,
+      "label": "9–16",
+      "team": "Swiss Team 12"
+    },
+    {
+      "place": 9,
+      "label": "9–16",
+      "team": "Swiss Team 14"
+    },
+    {
+      "place": 9,
+      "label": "9–16",
+      "team": "Swiss Team 3"
+    },
+    {
+      "place": 9,
+      "label": "9–16",
+      "team": "Swiss Team 8"
+    },
+    {
+      "place": 9,
+      "label": "9–16",
+      "team": "Swiss Team 15"
+    },
+    {
+      "place": 9,
+      "label": "9–16",
+      "team": "Swiss Team 16"
+    },
+    {
+      "place": 9,
+      "label": "9–16",
+      "team": "Swiss Team 13"
+    }
+  ],
+  "stages": [
+    {
+      "type": "swiss",
+      "name": "Швейцарская система",
+      "advance": 8,
+      "teams": [
+        "Swiss Team 1",
+        "Swiss Team 2",
+        "Swiss Team 3",
+        "Swiss Team 4",
+        "Swiss Team 5",
+        "Swiss Team 6",
+        "Swiss Team 7",
+        "Swiss Team 8",
+        "Swiss Team 9",
+        "Swiss Team 10",
+        "Swiss Team 11",
+        "Swiss Team 12",
+        "Swiss Team 13",
+        "Swiss Team 14",
+        "Swiss Team 15",
+        "Swiss Team 16"
+      ],
+      "rounds": [
+        {
+          "name": "Раунд 1",
+          "matches": [
+            {
+              "team1": "Swiss Team 9",
+              "team2": "Swiss Team 8",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 12",
+              "team2": "Swiss Team 4",
+              "score1": 1,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 15",
+              "team2": "Swiss Team 2",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 6",
+              "team2": "Swiss Team 13",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 3",
+              "team2": "Swiss Team 11",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 5",
+              "team2": "Swiss Team 7",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 10",
+              "team2": "Swiss Team 14",
+              "score1": 2,
+              "score2": 1,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 16",
+              "team2": "Swiss Team 1",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-05"
+            }
+          ]
+        },
+        {
+          "name": "Раунд 2",
+          "matches": [
+            {
+              "team1": "Swiss Team 2",
+              "team2": "Swiss Team 3",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 4",
+              "team2": "Swiss Team 1",
+              "score1": 2,
+              "score2": 1,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 9",
+              "team2": "Swiss Team 7",
+              "score1": 1,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 6",
+              "team2": "Swiss Team 10",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 8",
+              "team2": "Swiss Team 15",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 13",
+              "team2": "Swiss Team 12",
+              "score1": 1,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 14",
+              "team2": "Swiss Team 5",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 16",
+              "team2": "Swiss Team 11",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-05"
+            }
+          ]
+        },
+        {
+          "name": "Раунд 3",
+          "matches": [
+            {
+              "team1": "Swiss Team 10",
+              "team2": "Swiss Team 7",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 4",
+              "team2": "Swiss Team 2",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 5",
+              "team2": "Swiss Team 9",
+              "score1": 1,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 3",
+              "team2": "Swiss Team 1",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 8",
+              "team2": "Swiss Team 6",
+              "score1": 1,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 11",
+              "team2": "Swiss Team 12",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 16",
+              "team2": "Swiss Team 15",
+              "score1": 1,
+              "score2": 2,
+              "date": "2026-12-05"
+            },
+            {
+              "team1": "Swiss Team 13",
+              "team2": "Swiss Team 14",
+              "score1": 1,
+              "score2": 2,
+              "date": "2026-12-05"
+            }
+          ]
+        },
+        {
+          "name": "Раунд 4",
+          "matches": [
+            {
+              "team1": "Swiss Team 6",
+              "team2": "Swiss Team 4",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-06"
+            },
+            {
+              "team1": "Swiss Team 1",
+              "team2": "Swiss Team 10",
+              "score1": 2,
+              "score2": 1,
+              "date": "2026-12-06"
+            },
+            {
+              "team1": "Swiss Team 12",
+              "team2": "Swiss Team 9",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-06"
+            },
+            {
+              "team1": "Swiss Team 8",
+              "team2": "Swiss Team 14",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-06"
+            },
+            {
+              "team1": "Swiss Team 15",
+              "team2": "Swiss Team 5",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-06"
+            },
+            {
+              "team1": "Swiss Team 3",
+              "team2": "Swiss Team 11",
+              "score1": 1,
+              "score2": 2,
+              "date": "2026-12-06"
+            }
+          ]
+        },
+        {
+          "name": "Раунд 5",
+          "matches": [
+            {
+              "team1": "Swiss Team 5",
+              "team2": "Swiss Team 12",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-06"
+            },
+            {
+              "team1": "Swiss Team 11",
+              "team2": "Swiss Team 14",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-06"
+            },
+            {
+              "team1": "Swiss Team 6",
+              "team2": "Swiss Team 10",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-06"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "double_elim",
+      "name": "Плей-офф",
+      "rounds": [
+        {
+          "name": "Верхняя сетка · четвертьфиналы",
+          "bracket": "upper",
+          "matches": [
+            {
+              "id": "ub-qf-1",
+              "team1": "Swiss Team 7",
+              "team2": "Swiss Team 11",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-07",
+              "next": "ub-sf-1"
+            },
+            {
+              "id": "ub-qf-2",
+              "team1": "Swiss Team 9",
+              "team2": "Swiss Team 1",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-07",
+              "next": "ub-sf-1"
+            },
+            {
+              "id": "ub-qf-3",
+              "team1": "Swiss Team 2",
+              "team2": "Swiss Team 6",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-07",
+              "next": "ub-sf-2"
+            },
+            {
+              "id": "ub-qf-4",
+              "team1": "Swiss Team 4",
+              "team2": "Swiss Team 5",
+              "score1": 1,
+              "score2": 2,
+              "date": "2026-12-07",
+              "next": "ub-sf-2"
+            }
+          ]
+        },
+        {
+          "name": "Верхняя сетка · полуфиналы",
+          "bracket": "upper",
+          "matches": [
+            {
+              "id": "ub-sf-1",
+              "team1": "Swiss Team 7",
+              "team2": "Swiss Team 9",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-07",
+              "next": "ub-f"
+            },
+            {
+              "id": "ub-sf-2",
+              "team1": "Swiss Team 2",
+              "team2": "Swiss Team 5",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-07",
+              "next": "ub-f"
+            }
+          ]
+        },
+        {
+          "name": "Верхняя сетка · финал",
+          "bracket": "upper",
+          "matches": [
+            {
+              "id": "ub-f",
+              "team1": "Swiss Team 7",
+              "team2": "Swiss Team 2",
+              "score1": 2,
+              "score2": 1,
+              "date": "2026-12-07",
+              "next": "gf"
+            }
+          ]
+        },
+        {
+          "name": "Нижняя сетка · раунд 1",
+          "bracket": "lower",
+          "matches": [
+            {
+              "id": "lb-r1-1",
+              "team1": "Swiss Team 11",
+              "team2": "Swiss Team 1",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-07",
+              "next": "lb-r2-1"
+            },
+            {
+              "id": "lb-r1-2",
+              "team1": "Swiss Team 6",
+              "team2": "Swiss Team 4",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-07",
+              "next": "lb-r2-2"
+            }
+          ]
+        },
+        {
+          "name": "Нижняя сетка · раунд 2",
+          "bracket": "lower",
+          "matches": [
+            {
+              "id": "lb-r2-1",
+              "team1": "Swiss Team 1",
+              "team2": "Swiss Team 5",
+              "score1": 1,
+              "score2": 2,
+              "date": "2026-12-07",
+              "next": "lb-sf"
+            },
+            {
+              "id": "lb-r2-2",
+              "team1": "Swiss Team 4",
+              "team2": "Swiss Team 9",
+              "score1": 2,
+              "score2": 0,
+              "date": "2026-12-07",
+              "next": "lb-sf"
+            }
+          ]
+        },
+        {
+          "name": "Нижняя сетка · полуфинал",
+          "bracket": "lower",
+          "matches": [
+            {
+              "id": "lb-sf",
+              "team1": "Swiss Team 5",
+              "team2": "Swiss Team 4",
+              "score1": 2,
+              "score2": 1,
+              "date": "2026-12-07",
+              "next": "lb-f"
+            }
+          ]
+        },
+        {
+          "name": "Нижняя сетка · финал",
+          "bracket": "lower",
+          "matches": [
+            {
+              "id": "lb-f",
+              "team1": "Swiss Team 5",
+              "team2": "Swiss Team 2",
+              "score1": 0,
+              "score2": 2,
+              "date": "2026-12-07",
+              "next": "gf"
+            }
+          ]
+        },
+        {
+          "name": "Гранд-финал",
+          "bracket": "final",
+          "matches": [
+            {
+              "id": "gf",
+              "team1": "Swiss Team 7",
+              "team2": "Swiss Team 2",
+              "score1": 1,
+              "score2": 3,
+              "date": "2026-12-07"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

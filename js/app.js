@@ -3,6 +3,7 @@
 
 const app = document.getElementById('app');
 const cache = new Map();
+const DEFAULT_LOGO = 'assets/dota2.png';
 
 /* ---------- Утилиты ---------- */
 
@@ -68,11 +69,13 @@ function getJson(url) {
 
 /* ---------- Команды: логотип, чип, аббревиатура ---------- */
 
+const hasLogo = (ctx, name) => !!ctx.teams.get(name)?.logo;
+
+// Логотип команды; если не задан — картинка по умолчанию assets/dota2.png
 function tlogo(ctx, name, size = '') {
   const t = ctx.teams.get(name);
-  return t?.logo
-    ? `<img class="tlogo ${size}" src="${asset(ctx.base, t.logo)}" alt="" loading="lazy">`
-    : `<span class="tlogo ph ${size}">${esc(String(name || '?').trim().charAt(0).toUpperCase())}</span>`;
+  const src = t?.logo ? asset(ctx.base, t.logo) : DEFAULT_LOGO;
+  return `<img class="tlogo ${size}" src="${src}" alt="" loading="lazy">`;
 }
 const teamChip = (ctx, name) =>
   name
@@ -84,6 +87,9 @@ function abbr(name) {
   if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
   return words.map((w) => (/^\d+$/.test(w) ? w : w[0].toUpperCase())).join('');
 }
+// Короткая метка соперника в таблицах: свой логотип или аббревиатура
+const teamMark = (ctx, name) =>
+  hasLogo(ctx, name) ? tlogo(ctx, name) : `<span class="abbr">${esc(abbr(name))}</span>`;
 
 /* ---------- Главная: список турниров ---------- */
 
@@ -96,7 +102,7 @@ const tournamentCard = (t) => `
     </div>
     <dl class="mini">
       ${t.prize_pool ? `<div><dt>Призовой фонд</dt><dd>${esc(t.prize_pool)}</dd></div>` : ''}
-      ${t.pts_cap ? `<div><dt>Лимит ПТС</dt><dd>${num(t.pts_cap)}</dd></div>` : ''}
+      ${t.pts_cap ? `<div><dt>Лимит</dt><dd>${num(t.pts_cap)}</dd></div>` : ''}
       <div><dt>Команд</dt><dd>${t.teams_count || '—'}</dd></div>
       ${t.winner ? `<div><dt>Победитель</dt><dd>${esc(t.winner)}</dd></div>` : ''}
     </dl>
@@ -109,7 +115,7 @@ async function homeView() {
   return `
     <section class="intro">
       <h1>Турниры Dota 2 с ограничением по ПТС</h1>
-      <p>Призовые места, составы команд, групповые этапы и сетки полупрофессиональных турниров СНГ.</p>
+      <p>Призовые места, составы команд, групповые этапы, швейцарка и сетки полупрофессиональных турниров СНГ.</p>
     </section>
     <h2>Все турниры</h2>
     ${
@@ -138,10 +144,6 @@ function infobox(ctx) {
     .map(([k, u]) => `<a class="pill-link" href="${safeUrl(u)}" target="_blank" rel="noopener noreferrer">${esc(LINK_LABELS[k] || k)}</a>`)
     .join('');
 
-  const chrono = (label, c) =>
-    c?.name ? `<div class="ib-row"><dt>${label}</dt><dd>${c.slug ? `<a href="#/t/${enc(c.slug)}">${esc(c.name)}</a>` : esc(c.name)}</dd></div>` : '';
-  const chronology = chrono('← Раньше', i.chronology?.previous) + chrono('Позже →', i.chronology?.next);
-
   return `
     <aside class="infobox">
       <div class="ib-title">${esc(i.name)}</div>
@@ -151,21 +153,18 @@ function infobox(ctx) {
         ${row('Серия', esc(i.series))}
         ${row('Организатор', esc(i.organizer))}
         ${row('Спонсоры', lines(i.sponsors))}
-        ${row('Сервер', esc(i.server))}
         ${row('Тип', esc(TYPES[i.type] || i.type))}
         ${row('Локация', esc(i.location))}
         ${row('Формат', lines(i.format))}
         ${row('Призовой фонд', esc(i.prize_pool))}
-        ${row('Лимит ПТС', i.pts_cap ? num(i.pts_cap) : '')}
+        ${row('Лимит', i.pts_cap ? num(i.pts_cap) : '')}
         ${row('Начало', fmtDate(i.date_start))}
         ${row('Окончание', fmtDate(i.date_end))}
         ${row('Игра', esc(i.game || 'Dota 2'))}
         ${row('Версия', esc(i.version))}
         ${row('Команд', teamsCount)}
-        ${row('Уровень', esc(i.tier))}
       </dl>
       ${links ? `<div class="ib-head">Ссылки</div><div class="ib-links">${links}</div>` : ''}
-      ${chronology ? `<div class="ib-head">Хронология</div><dl>${chronology}</dl>` : ''}
     </aside>`;
 }
 
@@ -177,15 +176,15 @@ function participantsSection(ctx) {
   const teams = ctx.roster?.teams || [];
   if (!teams.length) return '';
   const person = (p, tag) =>
-    `<li class="${tag ? 'sub' : ''}">${flag(p.country)}<span class="nick">${esc(p.nick)}</span>${
+    `<li${tag ? ' class="sub"' : ''}><span class="nick">${esc(p.nick)}</span>${
       tag ? `<span class="pill">${tag}</span>` : `<span class="pos">${esc(p.pos ?? '')}</span>`
     }</li>`;
 
   const cards = teams
     .map((t) => {
       const players = (t.players || []).map((p, i) => person({ ...p, pos: p.pos ?? i + 1 })).join('');
-      const subs = arr(t.subs).map((p) => person(p, 'Запас')).join('');
       const coach = arr(t.coach).map((p) => person(p, 'Тренер')).join('');
+      const subs = arr(t.subs).map((p) => person(p, 'Запас')).join('');
       return `
         <article class="pcard">
           <header>
@@ -193,7 +192,9 @@ function participantsSection(ctx) {
             ${t.status ? `<span class="pill">${esc(TEAM_STATUS[t.status] || t.status)}</span>` : ''}
           </header>
           ${t.qualifier ? `<div class="qual">${esc(t.qualifier)}</div>` : ''}
-          <ul class="roster">${players}${subs}${coach}</ul>
+          ${subs ? `<div class="tabs"><button type="button" class="on" data-tab="main">Основа</button><button type="button" data-tab="subs">Запас</button></div>` : ''}
+          <ul class="roster main">${players}${coach}</ul>
+          ${subs ? `<ul class="roster subs">${subs}</ul>` : ''}
         </article>`;
     })
     .join('');
@@ -204,7 +205,6 @@ function participantsSection(ctx) {
       <div class="participants rosters-on">
         <div class="controls">
           <label class="sw"><input type="checkbox" data-toggle="rosters-on" checked><span>Показывать составы</span></label>
-          <label class="sw"><input type="checkbox" data-toggle="compact"><span>Компактный вид</span></label>
         </div>
         <div class="pgrid">${cards}</div>
       </div>
@@ -277,7 +277,47 @@ function prizesSection(ctx) {
     </section>`;
 }
 
-/* ---------- Групповой этап ---------- */
+/* ---------- Этапы турнира (stages) ---------- */
+
+const FORMAT_LABELS = {
+  round_robin: 'Round Robin',
+  single_elim: 'Single Elimination',
+  double_elim: 'Double Elimination',
+  swiss: 'Швейцарская система',
+};
+const fmtPill = (f) => (FORMAT_LABELS[f] ? `<span class="fmt">${FORMAT_LABELS[f]}</span>` : '');
+
+// Старый формат (groups / playoffs) тоже понимаем
+function stagesOf(result) {
+  if (result?.stages?.length) return result.stages;
+  const out = [];
+  if (result?.groups?.length) out.push({ type: 'groups', name: 'Групповой этап', groups: result.groups });
+  const rounds = result?.playoffs?.rounds || [];
+  if (rounds.length) {
+    out.push({ type: rounds.some((r) => r.bracket === 'lower') ? 'double_elim' : 'single_elim', name: 'Плей-офф', rounds });
+  }
+  return out;
+}
+
+function stageSection(ctx, st, i) {
+  let body = '';
+  if (st.type === 'groups') body = (st.groups || []).map((g) => groupBlock(ctx, g)).join('');
+  else if (st.type === 'swiss') body = swissBlock(ctx, st);
+  else if (st.type === 'single_elim' || st.type === 'double_elim') body = bracketHtml(ctx, st.rounds || []);
+  if (!body) return '';
+  return `<section id="stage-${i}"><h2>${esc(st.name || FORMAT_LABELS[st.type] || 'Этап')}${st.type !== 'groups' ? fmtPill(st.type) : ''}</h2>${body}</section>`;
+}
+
+/* --- Группа: round robin / single elimination / double elimination / swiss --- */
+
+function groupBlock(ctx, g) {
+  const f = g.format || 'round_robin';
+  let body;
+  if (f === 'single_elim' || f === 'double_elim') body = bracketHtml(ctx, g.rounds || []);
+  else if (f === 'swiss') body = swissBlock(ctx, g);
+  else body = roundRobinBody(ctx, g);
+  return `<div class="group"><h3>${esc(g.name || 'Группа')}${fmtPill(f)}</h3>${body}</div>`;
+}
 
 function computeGroup(g) {
   const names = arr(g.teams).length ? g.teams : [...new Set((g.matches || []).flatMap((m) => [m.team1, m.team2]))];
@@ -295,7 +335,7 @@ function computeGroup(g) {
   );
 }
 
-function groupBlock(ctx, g) {
+function roundRobinBody(ctx, g) {
   const rows = computeGroup(g);
   const adv = Number(g.advance) || 0;
   const started = rows.some((r) => r.w + r.d + r.l);
@@ -308,10 +348,7 @@ function groupBlock(ctx, g) {
     })
     .join('');
 
-  const head = (r) => {
-    const t = ctx.teams.get(r.name);
-    return `<th title="${esc(r.name)}">${t?.logo ? tlogo(ctx, r.name) : `<span class="abbr">${esc(abbr(r.name))}</span>`}</th>`;
-  };
+  const head = (r) => `<th title="${esc(r.name)}">${teamMark(ctx, r.name)}</th>`;
   const find = (a, b) => (g.matches || []).find((m) => (m.team1 === a && m.team2 === b) || (m.team1 === b && m.team2 === a));
   const cross = rows
     .map((row, i) => {
@@ -331,27 +368,88 @@ function groupBlock(ctx, g) {
     .join('');
 
   return `
-    <div class="group">
-      <h3>${esc(g.name || 'Группа')}</h3>
-      <div class="gwrap">
-        <div class="tbl st">
-          <table>
-            <thead><tr><th>#</th><th>Участник</th><th class="c">Матчи</th><th class="c">Карты</th></tr></thead>
-            <tbody>${trs}</tbody>
-          </table>
-        </div>
-        <div class="tbl xt"><table><tbody>${cross}</tbody></table></div>
+    <div class="gwrap">
+      <div class="tbl st">
+        <table>
+          <thead><tr><th>#</th><th>Участник</th><th class="c">Матчи</th><th class="c">Карты</th></tr></thead>
+          <tbody>${trs}</tbody>
+        </table>
       </div>
+      <div class="tbl xt"><table><tbody>${cross}</tbody></table></div>
     </div>`;
 }
 
-function groupsSection(ctx) {
-  const groups = ctx.result?.groups || [];
-  if (!groups.length) return '';
-  return `<section id="groups"><h2>Групповой этап</h2>${groups.map((g) => groupBlock(ctx, g)).join('')}</section>`;
+/* --- Швейцарская система --- */
+
+function matchRow(m) {
+  const known = hasScore(m);
+  const s1 = +m.score1, s2 = +m.score2;
+  const c1 = known ? (s1 > s2 ? 'win' : s1 < s2 ? 'lose' : '') : '';
+  const c2 = known ? (s2 > s1 ? 'win' : s2 < s1 ? 'lose' : '') : '';
+  return `<div class="match"><span class="${c1}">${esc(m.team1)}</span><span class="score">${known ? `${s1} : ${s2}` : 'vs'}</span><span class="t2 ${c2}">${esc(m.team2)}</span></div>`;
 }
 
-/* ---------- Плей-офф ---------- */
+function swissBlock(ctx, s) {
+  const rounds = s.rounds || [];
+  const names = arr(s.teams).length
+    ? s.teams
+    : [...new Set(rounds.flatMap((r) => (r.matches || []).flatMap((m) => [m.team1, m.team2])))];
+  if (!names.length) return '';
+  const st = new Map(names.map((n) => [n, { name: n, w: 0, l: 0, d: 0, gw: 0, gl: 0, opps: [], cells: [], bh: 0 }]));
+
+  rounds.forEach((r, ri) => {
+    for (const m of r.matches || []) {
+      const a = st.get(m.team1), b = st.get(m.team2);
+      if (!a || !b) continue;
+      const ok = hasScore(m);
+      const s1 = ok ? +m.score1 : null, s2 = ok ? +m.score2 : null;
+      a.cells[ri] = { opp: m.team2, mine: s1, other: s2 };
+      b.cells[ri] = { opp: m.team1, mine: s2, other: s1 };
+      if (!ok) continue;
+      a.opps.push(m.team2); b.opps.push(m.team1);
+      a.gw += s1; a.gl += s2; b.gw += s2; b.gl += s1;
+      if (s1 > s2) { a.w++; b.l++; } else if (s1 < s2) { b.w++; a.l++; } else { a.d++; b.d++; }
+    }
+  });
+  // Buchholz: сумма (победы − поражения) всех соперников
+  for (const t of st.values()) t.bh = t.opps.reduce((sum, o) => sum + ((st.get(o)?.w || 0) - (st.get(o)?.l || 0)), 0);
+
+  const rows = [...st.values()].sort(
+    (x, y) => y.w - x.w || x.l - y.l || y.bh - x.bh || y.gw - y.gl - (x.gw - x.gl) || x.name.localeCompare(y.name, 'ru'),
+  );
+  const adv = Number(s.advance) || 0;
+  const started = rows.some((r) => r.w + r.l);
+
+  const cell = (c) => {
+    if (!c) return '<td></td>';
+    const known = c.mine != null;
+    const cls = known ? (c.mine > c.other ? 'w' : c.mine < c.other ? 'l' : 'd') : '';
+    return `<td class="rc" title="${esc(c.opp)}">${known ? `<span class="sc ${cls}">${c.mine}:${c.other}</span>` : ''}${teamMark(ctx, c.opp)}</td>`;
+  };
+
+  const trs = rows
+    .map((t, i) => {
+      const cls = adv && started ? (i < adv ? 'adv' : 'out') : '';
+      return `<tr class="${cls}"><td class="n">${i + 1}</td><td>${teamChip(ctx, t.name)}</td><td class="c">${t.w}-${t.l}</td><td class="c">${t.gw} - ${t.gl}</td><td class="c">${t.bh}</td>${rounds.map((_, ri) => cell(t.cells[ri])).join('')}</tr>`;
+    })
+    .join('');
+
+  const heads = rounds.map((r, i) => `<th class="c" title="${esc(r.name || '')}">Раунд ${i + 1}</th>`).join('');
+  const list = rounds
+    .map((r, i) => `<div class="round"><h3>${esc(r.name || `Раунд ${i + 1}`)}</h3>${(r.matches || []).map(matchRow).join('')}</div>`)
+    .join('');
+
+  return `
+    <div class="tbl swiss">
+      <div class="scroll"><table>
+        <thead><tr><th>#</th><th>Участник</th><th class="c">Матчи</th><th class="c">Карты</th><th class="c" title="Сумма (победы − поражения) соперников">Buchholz</th>${heads}</tr></thead>
+        <tbody>${trs}</tbody>
+      </table></div>
+    </div>
+    <details class="fold"><summary>Все матчи по раундам</summary><div class="fold-body">${list}</div></details>`;
+}
+
+/* --- Сетки: Single / Double Elimination --- */
 
 function bmatch(ctx, m) {
   const known = hasScore(m);
@@ -364,23 +462,25 @@ function bmatch(ctx, m) {
   return `<div class="bmatch"${m.id ? ` data-id="${esc(m.id)}"` : ''}${m.next ? ` data-next="${esc(m.next)}"` : ''}${m.date ? ` title="${fmtDate(m.date)}"` : ''}>${team(m.team1, m.score1, cls(s1, s2))}${team(m.team2, m.score2, cls(s2, s1))}</div>`;
 }
 
-function playoffsSection(ctx) {
-  const rounds = ctx.result?.playoffs?.rounds || [];
+// rounds[].bracket: upper (по умолчанию) | lower | final | third (матч за 3 место)
+function bracketHtml(ctx, rounds) {
   if (!rounds.length) return '';
   const by = (k) => rounds.filter((r) => (r.bracket || 'upper') === k);
-  const col = (r) =>
-    `<div class="bcol"><div class="bhead">${esc(r.name)}</div><div class="bms">${(r.matches || []).map((m) => bmatch(ctx, m)).join('')}</div></div>`;
-  const row = (k) => (by(k).length ? `<div class="brow">${by(k).map(col).join('')}</div>` : '');
+  const matches = (r) => (r.matches || []).map((m) => bmatch(ctx, m)).join('');
+  const col = (r, extra = '') =>
+    `<div class="bcol"><div class="bhead">${esc(r.name)}</div><div class="bms">${matches(r)}${extra}</div></div>`;
+  const row = (k) => (by(k).length ? `<div class="brow">${by(k).map((r) => col(r)).join('')}</div>` : '');
+  const third = by('third')
+    .map((r) => `<div class="bthird"><div class="bsub">${esc(r.name)}</div>${matches(r)}</div>`)
+    .join('');
   const fin = by('final');
+  const finHtml = fin.length ? `<div class="bfinal">${fin.map((r, i) => col(r, i === fin.length - 1 ? third : '')).join('')}</div>` : '';
   return `
-    <section id="playoffs">
-      <h2>Плей-офф</h2>
-      <div class="bracket"><div class="binner">
-        <svg class="blines" aria-hidden="true"></svg>
-        <div class="bmain">${row('upper')}${row('lower')}</div>
-        ${fin.length ? `<div class="bfinal">${fin.map(col).join('')}</div>` : ''}
-      </div></div>
-    </section>`;
+    <div class="bracket"><div class="binner">
+      <svg class="blines" aria-hidden="true"></svg>
+      <div class="bmain">${row('upper')}${row('lower')}</div>
+      ${finHtml}
+    </div></div>`;
 }
 
 // Линии сетки: от правого края матча к левому краю матча, куда проходит победитель (data-next)
@@ -405,11 +505,11 @@ function drawBrackets() {
   });
 }
 
-/* ---------- Матчи списком (если нет групп и сетки) ---------- */
+/* ---------- Матчи списком (если нет этапов) ---------- */
 
 function matchesSection(ctx) {
   const { result } = ctx;
-  if (result?.groups?.length || result?.playoffs?.rounds?.length) return '';
+  if (stagesOf(result).length) return '';
   const matches = result?.matches || [];
   if (!matches.length) return '';
   const rounds = new Map();
@@ -419,18 +519,7 @@ function matchesSection(ctx) {
     rounds.get(k).push(m);
   }
   const html = [...rounds]
-    .map(([round, ms]) => {
-      const rows = ms
-        .map((m) => {
-          const known = hasScore(m);
-          const s1 = +m.score1, s2 = +m.score2;
-          const c1 = known ? (s1 > s2 ? 'win' : s1 < s2 ? 'lose' : '') : '';
-          const c2 = known ? (s2 > s1 ? 'win' : s2 < s1 ? 'lose' : '') : '';
-          return `<div class="match"><span class="${c1}">${esc(m.team1)}</span><span class="score">${known ? `${s1} : ${s2}` : 'vs'}</span><span class="t2 ${c2}">${esc(m.team2)}</span></div>`;
-        })
-        .join('');
-      return `<div class="round"><h3>${esc(round)}</h3>${rows}</div>`;
-    })
+    .map(([round, ms]) => `<div class="round"><h3>${esc(round)}</h3>${ms.map(matchRow).join('')}</div>`)
     .join('');
   return `<section id="matches"><h2>Матчи</h2>${html}</section>`;
 }
@@ -472,16 +561,16 @@ async function tournamentView(slug) {
 
   document.title = `${info.name} — Anypedia`;
 
+  const stages = stagesOf(result).map((st, i) => [`stage-${i}`, st.name || FORMAT_LABELS[st.type] || 'Этап', stageSection(ctx, st, i)]);
   const sections = [
     ['participants', 'Участники', participantsSection(ctx)],
     ['prizes', 'Призовые места', prizesSection(ctx)],
-    ['groups', 'Групповой этап', groupsSection(ctx)],
-    ['playoffs', 'Плей-офф', playoffsSection(ctx)],
+    ...stages,
     ['matches', 'Матчи', matchesSection(ctx)],
     ['streams', 'Трансляции', streamsSection(ctx)],
   ].filter((s) => s[2]);
 
-  const nav = sections.map(([id, label]) => `<a href="#/t/${enc(slug)}" data-scroll="${id}">${label}</a>`).join('');
+  const nav = sections.map(([id, label]) => `<a href="#/t/${enc(slug)}" data-scroll="${id}">${esc(label)}</a>`).join('');
 
   return `
     <a class="back" href="#/">← Все турниры</a>
@@ -525,12 +614,20 @@ async function route() {
   requestAnimationFrame(drawBrackets);
 }
 
-// Переключатели, раскрытие призов, прокрутка к секциям
+/* ---------- Взаимодействие ---------- */
+
 app.addEventListener('change', (e) => {
   const t = e.target;
   if (t.matches?.('[data-toggle]')) t.closest('.participants')?.classList.toggle(t.dataset.toggle, t.checked);
 });
 app.addEventListener('click', (e) => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab) {
+    const card = tab.closest('.pcard');
+    card.classList.toggle('show-subs', tab.dataset.tab === 'subs');
+    card.querySelectorAll('[data-tab]').forEach((b) => b.classList.toggle('on', b === tab));
+    return;
+  }
   const more = e.target.closest('[data-expand]');
   if (more) {
     const box = more.closest('.prizes');
@@ -543,6 +640,14 @@ app.addEventListener('click', (e) => {
     e.preventDefault();
     document.getElementById(link.dataset.scroll)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+});
+
+// Тема: светлая / тёмная (начальное значение ставит скрипт в <head>)
+const themeBtn = document.getElementById('theme');
+themeBtn?.addEventListener('click', () => {
+  const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('theme', next); } catch { /* приватный режим */ }
 });
 
 window.addEventListener('hashchange', route);
