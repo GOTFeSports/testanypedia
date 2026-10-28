@@ -1,6 +1,243 @@
 {
-  "generated": "2026-10-28T20:06:37.355Z",
+  "generated": "2026-10-28T20:26:32.725Z",
+  "stats": {
+    "tournaments": 3,
+    "teams": 28,
+    "matches": 67,
+    "live": 0,
+    "finished": 2
+  },
+  "matches": {
+    "upcoming": [
+      {
+        "slug": "anylvl-cup-2",
+        "tournament": "AnyLvL Cup #2",
+        "stage": "Четвертьфиналы",
+        "team1": "Тестовая команда 1",
+        "team2": "Тестовая команда 8",
+        "score1": null,
+        "score2": null,
+        "date": "2026-12-20",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "anylvl-cup-2",
+        "tournament": "AnyLvL Cup #2",
+        "stage": "Четвертьфиналы",
+        "team1": "Тестовая команда 4",
+        "team2": "Тестовая команда 5",
+        "score1": null,
+        "score2": null,
+        "date": "2026-12-20",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "anylvl-cup-2",
+        "tournament": "AnyLvL Cup #2",
+        "stage": "Четвертьфиналы",
+        "team1": "Тестовая команда 2",
+        "team2": "Тестовая команда 7",
+        "score1": null,
+        "score2": null,
+        "date": "2026-12-20",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "anylvl-cup-2",
+        "tournament": "AnyLvL Cup #2",
+        "stage": "Четвертьфиналы",
+        "team1": "Тестовая команда 3",
+        "team2": "Тестовая команда 6",
+        "score1": null,
+        "score2": null,
+        "date": "2026-12-20",
+        "logo1": null,
+        "logo2": null
+      }
+    ],
+    "completed": [
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Верхняя сетка · четвертьфиналы",
+        "team1": "Swiss Team 7",
+        "team2": "Swiss Team 11",
+        "score1": 2,
+        "score2": 0,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Верхняя сетка · четвертьфиналы",
+        "team1": "Swiss Team 9",
+        "team2": "Swiss Team 1",
+        "score1": 2,
+        "score2": 0,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Верхняя сетка · четвертьфиналы",
+        "team1": "Swiss Team 2",
+        "team2": "Swiss Team 6",
+        "score1": 2,
+        "score2": 0,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Верхняя сетка · четвертьфиналы",
+        "team1": "Swiss Team 4",
+        "team2": "Swiss Team 5",
+        "score1": 1,
+        "score2": 2,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Верхняя сетка · полуфиналы",
+        "team1": "Swiss Team 7",
+        "team2": "Swiss Team 9",
+        "score1": 2,
+        "score2": 0,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Верхняя сетка · полуфиналы",
+        "team1": "Swiss Team 2",
+        "team2": "Swiss Team 5",
+        "score1": 2,
+        "score2": 0,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Верхняя сетка · финал",
+        "team1": "Swiss Team 7",
+        "team2": "Swiss Team 2",
+        "score1": 2,
+        "score2": 1,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Нижняя сетка · раунд 1",
+        "team1": "Swiss Team 11",
+        "team2": "Swiss Team 1",
+        "score1": 0,
+        "score2": 2,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Нижняя сетка · раунд 1",
+        "team1": "Swiss Team 6",
+        "team2": "Swiss Team 4",
+        "score1": 0,
+        "score2": 2,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Нижняя сетка · раунд 2",
+        "team1": "Swiss Team 1",
+        "team2": "Swiss Team 5",
+        "score1": 1,
+        "score2": 2,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Нижняя сетка · раунд 2",
+        "team1": "Swiss Team 4",
+        "team2": "Swiss Team 9",
+        "score1": 2,
+        "score2": 0,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      },
+      {
+        "slug": "swiss-test",
+        "tournament": "Swiss Test Cup",
+        "stage": "Нижняя сетка · полуфинал",
+        "team1": "Swiss Team 5",
+        "team2": "Swiss Team 4",
+        "score1": 2,
+        "score2": 1,
+        "date": "2026-12-07",
+        "logo1": null,
+        "logo2": null
+      }
+    ]
+  },
   "tournaments": [
+    {
+      "slug": "anylvl-cup-2",
+      "name": "AnyLvL Cup #2",
+      "logo": null,
+      "status": "upcoming",
+      "date_start": "2026-12-20",
+      "date_end": "2026-12-21",
+      "organizer": "AnyLvL x GOTF eSports",
+      "prize_pool": "15 000 ₽",
+      "pts_cap": 20000,
+      "teams_count": 8,
+      "winner": null,
+      "winner_logo": null,
+      "sections": [
+        {
+          "id": "participants",
+          "label": "Участники"
+        },
+        {
+          "id": "prizes",
+          "label": "Призы"
+        },
+        {
+          "id": "stage-0",
+          "label": "Плей-офф"
+        },
+        {
+          "id": "streams",
+          "label": "Трансляции"
+        }
+      ]
+    },
     {
       "slug": "swiss-test",
       "name": "Swiss Test Cup",
@@ -12,7 +249,30 @@
       "prize_pool": "20 000 ₽",
       "pts_cap": 20000,
       "teams_count": 16,
-      "winner": "Swiss Team 2"
+      "winner": "Swiss Team 2",
+      "winner_logo": null,
+      "sections": [
+        {
+          "id": "participants",
+          "label": "Участники"
+        },
+        {
+          "id": "prizes",
+          "label": "Призы"
+        },
+        {
+          "id": "stage-0",
+          "label": "Швейцарская система"
+        },
+        {
+          "id": "stage-1",
+          "label": "Плей-офф"
+        },
+        {
+          "id": "streams",
+          "label": "Трансляции"
+        }
+      ]
     },
     {
       "slug": "anylvl-cup",
@@ -25,7 +285,30 @@
       "prize_pool": "10 000 ₽",
       "pts_cap": 20000,
       "teams_count": 12,
-      "winner": "Тестовая команда 1"
+      "winner": "Тестовая команда 1",
+      "winner_logo": null,
+      "sections": [
+        {
+          "id": "participants",
+          "label": "Участники"
+        },
+        {
+          "id": "prizes",
+          "label": "Призы"
+        },
+        {
+          "id": "stage-0",
+          "label": "Групповой этап"
+        },
+        {
+          "id": "stage-1",
+          "label": "Плей-офф"
+        },
+        {
+          "id": "streams",
+          "label": "Трансляции"
+        }
+      ]
     }
   ]
 }

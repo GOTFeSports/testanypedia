@@ -1,0 +1,39 @@
+{
+  "name": "AnyLvL Cup #2",
+  "series": "AnyLvL Cup",
+  "organizer": "AnyLvL x GOTF eSports",
+  "status": "upcoming",
+  "type": "online",
+  "location": "СНГ",
+  "game": "Dota 2",
+  "date_start": "2026-12-20",
+  "date_end": "2026-12-21",
+  "format": [
+    "Single Elimination, Bo3 (финал Bo5)"
+  ],
+  "pts_cap": 20000,
+  "prize_pool": "15 000 ₽",
+  "description": "ТЕСТОВЫЕ ДАННЫЕ — пример предстоящего турнира.",
+  "links": {},
+  "prizes": [
+    {
+      "place": 1,
+      "prize": "8 000 ₽"
+    },
+    {
+      "place": 2,
+      "prize": "4 000 ₽"
+    },
+    {
+      "place": 3,
+      "prize": "3 000 ₽"
+    }
+  ],
+  "streams": [
+    {
+      "lang": "ru",
+      "platform": "twitch",
+      "url": "https://www.twitch.tv/"
+    }
+  ]
+}

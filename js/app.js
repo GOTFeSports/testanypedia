@@ -1,5 +1,5 @@
 // Anypedia — страницы турниров.
-// Данные: tournaments/<slug>/{information,roster,result}.json (список — tournaments/index.json)
+// Данные: tournaments/<slug>/{information,roster,result}.json (список, статистика и матчи — tournaments/index.json)
 
 const app = document.getElementById('app');
 const cache = new Map();
@@ -15,7 +15,7 @@ const arr = (v) => (Array.isArray(v) ? v : v ? [v] : []);
 const num = (n) => (n == null || n === '' || isNaN(Number(n)) ? '—' : Number(n).toLocaleString('ru-RU'));
 const hasScore = (m) => m.score1 != null && m.score2 != null && m.score1 !== '' && m.score2 !== '' && !isNaN(m.score1) && !isNaN(m.score2);
 
-// Путь к файлу: полный URL как есть, иначе относительно папки турнира
+// Путь к файлу: полный URL как есть, иначе относительно base
 const asset = (base, p) =>
   !p ? '' : /^https?:\/\//i.test(p) ? esc(p) : esc(base + String(p).split('/').map(encodeURIComponent).join('/'));
 
@@ -42,8 +42,7 @@ function dateRange(a, b) {
   if (!b || a === b) return fmtDate(a || b);
   const x = toDate(a), y = toDate(b);
   if (!isNaN(x) && !isNaN(y) && x.getMonth() === y.getMonth() && x.getFullYear() === y.getFullYear()) {
-    const month = x.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }).replace(/ г\.$/, '');
-    return `${x.getDate()}–${y.getDate()} ${month}`;
+    return `${x.getDate()}–${fmtDate(b)}`;
   }
   return `${fmtDate(a)} — ${fmtDate(b)}`;
 }
@@ -91,15 +90,26 @@ function abbr(name) {
 const teamMark = (ctx, name) =>
   hasLogo(ctx, name) ? tlogo(ctx, name) : `<span class="abbr">${esc(abbr(name))}</span>`;
 
-/* ---------- Главная: список турниров ---------- */
+/* ---------- Главная ---------- */
+
+const ORDER = { live: 0, upcoming: 1, finished: 2 };
+function sortTournaments(list) {
+  const d = (t) => String(t.date_start ?? '');
+  return [...list].sort(
+    (a, b) =>
+      (ORDER[a.status] ?? 3) - (ORDER[b.status] ?? 3) ||
+      (a.status === 'finished' ? d(b).localeCompare(d(a)) : d(a).localeCompare(d(b))),
+  );
+}
+
+const tourLogo = (t, size) =>
+  `<img class="tlogo ${size}" src="${t.logo ? asset(`tournaments/${encodeURIComponent(t.slug)}/`, t.logo) : DEFAULT_LOGO}" alt="" loading="lazy">`;
+const matchLogo = (p) => `<img class="tlogo sm" src="${p ? asset('', p) : DEFAULT_LOGO}" alt="" loading="lazy">`;
 
 const tournamentCard = (t) => `
   <a class="card tcard" href="#/t/${enc(t.slug)}">
     <div class="tcard-top">${badge(t.status)}<span class="muted">${dateRange(t.date_start, t.date_end)}</span></div>
-    <div class="tcard-title">
-      ${t.logo ? `<img class="tlogo lg" src="${asset(`tournaments/${encodeURIComponent(t.slug)}/`, t.logo)}" alt="" loading="lazy">` : ''}
-      <h3>${esc(t.name)}</h3>
-    </div>
+    <div class="tcard-title">${tourLogo(t, 'lg')}<h3>${esc(t.name)}</h3></div>
     <dl class="mini">
       ${t.prize_pool ? `<div><dt>Призовой фонд</dt><dd>${esc(t.prize_pool)}</dd></div>` : ''}
       ${t.pts_cap ? `<div><dt>Лимит</dt><dd>${num(t.pts_cap)}</dd></div>` : ''}
@@ -108,21 +118,120 @@ const tournamentCard = (t) => `
     </dl>
   </a>`;
 
+function featureCard(t) {
+  const fact = (label, value) => (value ? `<div><dt>${label}</dt><dd>${value}</dd></div>` : '');
+  const chips = (t.sections || [])
+    .slice(0, 5)
+    .map((s) => `<a class="pill-link" href="#/t/${enc(t.slug)}/${enc(s.id)}">${esc(s.label)}</a>`)
+    .join('');
+  return `
+    <article class="feature">
+      <a class="f-head" href="#/t/${enc(t.slug)}">
+        <span class="f-kicker">${esc(STATUS[t.status] || '')}${t.organizer ? ` · ${esc(t.organizer)}` : ''}</span>
+        <span class="f-title">${esc(t.name)}</span>
+      </a>
+      <div class="f-body">
+        ${tourLogo(t, 'xl')}
+        <dl class="f-facts">
+          ${fact('Даты', dateRange(t.date_start, t.date_end))}
+          ${fact('Призовой фонд', esc(t.prize_pool))}
+          ${fact('Лимит', t.pts_cap ? num(t.pts_cap) : '')}
+          ${fact('Команд', t.teams_count || '')}
+          ${t.winner ? fact('Победитель', `<span class="chip">${matchLogo(t.winner_logo)}<span class="txt">${esc(t.winner)}</span></span>`) : ''}
+        </dl>
+      </div>
+      ${chips ? `<nav class="f-links">${chips}</nav>` : ''}
+    </article>`;
+}
+
+function matchRow(m, withStage = true) {
+  const known = hasScore(m);
+  const s1 = +m.score1, s2 = +m.score2;
+  const c1 = known ? (s1 > s2 ? 'win' : s1 < s2 ? 'lose' : '') : '';
+  const c2 = known ? (s2 > s1 ? 'win' : s2 < s1 ? 'lose' : '') : '';
+  return `
+    <a class="mrow" href="#/t/${enc(m.slug)}">
+      <div class="mtop"><span class="mt-name">${esc(m.tournament)}${withStage && m.stage ? ` · ${esc(m.stage)}` : ''}</span>${m.date ? `<span>${esc(shortDate(m.date))}</span>` : ''}</div>
+      <div class="mbody">
+        <span class="side l ${c1}"><span class="txt">${esc(m.team1)}</span>${matchLogo(m.logo1)}</span>
+        <span class="mscore">${known ? `${s1}:${s2}` : 'vs'}</span>
+        <span class="side r ${c2}">${matchLogo(m.logo2)}<span class="txt">${esc(m.team2)}</span></span>
+      </div>
+    </a>`;
+}
+
+const TROPHY = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>`;
+
 async function homeView() {
   const idx = await getJson('tournaments/index.json');
   if (!idx) throw new Error('tournaments/index.json не найден — запустите npm run build');
-  const list = idx.tournaments || [];
-  return `
-    <section class="intro">
+  const list = sortTournaments(idx.tournaments || []);
+  const stats = idx.stats || {};
+  const mt = idx.matches || { upcoming: [], completed: [] };
+
+  const hero = `
+    <section class="hero">
       <h1>Турниры Dota 2 с ограничением по ПТС</h1>
       <p>Призовые места, составы команд, групповые этапы, швейцарка и сетки полупрофессиональных турниров СНГ.</p>
-    </section>
-    <h2>Все турниры</h2>
-    ${
-      list.length
-        ? `<div class="grid">${list.map(tournamentCard).join('')}</div>`
-        : `<div class="empty">Турниров пока нет. Добавьте папку в <code>tournaments/</code> и запустите <code>npm run build</code>.</div>`
-    }`;
+      <div class="stats">
+        <div class="stat"><b>${num(stats.tournaments ?? list.length)}</b><span>Турниров</span></div>
+        <div class="stat"><b>${num(stats.teams ?? 0)}</b><span>Команд</span></div>
+        <div class="stat"><b>${num(stats.matches ?? 0)}</b><span>Матчей сыграно</span></div>
+        <div class="stat"><b>${num(stats.finished ?? 0)}</b><span>Завершено</span></div>
+      </div>
+    </section>`;
+
+  if (!list.length) {
+    return `${hero}<div class="empty" style="margin-top:28px">Турниров пока нет. Добавьте папку в <code>tournaments/</code> и запустите <code>npm run build</code>.</div>`;
+  }
+
+  const [feat, ...rest] = list;
+  const groups = [['live', 'Идут сейчас'], ['upcoming', 'Скоро'], ['finished', 'Завершённые']]
+    .map(([k, label]) => {
+      const items = rest.filter((t) => t.status === k);
+      return items.length ? `<h2>${label}</h2><div class="grid">${items.map(tournamentCard).join('')}</div>` : '';
+    })
+    .join('');
+
+  const startTab = mt.upcoming?.length ? 'upcoming' : 'completed';
+  const pane = (key, empty) => {
+    const items = mt[key] || [];
+    return `<div class="mlist" data-pane="${key}"${key === startTab ? '' : ' hidden'}>${
+      items.length ? items.map((m) => matchRow(m)).join('') : `<div class="mempty">${empty}</div>`
+    }</div>`;
+  };
+  const tab = (key, label) => `<button type="button" data-mtab="${key}" class="${key === startTab ? 'on' : ''}">${label}</button>`;
+
+  const winners = list.filter((t) => t.status === 'finished' && t.winner);
+  const winnersHtml = winners.length
+    ? `<section class="panel">
+        <div class="panel-h">Победители</div>
+        <ul class="wlist">${winners
+          .slice(0, 8)
+          .map(
+            (t) =>
+              `<li><a href="#/t/${enc(t.slug)}"><span class="wt">${esc(t.name)}</span><span class="wn">${TROPHY}<span class="chip">${matchLogo(t.winner_logo)}<span class="txt">${esc(t.winner)}</span></span></span></a></li>`,
+          )
+          .join('')}</ul>
+      </section>`
+    : '';
+
+  return `
+    ${hero}
+    <div class="home">
+      <div class="home-main">
+        ${featureCard(feat)}
+        ${groups}
+      </div>
+      <aside class="home-side">
+        <section class="panel">
+          <div class="panel-h">Матчи</div>
+          <div class="mtabs">${tab('upcoming', 'Предстоящие')}${tab('completed', 'Завершённые')}</div>
+          ${pane('upcoming', 'Предстоящих матчей нет')}${pane('completed', 'Сыгранных матчей пока нет')}
+        </section>
+        ${winnersHtml}
+      </aside>
+    </div>`;
 }
 
 /* ---------- Инфобокс ---------- */
@@ -170,31 +279,36 @@ function infobox(ctx) {
 
 /* ---------- Участники ---------- */
 
-const TEAM_STATUS = { invited: 'Приглашена', qualified: 'Квалификация', registered: 'Заявка' };
+const TEAM_STATUS = { invited: 'Приглашена', qualified: 'Квалификация', registered: 'Заявка подана' };
 
 function participantsSection(ctx) {
   const teams = ctx.roster?.teams || [];
   if (!teams.length) return '';
-  const person = (p, tag) =>
-    `<li${tag ? ' class="sub"' : ''}><span class="nick">${esc(p.nick)}</span>${
-      tag ? `<span class="pill">${tag}</span>` : `<span class="pos">${esc(p.pos ?? '')}</span>`
-    }</li>`;
+  // Строка «статус / квалификация» есть у всех карточек, если она есть хотя бы у одной — так карточки выровнены
+  const anyMeta = teams.some((t) => t.status || t.qualifier);
+
+  const li = (p, badgeHtml) =>
+    `<li><span class="nick" title="${esc(p.nick)}">${esc(p.nick)}</span>${badgeHtml}</li>`;
 
   const cards = teams
     .map((t) => {
-      const players = (t.players || []).map((p, i) => person({ ...p, pos: p.pos ?? i + 1 })).join('');
-      const coach = arr(t.coach).map((p) => person(p, 'Тренер')).join('');
-      const subs = arr(t.subs).map((p) => person(p, 'Запас')).join('');
+      const players = (t.players || []).map((p, i) => li(p, `<span class="pos">${esc(p.pos ?? i + 1)}</span>`)).join('');
+      const coach = arr(t.coach).map((p) => li(p, '<span class="pill">Тренер</span>')).join('');
+      const subsArr = arr(t.subs);
+      const subs = subsArr.map((p, i) => li(p, `<span class="pos">S${i + 1}</span>`)).join('');
+      const metaText = t.qualifier || TEAM_STATUS[t.status] || '';
       return `
         <article class="pcard">
-          <header>
-            ${tlogo(ctx, t.name, 'md')}<h3>${esc(t.name)}</h3>
-            ${t.status ? `<span class="pill">${esc(TEAM_STATUS[t.status] || t.status)}</span>` : ''}
-          </header>
-          ${t.qualifier ? `<div class="qual">${esc(t.qualifier)}</div>` : ''}
-          ${subs ? `<div class="tabs"><button type="button" class="on" data-tab="main">Основа</button><button type="button" data-tab="subs">Запас</button></div>` : ''}
-          <ul class="roster main">${players}${coach}</ul>
-          ${subs ? `<ul class="roster subs">${subs}</ul>` : ''}
+          <header>${tlogo(ctx, t.name, 'md')}<h3 title="${esc(t.name)}">${esc(t.name)}</h3></header>
+          ${anyMeta ? `<div class="pmeta st-${esc(t.status || '')}" title="${esc(metaText)}">${metaText ? `<i></i><span>${esc(metaText)}</span>` : ''}</div>` : ''}
+          <div class="tabs">
+            <button type="button" class="on" data-tab="main">Основа</button>
+            <button type="button" data-tab="subs"${subsArr.length ? '' : ' disabled'}>Запас${subsArr.length ? `<i>${subsArr.length}</i>` : ''}</button>
+          </div>
+          <div class="rbox">
+            <ul class="roster main">${players}${coach}</ul>
+            <ul class="roster subs">${subs}</ul>
+          </div>
         </article>`;
     })
     .join('');
@@ -251,7 +365,7 @@ function prizesSection(ctx) {
       const teams = r.teams.length
         ? `<div class="pteams">${r.teams.map((t) => teamChip(ctx, t)).join('')}</div>`
         : teamChip(ctx, null);
-      return `<tr class="${cls} ${extra}"><td class="n"><span class="pbadge">${esc(r.label)}</span></td><td>${teams}</td><td class="r">${r.prize ? esc(r.prize) : '—'}</td></tr>`;
+      return `<tr class="${cls} ${extra}"><td class="n"><span class="pbadge">${esc(r.label)}</span></td><td class="nm">${teams}</td><td class="r">${r.prize ? esc(r.prize) : '—'}</td></tr>`;
     })
     .join('');
 
@@ -335,6 +449,14 @@ function computeGroup(g) {
   );
 }
 
+function matchLine(m) {
+  const known = hasScore(m);
+  const s1 = +m.score1, s2 = +m.score2;
+  const c1 = known ? (s1 > s2 ? 'win' : s1 < s2 ? 'lose' : '') : '';
+  const c2 = known ? (s2 > s1 ? 'win' : s2 < s1 ? 'lose' : '') : '';
+  return `<div class="match"><span class="${c1}">${esc(m.team1)}</span><span class="score">${known ? `${s1} : ${s2}` : 'vs'}</span><span class="t2 ${c2}">${esc(m.team2)}</span></div>`;
+}
+
 function roundRobinBody(ctx, g) {
   const rows = computeGroup(g);
   const adv = Number(g.advance) || 0;
@@ -344,7 +466,7 @@ function roundRobinBody(ctx, g) {
   const trs = rows
     .map((r, i) => {
       const cls = adv && started ? (i < adv ? 'adv' : 'out') : '';
-      return `<tr class="${cls}"><td class="n">${i + 1}</td><td>${teamChip(ctx, r.name)}</td><td class="c">${r.w}-${anyDraw ? `${r.d}-` : ''}${r.l}</td><td class="c">${r.gw} - ${r.gl}</td></tr>`;
+      return `<tr class="${cls}"><td class="n">${i + 1}</td><td class="nm">${teamChip(ctx, r.name)}</td><td class="c">${r.w}-${anyDraw ? `${r.d}-` : ''}${r.l}</td><td class="c">${r.gw} - ${r.gl}</td></tr>`;
     })
     .join('');
 
@@ -367,6 +489,7 @@ function roundRobinBody(ctx, g) {
     })
     .join('');
 
+  const list = (g.matches || []).map(matchLine).join('');
   return `
     <div class="gwrap">
       <div class="tbl st">
@@ -375,19 +498,12 @@ function roundRobinBody(ctx, g) {
           <tbody>${trs}</tbody>
         </table>
       </div>
-      <div class="tbl xt"><table><tbody>${cross}</tbody></table></div>
-    </div>`;
+      <div class="tbl xt" style="--n:${rows.length + 1}"><table><tbody>${cross}</tbody></table></div>
+    </div>
+    ${list ? `<details class="fold"><summary>Все матчи группы</summary><div class="fold-body">${list}</div></details>` : ''}`;
 }
 
 /* --- Швейцарская система --- */
-
-function matchRow(m) {
-  const known = hasScore(m);
-  const s1 = +m.score1, s2 = +m.score2;
-  const c1 = known ? (s1 > s2 ? 'win' : s1 < s2 ? 'lose' : '') : '';
-  const c2 = known ? (s2 > s1 ? 'win' : s2 < s1 ? 'lose' : '') : '';
-  return `<div class="match"><span class="${c1}">${esc(m.team1)}</span><span class="score">${known ? `${s1} : ${s2}` : 'vs'}</span><span class="t2 ${c2}">${esc(m.team2)}</span></div>`;
-}
 
 function swissBlock(ctx, s) {
   const rounds = s.rounds || [];
@@ -421,30 +537,30 @@ function swissBlock(ctx, s) {
   const started = rows.some((r) => r.w + r.l);
 
   const cell = (c) => {
-    if (!c) return '<td></td>';
+    if (!c) return '<td class="rd"></td>';
     const known = c.mine != null;
     const cls = known ? (c.mine > c.other ? 'w' : c.mine < c.other ? 'l' : 'd') : '';
-    return `<td class="rc" title="${esc(c.opp)}">${known ? `<span class="sc ${cls}">${c.mine}:${c.other}</span>` : ''}${teamMark(ctx, c.opp)}</td>`;
+    return `<td class="rc rd" title="${esc(c.opp)}">${known ? `<span class="sc ${cls}">${c.mine}:${c.other}</span>` : ''}${teamMark(ctx, c.opp)}</td>`;
   };
 
   const trs = rows
     .map((t, i) => {
       const cls = adv && started ? (i < adv ? 'adv' : 'out') : '';
-      return `<tr class="${cls}"><td class="n">${i + 1}</td><td>${teamChip(ctx, t.name)}</td><td class="c">${t.w}-${t.l}</td><td class="c">${t.gw} - ${t.gl}</td><td class="c">${t.bh}</td>${rounds.map((_, ri) => cell(t.cells[ri])).join('')}</tr>`;
+      return `<tr class="${cls}"><td class="n">${i + 1}</td><td class="nm">${teamChip(ctx, t.name)}</td><td class="c">${t.w}-${t.l}</td><td class="c gm">${t.gw} - ${t.gl}</td><td class="c">${t.bh}</td>${rounds.map((_, ri) => cell(t.cells[ri])).join('')}</tr>`;
     })
     .join('');
 
-  const heads = rounds.map((r, i) => `<th class="c" title="${esc(r.name || '')}">Раунд ${i + 1}</th>`).join('');
+  const heads = rounds.map((r, i) => `<th class="c rd" title="${esc(r.name || '')}">Р${i + 1}</th>`).join('');
   const list = rounds
-    .map((r, i) => `<div class="round"><h3>${esc(r.name || `Раунд ${i + 1}`)}</h3>${(r.matches || []).map(matchRow).join('')}</div>`)
+    .map((r, i) => `<div class="round"><h3>${esc(r.name || `Раунд ${i + 1}`)}</h3>${(r.matches || []).map(matchLine).join('')}</div>`)
     .join('');
 
   return `
-    <div class="tbl swiss">
-      <div class="scroll"><table>
-        <thead><tr><th>#</th><th>Участник</th><th class="c">Матчи</th><th class="c">Карты</th><th class="c" title="Сумма (победы − поражения) соперников">Buchholz</th>${heads}</tr></thead>
+    <div class="tbl swiss" data-rounds="${rounds.length}">
+      <table>
+        <thead><tr><th>#</th><th>Участник</th><th class="c">Матчи</th><th class="c gm">Карты</th><th class="c" title="Сумма (победы − поражения) соперников">Buchholz</th>${heads}</tr></thead>
         <tbody>${trs}</tbody>
-      </table></div>
+      </table>
     </div>
     <details class="fold"><summary>Все матчи по раундам</summary><div class="fold-body">${list}</div></details>`;
 }
@@ -483,11 +599,26 @@ function bracketHtml(ctx, rounds) {
     </div></div>`;
 }
 
-// Линии сетки: от правого края матча к левому краю матча, куда проходит победитель (data-next)
-function drawBrackets() {
-  document.querySelectorAll('.binner').forEach((inner) => {
-    const svg = inner.querySelector('.blines');
-    if (!svg) return;
+// Сетка всегда помещается по ширине: линии рисуем в «естественном» размере, затем
+// масштабируем под контейнер. Если пришлось бы слишком мелко — раунды идут списком (класс .stack).
+const MIN_SCALE = 0.68;
+function fitBrackets() {
+  // Швейцарка: если колонки раундов не помещаются рядом с названиями — прячем их (матчи остаются в списке под таблицей)
+  document.querySelectorAll('.swiss').forEach((box) => {
+    box.classList.remove('compact');
+    const need = 340 + (Number(box.dataset.rounds) || 0) * 58;
+    box.classList.toggle('compact', box.clientWidth < need);
+  });
+  document.querySelectorAll('.bracket').forEach((box) => {
+    const inner = box.querySelector('.binner');
+    const svg = inner?.querySelector('.blines');
+    if (!inner || !svg) return;
+
+    box.classList.remove('stack');
+    inner.style.transform = '';
+    box.style.height = '';
+
+    const natural = inner.offsetWidth;
     const r0 = inner.getBoundingClientRect();
     svg.setAttribute('width', inner.scrollWidth);
     svg.setAttribute('height', inner.scrollHeight);
@@ -502,8 +633,22 @@ function drawBrackets() {
       d += `M${x1} ${y1}H${xm}V${y2}H${x2}`;
     });
     svg.innerHTML = `<path d="${d}"/>`;
+
+    const scale = box.clientWidth / natural;
+    if (scale >= 1) return;
+    if (scale >= MIN_SCALE) {
+      inner.style.transform = `scale(${scale})`;
+      box.style.height = `${inner.offsetHeight * scale}px`;
+    } else {
+      box.classList.add('stack');
+    }
   });
 }
+let fitRaf = 0;
+const scheduleFit = () => {
+  cancelAnimationFrame(fitRaf);
+  fitRaf = requestAnimationFrame(fitBrackets);
+};
 
 /* ---------- Матчи списком (если нет этапов) ---------- */
 
@@ -519,7 +664,7 @@ function matchesSection(ctx) {
     rounds.get(k).push(m);
   }
   const html = [...rounds]
-    .map(([round, ms]) => `<div class="round"><h3>${esc(round)}</h3>${ms.map(matchRow).join('')}</div>`)
+    .map(([round, ms]) => `<div class="round"><h3>${esc(round)}</h3>${ms.map(matchLine).join('')}</div>`)
     .join('');
   return `<section id="matches"><h2>Матчи</h2>${html}</section>`;
 }
@@ -561,16 +706,17 @@ async function tournamentView(slug) {
 
   document.title = `${info.name} — Anypedia`;
 
-  const stages = stagesOf(result).map((st, i) => [`stage-${i}`, st.name || FORMAT_LABELS[st.type] || 'Этап', stageSection(ctx, st, i)]);
-  const sections = [
+  const top = [
     ['participants', 'Участники', participantsSection(ctx)],
     ['prizes', 'Призовые места', prizesSection(ctx)],
-    ...stages,
+  ].filter((s) => s[2]);
+  const rest = [
+    ...stagesOf(result).map((st, i) => [`stage-${i}`, st.name || FORMAT_LABELS[st.type] || 'Этап', stageSection(ctx, st, i)]),
     ['matches', 'Матчи', matchesSection(ctx)],
     ['streams', 'Трансляции', streamsSection(ctx)],
   ].filter((s) => s[2]);
 
-  const nav = sections.map(([id, label]) => `<a href="#/t/${enc(slug)}" data-scroll="${id}">${esc(label)}</a>`).join('');
+  const nav = [...top, ...rest].map(([id, label]) => `<a href="#/t/${enc(slug)}" data-scroll="${id}">${esc(label)}</a>`).join('');
 
   return `
     <a class="back" href="#/">← Все турниры</a>
@@ -581,9 +727,10 @@ async function tournamentView(slug) {
       ${nav ? `<nav class="snav">${nav}</nav>` : ''}
     </header>
     <div class="layout">
-      <div class="main">${sections.map((s) => s[2]).join('') || '<div class="empty">Данные турнира пока не добавлены.</div>'}</div>
+      <div class="main">${top.map((s) => s[2]).join('') || '<div class="empty">Данные турнира пока не добавлены.</div>'}</div>
       ${infobox(ctx)}
-    </div>`;
+    </div>
+    <div class="stages">${rest.map((s) => s[2]).join('')}</div>`;
 }
 
 /* ---------- Служебное ---------- */
@@ -600,7 +747,7 @@ const errorView = (e) => `
 
 async function route() {
   const hash = location.hash.replace(/^#/, '') || '/';
-  const m = hash.match(/^\/t\/([^/?]+)/);
+  const m = hash.match(/^\/t\/([^/?]+)(?:\/([A-Za-z0-9_-]+))?/);
   document.title = 'Anypedia — турниры Dota 2 с ограничением по ПТС';
   try {
     if (m) app.innerHTML = await tournamentView(decodeURIComponent(m[1]));
@@ -611,7 +758,10 @@ async function route() {
     app.innerHTML = errorView(e);
   }
   window.scrollTo(0, 0);
-  requestAnimationFrame(drawBrackets);
+  fitBrackets();
+  scheduleFit();
+  // Ссылка вида #/t/<slug>/<раздел> прокручивает к разделу
+  if (m?.[2]) requestAnimationFrame(() => document.getElementById(m[2])?.scrollIntoView({ block: 'start' }));
 }
 
 /* ---------- Взаимодействие ---------- */
@@ -626,6 +776,13 @@ app.addEventListener('click', (e) => {
     const card = tab.closest('.pcard');
     card.classList.toggle('show-subs', tab.dataset.tab === 'subs');
     card.querySelectorAll('[data-tab]').forEach((b) => b.classList.toggle('on', b === tab));
+    return;
+  }
+  const mtab = e.target.closest('[data-mtab]');
+  if (mtab) {
+    const panel = mtab.closest('.panel');
+    panel.querySelectorAll('[data-mtab]').forEach((b) => b.classList.toggle('on', b === mtab));
+    panel.querySelectorAll('[data-pane]').forEach((p) => (p.hidden = p.dataset.pane !== mtab.dataset.mtab));
     return;
   }
   const more = e.target.closest('[data-expand]');
@@ -643,14 +800,20 @@ app.addEventListener('click', (e) => {
 });
 
 // Тема: светлая / тёмная (начальное значение ставит скрипт в <head>)
-const themeBtn = document.getElementById('theme');
-themeBtn?.addEventListener('click', () => {
+document.getElementById('theme')?.addEventListener('click', () => {
   const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
   document.documentElement.dataset.theme = next;
   try { localStorage.setItem('theme', next); } catch { /* приватный режим */ }
 });
 
+// Стрелка «наверх»: появляется после прокрутки
+const toTop = document.getElementById('totop');
+const onScroll = () => toTop?.classList.toggle('show', window.scrollY > 400);
+toTop?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
 window.addEventListener('hashchange', route);
-window.addEventListener('resize', drawBrackets);
-document.fonts?.ready.then(drawBrackets);
+window.addEventListener('resize', scheduleFit);
+document.fonts?.ready.then(scheduleFit);
 route();
