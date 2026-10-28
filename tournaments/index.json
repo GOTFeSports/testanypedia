@@ -1,9 +1,10 @@
 {
-  "generated": "2026-10-28T11:01:46.721Z",
+  "generated": "2026-10-28T11:13:47.867Z",
   "tournaments": [
     {
       "slug": "anylvl-cup",
       "name": "AnyLvL Cup",
+      "logo": "",
       "status": "finished",
       "date_start": "2026-11-14",
       "date_end": "2026-11-15",
@@ -11,7 +12,7 @@
       "prize_pool": "10 000 ₽",
       "pts_cap": 20000,
       "teams_count": 8,
-      "winner": "Тестовая команда 3"
+      "winner": "Тестовая команда 6"
     }
   ]
 }

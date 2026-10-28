@@ -2,91 +2,237 @@
   "teams": [
     {
       "name": "Тестовая команда 1",
-      "tag": "T1",
+      "status": "invited",
       "players": [
-        { "nick": "alpha_1", "role": "Pos 1", "pts": 4500 },
-        { "nick": "alpha_2", "role": "Pos 2", "pts": 4200 },
-        { "nick": "alpha_3", "role": "Pos 3", "pts": 4000 },
-        { "nick": "alpha_4", "role": "Pos 4", "pts": 3800 },
-        { "nick": "alpha_5", "role": "Pos 5", "pts": 3000 }
-      ]
+        {
+          "nick": "alpha_1",
+          "country": "ua"
+        },
+        {
+          "nick": "alpha_2",
+          "country": "kz"
+        },
+        {
+          "nick": "alpha_3",
+          "country": "by"
+        },
+        {
+          "nick": "alpha_4",
+          "country": "ru"
+        },
+        {
+          "nick": "alpha_5",
+          "country": "ua"
+        }
+      ],
+      "coach": {
+        "nick": "alpha_coach",
+        "country": "ru"
+      }
     },
     {
       "name": "Тестовая команда 2",
-      "tag": "T2",
+      "status": "invited",
       "players": [
-        { "nick": "bravo_1", "role": "Pos 1", "pts": 4100 },
-        { "nick": "bravo_2", "role": "Pos 2", "pts": 4000 },
-        { "nick": "bravo_3", "role": "Pos 3", "pts": 3900 },
-        { "nick": "bravo_4", "role": "Pos 4", "pts": 3700 },
-        { "nick": "bravo_5", "role": "Pos 5", "pts": 3500 }
-      ]
+        {
+          "nick": "bravo_1",
+          "country": "kz"
+        },
+        {
+          "nick": "bravo_2",
+          "country": "by"
+        },
+        {
+          "nick": "bravo_3",
+          "country": "ru"
+        },
+        {
+          "nick": "bravo_4",
+          "country": "ua"
+        },
+        {
+          "nick": "bravo_5",
+          "country": "ru"
+        }
+      ],
+      "subs": [
+        {
+          "nick": "bravo_sub",
+          "country": "ru"
+        }
+      ],
+      "coach": {
+        "nick": "bravo_coach",
+        "country": "ru"
+      }
     },
     {
       "name": "Тестовая команда 3",
-      "tag": "T3",
+      "status": "invited",
       "players": [
-        { "nick": "charlie_1", "role": "Pos 1", "pts": 4000 },
-        { "nick": "charlie_2", "role": "Pos 2", "pts": 3900 },
-        { "nick": "charlie_3", "role": "Pos 3", "pts": 3800 },
-        { "nick": "charlie_4", "role": "Pos 4", "pts": 3600 },
-        { "nick": "charlie_5", "role": "Pos 5", "pts": 3400 }
-      ]
+        {
+          "nick": "charlie_1",
+          "country": "by"
+        },
+        {
+          "nick": "charlie_2",
+          "country": "ru"
+        },
+        {
+          "nick": "charlie_3",
+          "country": "ua"
+        },
+        {
+          "nick": "charlie_4",
+          "country": "ru"
+        },
+        {
+          "nick": "charlie_5",
+          "country": "kz"
+        }
+      ],
+      "coach": {
+        "nick": "charlie_coach",
+        "country": "ru"
+      }
     },
     {
       "name": "Тестовая команда 4",
-      "tag": "T4",
+      "status": "invited",
       "players": [
-        { "nick": "delta_1", "role": "Pos 1", "pts": 3900 },
-        { "nick": "delta_2", "role": "Pos 2", "pts": 3800 },
-        { "nick": "delta_3", "role": "Pos 3", "pts": 3700 },
-        { "nick": "delta_4", "role": "Pos 4", "pts": 3500 },
-        { "nick": "delta_5", "role": "Pos 5", "pts": 3300 }
+        {
+          "nick": "delta_1",
+          "country": "ru"
+        },
+        {
+          "nick": "delta_2",
+          "country": "ua"
+        },
+        {
+          "nick": "delta_3",
+          "country": "ru"
+        },
+        {
+          "nick": "delta_4",
+          "country": "kz"
+        },
+        {
+          "nick": "delta_5",
+          "country": "ru"
+        }
       ]
     },
     {
       "name": "Тестовая команда 5",
-      "tag": "T5",
+      "status": "invited",
       "players": [
-        { "nick": "echo_1", "role": "Pos 1", "pts": 3800 },
-        { "nick": "echo_2", "role": "Pos 2", "pts": 3700 },
-        { "nick": "echo_3", "role": "Pos 3", "pts": 3600 },
-        { "nick": "echo_4", "role": "Pos 4", "pts": 3400 },
-        { "nick": "echo_5", "role": "Pos 5", "pts": 3200 }
+        {
+          "nick": "echo_1",
+          "country": "ua"
+        },
+        {
+          "nick": "echo_2",
+          "country": "ru"
+        },
+        {
+          "nick": "echo_3",
+          "country": "kz"
+        },
+        {
+          "nick": "echo_4",
+          "country": "ru"
+        },
+        {
+          "nick": "echo_5",
+          "country": "ua"
+        }
+      ],
+      "subs": [
+        {
+          "nick": "echo_sub",
+          "country": "ru"
+        }
       ]
     },
     {
       "name": "Тестовая команда 6",
-      "tag": "T6",
+      "status": "invited",
       "players": [
-        { "nick": "foxtrot_1", "role": "Pos 1", "pts": 3700 },
-        { "nick": "foxtrot_2", "role": "Pos 2", "pts": 3600 },
-        { "nick": "foxtrot_3", "role": "Pos 3", "pts": 3500 },
-        { "nick": "foxtrot_4", "role": "Pos 4", "pts": 3300 },
-        { "nick": "foxtrot_5", "role": "Pos 5", "pts": 3100 }
+        {
+          "nick": "foxtrot_1",
+          "country": "ru"
+        },
+        {
+          "nick": "foxtrot_2",
+          "country": "kz"
+        },
+        {
+          "nick": "foxtrot_3",
+          "country": "ru"
+        },
+        {
+          "nick": "foxtrot_4",
+          "country": "ua"
+        },
+        {
+          "nick": "foxtrot_5",
+          "country": "kz"
+        }
       ]
     },
     {
       "name": "Тестовая команда 7",
-      "tag": "T7",
+      "status": "qualified",
       "players": [
-        { "nick": "golf_1", "role": "Pos 1", "pts": 3600 },
-        { "nick": "golf_2", "role": "Pos 2", "pts": 3500 },
-        { "nick": "golf_3", "role": "Pos 3", "pts": 3400 },
-        { "nick": "golf_4", "role": "Pos 4", "pts": 3200 },
-        { "nick": "golf_5", "role": "Pos 5", "pts": 3000 }
-      ]
+        {
+          "nick": "golf_1",
+          "country": "kz"
+        },
+        {
+          "nick": "golf_2",
+          "country": "ru"
+        },
+        {
+          "nick": "golf_3",
+          "country": "ua"
+        },
+        {
+          "nick": "golf_4",
+          "country": "kz"
+        },
+        {
+          "nick": "golf_5",
+          "country": "by"
+        }
+      ],
+      "qualifier": "Открытая квалификация · 1 место"
     },
     {
       "name": "Тестовая команда 8",
-      "tag": "T8",
+      "status": "qualified",
       "players": [
-        { "nick": "hotel_1", "role": "Pos 1", "pts": 5200 },
-        { "nick": "hotel_2", "role": "Pos 2", "pts": 4800 },
-        { "nick": "hotel_3", "role": "Pos 3", "pts": 4500 },
-        { "nick": "hotel_4", "role": "Pos 4", "pts": 4000 },
-        { "nick": "hotel_5", "role": "Pos 5", "pts": 3500 }
-      ]
+        {
+          "nick": "hotel_1",
+          "country": "ru"
+        },
+        {
+          "nick": "hotel_2",
+          "country": "ua"
+        },
+        {
+          "nick": "hotel_3",
+          "country": "kz"
+        },
+        {
+          "nick": "hotel_4",
+          "country": "by"
+        },
+        {
+          "nick": "hotel_5",
+          "country": "ru"
+        }
+      ],
+      "qualifier": "Открытая квалификация · 2 место"
     }
   ]
 }

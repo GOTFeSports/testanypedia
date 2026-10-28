@@ -1,5 +1,5 @@
-// Собирает tournaments/index.json из папок tournaments/<slug>/.
-// GitHub Pages не умеет листать папки, поэтому список турниров лежит в одном файле.
+// Собирает tournaments/index.json из папок tournaments/<slug>/ и проверяет данные.
+// GitHub Pages / Vercel не умеют листать папки, поэтому список турниров лежит в одном файле.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,36 +18,50 @@ function readJson(p) {
   }
 }
 
+const isUrl = (s) => /^https?:\/\//i.test(s || '');
 const list = [];
 const dirs = fs.existsSync(TDIR) ? fs.readdirSync(TDIR, { withFileTypes: true }).filter((d) => d.isDirectory()) : [];
 
 for (const d of dirs) {
   const dir = path.join(TDIR, d.name);
+  const warn = (msg) => console.warn(`⚠ ${d.name}: ${msg}`);
   const info = readJson(path.join(dir, 'information.json'));
   if (!info) {
-    console.warn(`⚠ ${d.name}: нет information.json — пропущен`);
+    warn('нет information.json — пропущен');
     continue;
   }
   const roster = readJson(path.join(dir, 'roster.json'));
   const result = readJson(path.join(dir, 'result.json'));
   const teams = roster?.teams ?? [];
   const placements = result?.placements ?? [];
+  const known = new Set(teams.map((t) => t.name));
 
-  // Проверки, чтобы опечатки не доехали до сайта
-  const names = new Set(teams.map((t) => t.name));
-  for (const p of placements) {
-    if (names.size && !names.has(p.team)) console.warn(`⚠ ${d.name}: в result есть "${p.team}", но нет в roster`);
+  // --- проверки, чтобы опечатки не доехали до сайта ---
+  const used = new Set();
+  placements.forEach((p) => used.add(p.team));
+  for (const g of result?.groups ?? []) {
+    (g.teams ?? []).forEach((t) => used.add(t));
+    (g.matches ?? []).forEach((m) => [m.team1, m.team2].forEach((t) => t && used.add(t)));
   }
-  if (info.pts_cap) {
-    for (const t of teams) {
-      const total = (t.players ?? []).reduce((s, p) => s + (Number(p.pts) || 0), 0);
-      if (total > info.pts_cap) console.warn(`⚠ ${d.name}: "${t.name}" превышает лимит ПТС (${total} > ${info.pts_cap})`);
+  const ids = new Set();
+  const rounds = result?.playoffs?.rounds ?? [];
+  for (const r of rounds) for (const m of r.matches ?? []) if (m.id) ids.add(m.id);
+  for (const r of rounds) {
+    for (const m of r.matches ?? []) {
+      [m.team1, m.team2].forEach((t) => t && used.add(t));
+      if (m.next && !ids.has(m.next)) warn(`матч "${m.id ?? '?'}" ведёт в несуществующий матч "${m.next}"`);
     }
   }
+  for (const m of result?.matches ?? []) [m.team1, m.team2].forEach((t) => t && used.add(t));
+  if (known.size) for (const t of used) if (!known.has(t)) warn(`"${t}" есть в result, но нет в roster`);
+
+  const logos = [info.logo, ...teams.map((t) => t.logo)].filter((l) => l && !isUrl(l));
+  for (const l of logos) if (!fs.existsSync(path.join(dir, l))) warn(`не найден файл логотипа "${l}"`);
 
   list.push({
     slug: d.name,
     name: info.name ?? d.name,
+    logo: info.logo ?? null,
     status: info.status ?? 'upcoming',
     date_start: info.date_start ?? null,
     date_end: info.date_end ?? null,

@@ -1,21 +1,43 @@
 {
   "name": "AnyLvL Cup",
+  "logo": "",
+  "series": "AnyLvL Cup",
   "organizer": "AnyLvL x GOTF eSports",
+  "sponsors": [],
   "status": "finished",
+  "type": "online",
+  "server": "Europe East",
+  "location": "СНГ",
+  "game": "Dota 2",
+  "version": "",
+  "tier": "Полупрофессиональный",
   "date_start": "2026-11-14",
   "date_end": "2026-11-15",
-  "format": "Double Elimination, Bo3 (финал Bo5)",
+  "format": [
+    "Групповой этап: 2 группы по 4 команды, round-robin, Bo3",
+    "Плей-офф: Double Elimination, Bo3 (гранд-финал Bo5)"
+  ],
   "pts_cap": 20000,
   "prize_pool": "10 000 ₽",
-  "description": "ТЕСТОВЫЕ ДАННЫЕ — замените на реальные. Открытый турнир по Dota 2 с ограничением суммарного ПТС команды.",
+  "description": "ТЕСТОВЫЕ ДАННЫЕ — замените на реальные. Открытый турнир по Dota 2 с ограничением по ПТС.",
   "links": {
     "challonge": "",
     "rules": "",
-    "stream": ""
+    "discord": "",
+    "telegram": ""
+  },
+  "chronology": {
+    "previous": { "name": "AnyLvL Cup 0" },
+    "next": { "name": "AnyLvL Cup 2" }
   },
   "prizes": [
     { "place": 1, "prize": "5 000 ₽" },
     { "place": 2, "prize": "3 000 ₽" },
     { "place": 3, "prize": "2 000 ₽" }
+  ],
+  "streams": [
+    { "lang": "ru", "platform": "twitch", "url": "https://www.twitch.tv/" },
+    { "lang": "ru", "platform": "youtube", "url": "https://www.youtube.com/" },
+    { "lang": "en", "platform": "twitch", "url": "https://www.twitch.tv/" }
   ]
 }
