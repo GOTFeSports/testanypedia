@@ -8,8 +8,11 @@
   --line: #4b5366;
   --text: #e8eaf0;
   --muted: #8d95a8;
-  --accent: #ff6b3d;
-  --accent-soft: rgba(255, 107, 61, .14);
+  --accent: #34d27b;
+  --accent-soft: rgba(52, 210, 123, .14);
+  --on-accent: #04210f;
+  --grad-a: #17935a;
+  --grad-b: #0b5e3b;
   --gold: #f5c542;
   --silver: #c3cad6;
   --bronze: #d38b5d;
@@ -29,8 +32,11 @@
   --line: #aab3c4;
   --text: #1a1f2b;
   --muted: #667085;
-  --accent: #e5481a;
-  --accent-soft: rgba(229, 72, 26, .1);
+  --accent: #12894f;
+  --accent-soft: rgba(18, 137, 79, .1);
+  --on-accent: #ffffff;
+  --grad-a: #17935a;
+  --grad-b: #0b5e3b;
   --gold: #d9a100;
   --silver: #8e99ab;
   --bronze: #b8693a;
@@ -121,7 +127,7 @@ section[id] { scroll-margin-top: 76px; margin-bottom: 44px; }
 .pill-link:hover { border-color: var(--accent); color: var(--accent); }
 .btn {
   display: inline-block; padding: 8px 16px; border-radius: 10px; font-weight: 600; font-size: .9rem;
-  background: var(--accent); color: #fff;
+  background: var(--accent); color: var(--on-accent);
 }
 .btn:hover { filter: brightness(1.1); }
 
@@ -156,9 +162,14 @@ section[id] { scroll-margin-top: 76px; margin-bottom: 44px; }
 .home-main > h2 { margin-top: 36px; }
 .home-main .feature + h2 { margin-top: 36px; }
 
-.feature { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.f-head { display: flex; flex-direction: column; gap: 2px; padding: 16px 20px; color: #fff; background: linear-gradient(100deg, var(--accent), #b13a14); }
-.f-head:hover { filter: brightness(1.07); }
+.feature { position: relative; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: border-color .15s, transform .15s; }
+.feature:hover { border-color: var(--accent); transform: translateY(-2px); }
+.f-head { display: flex; flex-direction: column; gap: 2px; padding: 16px 20px; color: #fff; background: linear-gradient(100deg, var(--grad-a), var(--grad-b)); }
+/* Не использовать filter/transform на .f-head: они сжимают слой-ссылку ::after до размера шапки */
+.feature:hover .f-title { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 2px; }
+/* Весь баннер — ссылка: прозрачный слой растягивается на карточку, чипы разделов лежат поверх него */
+.f-head::after { content: ""; position: absolute; inset: 0; }
+.f-links a { position: relative; z-index: 1; }
 .f-kicker { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; opacity: .88; }
 .f-title { font-size: 1.55rem; font-weight: 800; letter-spacing: -.01em; }
 .f-body { display: flex; align-items: center; gap: 22px; padding: 20px; }
