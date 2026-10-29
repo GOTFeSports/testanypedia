@@ -6,7 +6,7 @@
   "description": "Anypedia — энциклопедия турниров Dota 2 с ограничением по ПТС",
   "scripts": {
     "build": "node tools/build-index.mjs",
-    "serve": "python3 -m http.server 8080"
+    "serve": "node tools/serve.mjs"
   },
   "engines": { "node": ">=18" }
 }

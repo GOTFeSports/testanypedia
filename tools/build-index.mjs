@@ -58,6 +58,8 @@ function collectMatches(result) {
   return out;
 }
 
+// Эти имена нельзя использовать как slug турнира: это папки сайта, адреса /<slug> с ними конфликтуют
+const RESERVED = new Set(['assets', 'css', 'js', 'tools', 'tournaments', 'index.html', 'vercel.json', 'package.json', 'readme.md']);
 const list = [];
 const allMatches = [];
 const uniqueTeams = new Set();
@@ -66,6 +68,7 @@ const dirs = fs.existsSync(TDIR) ? fs.readdirSync(TDIR, { withFileTypes: true })
 for (const d of dirs) {
   const dir = path.join(TDIR, d.name);
   const warn = (msg) => console.warn(`⚠ ${d.name}: ${msg}`);
+  if (RESERVED.has(d.name.toLowerCase())) warn('имя папки занято сайтом (адрес /' + d.name + ' не откроется) — переименуйте');
   const info = readJson(path.join(dir, 'information.json'));
   if (!info) {
     warn('нет information.json — пропущен');
